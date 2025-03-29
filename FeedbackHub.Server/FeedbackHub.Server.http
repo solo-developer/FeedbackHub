@@ -1,0 +1,6 @@
+@FeedbackHub.Server_HostAddress = http://localhost:5177
+
+GET {{FeedbackHub.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

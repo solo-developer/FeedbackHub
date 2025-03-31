@@ -1,0 +1,23 @@
+﻿namespace FeedbackHub.Domain.Entities
+{
+    public class Application : BaseEntity
+    {
+        public Application() { }
+
+        public string Name { get; set; }
+        public string ShortName { get; set; }
+        public byte[] Logo { get; set; }
+
+        public bool IsDeleted { get;private set; }
+        public List<UserSubscription> Subscriptions { get; private set; } = new();
+        public void MarkDeleted()
+        {
+            this.IsDeleted=true;
+        }
+
+        public void UndoDelete()
+        {
+            this.IsDeleted = false;
+        }
+    }
+}

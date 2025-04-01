@@ -8,6 +8,6 @@ namespace FeedbackHub.Domain.Entities
         public string Code { get; set; }
         public bool IsEnabled { get; set; }
 
-        public virtual List<RegistrationRequest> RegistrationRequests { get; set; }
+        public virtual List<RegistrationRequest> RegistrationRequests { get; set; } = new();
     }
 }

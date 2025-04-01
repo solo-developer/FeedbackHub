@@ -2,21 +2,20 @@
 {
     public class UserDetail : BaseEntity
     {
-
         public static UserDetail Create()
         {
             return new UserDetail();
         }
         protected UserDetail()
         {
-            
+
         }
-
-
-
+        public int AppUserId { get; set; }
         public bool IsDeleted { get; private set; }
-        public RegistrationRequest RegistrationRequest { get; set; }
-        public List<UserSubscription> Subscriptions { get; private set; } = new();
+
+        public virtual ApplicationUser ApplicationUser { get; private set; }
+        public virtual RegistrationRequest RegistrationRequest { get;private set; }
+        public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
 
         public void MarkDeleted()
         {
@@ -25,7 +24,7 @@
 
         public void UndoDelete()
         {
-            this.IsDeleted= false;
+            this.IsDeleted = false;
         }
 
         public void Subscribe(int applicationId)

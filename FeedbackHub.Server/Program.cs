@@ -1,4 +1,10 @@
 
+using FeedbackHub.Domain.Entities;
+using FeedbackHub.Infrastructure.Context;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
+
 namespace FeedbackHub.Server
 {
     public class Program
@@ -7,15 +13,30 @@ namespace FeedbackHub.Server
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("FeedbackHubSqlServerConnection"), b => b.MigrationsAssembly("FeedbackHub.Infrastructure"));
+                // options.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+            });
+         
+
+            builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => options.SignIn.RequireConfirmedAccount = false)
+            .AddEntityFrameworkStores<AppDbContext>();
             // Add services to the container.
             builder.Services.AddAuthorization();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
             var app = builder.Build();
+            var supportedCultures = new[] { "en-US", "fr-FR", "de-DE" };
+            var options = new RequestLocalizationOptions()
+                .SetDefaultCulture("en-US")
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
 
+            app.UseRequestLocalization(options);
             app.UseDefaultFiles();
             app.UseStaticFiles();
 

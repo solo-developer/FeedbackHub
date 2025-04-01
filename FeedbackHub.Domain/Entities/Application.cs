@@ -9,7 +9,7 @@
         public byte[] Logo { get; set; }
 
         public bool IsDeleted { get;private set; }
-        public List<UserSubscription> Subscriptions { get; private set; } = new();
+        public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
         public void MarkDeleted()
         {
             this.IsDeleted=true;

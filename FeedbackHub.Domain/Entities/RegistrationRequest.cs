@@ -14,8 +14,8 @@ namespace FeedbackHub.Domain.Entities
         }
         public int ClientId { get; set; }
         public int? ConvertedUserId { get; set; }
-        public Email Email { get; set; }
-        public DateTime RequestedAt { get; set; }
+        public required Email Email { get; set; }
+        public DateTime RequestedAt { get; set; } = DateTime.Now;
         public virtual Client Client { get; set; }
         public virtual UserDetail User { get; set; }
 

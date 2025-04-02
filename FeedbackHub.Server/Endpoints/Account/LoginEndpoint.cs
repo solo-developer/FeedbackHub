@@ -1,0 +1,126 @@
+﻿using Ardalis.ApiEndpoints;
+using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Exceptions;
+using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Logging;
+using FeedbackHub.Server.Helpers;
+using FeedbackHub.Server.Models;
+using FeedbackHub.Server.ViewModels.Account;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Swashbuckle.AspNetCore.Annotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace FeedbackHub.Server.Endpoints.Account
+{
+    public class LoginEndpoint : EndpointBaseAsync.WithRequest<LoginRequestViewModel>.WithResult<IActionResult>
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IUserService _userService;
+        private readonly JwtSettings _jwtSettings;
+
+        public LoginEndpoint(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserService userService,  IOptions<JwtSettings> jwtSettings)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _userService = userService;
+            _jwtSettings = jwtSettings.Value;
+        }
+
+
+        [HttpPost("/account/login")]
+        [SwaggerOperation(
+        Summary = "Creates a new Author",
+        Description = "Creates a new Author",
+        OperationId = "Author_Create",
+        Tags = new[] { "AuthorEndpoint" })
+        ]
+
+        public override async Task<IActionResult> HandleAsync(LoginRequestViewModel request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    ApplicationUser user = await _userManager.FindByEmailAsync(request.Username) ?? throw new ItemNotFoundException("Email is invalid.");
+
+
+                    if (await _userManager.CheckPasswordAsync(user, request.Password) == false)
+                    {
+                        return new JsonResult(JsonWrapper.BuildErrorJson("Username/password is incorrect."));
+                    }
+
+                    var token = GenerateJwtToken(user);
+                    var refreshToken = GenerateRefreshToken();
+
+                    await SaveRefreshTokenAsync(user, refreshToken); // Save in AspNetUserTokens
+
+                    return Ok(JsonWrapper.BuildSuccessJson(new
+                    {
+                        Token = token,
+                        RefreshToken = refreshToken
+                    }));
+                }
+            }
+            catch (CustomException ex)
+            {
+                return new JsonResult(JsonWrapper.BuildInfoJson(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to login", ex);
+            }
+            return new JsonResult(JsonWrapper.BuildErrorJson("Failed to login"));
+        }
+        private string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)); // Generates a secure random string
+        }
+
+        private string GenerateJwtToken(ApplicationUser user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), 
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpiryMinutes), 
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task SaveRefreshTokenAsync(ApplicationUser user, string refreshToken)
+        {
+            await _userManager.SetAuthenticationTokenAsync(user, "JWT", "RefreshToken", refreshToken);
+        }
+
+        private async Task<string> GetRefreshTokenAsync(ApplicationUser user)
+        {
+            return await _userManager.GetAuthenticationTokenAsync(user, "JWT", "RefreshToken");
+        }
+
+        private async Task RemoveRefreshTokenAsync(ApplicationUser user)
+        {
+            await _userManager.RemoveAuthenticationTokenAsync(user, "JWT", "RefreshToken");
+        }
+
+    }
+}

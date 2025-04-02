@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ardalis.ApiEndpoints" Version="4.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.*-*</Version>
@@ -21,6 +23,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +32,7 @@
     </ProjectReference>
     <ProjectReference Include="..\FeedbackHub.Domain\FeedbackHub.Domain.csproj" />
     <ProjectReference Include="..\FeedbackHub.Infrastructure\FeedbackHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\FeedbackHub.Logging\FeedbackHub.Logging.csproj" />
   </ItemGroup>
 
 </Project>

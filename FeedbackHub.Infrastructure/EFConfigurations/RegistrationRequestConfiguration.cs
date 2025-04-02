@@ -14,6 +14,9 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.Property(rr => rr.ClientId)
                 .IsRequired();
 
+            builder.Property(rr => rr.FullName)
+             .IsRequired().HasMaxLength(500);
+
             builder.Property(rr => rr.Email)
                 .IsRequired()
                 .HasConversion(

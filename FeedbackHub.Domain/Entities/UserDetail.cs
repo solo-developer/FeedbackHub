@@ -2,14 +2,15 @@
 {
     public class UserDetail : BaseEntity
     {
-        public static UserDetail Create()
+        public static UserDetail Create(string fullname)
         {
-            return new UserDetail();
+            return new UserDetail() { FullName =fullname };
         }
         protected UserDetail()
         {
 
         }
+        public string FullName { get; set; }
         public int AppUserId { get; set; }
         public bool IsDeleted { get; private set; }
 

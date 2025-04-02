@@ -1,17 +1,28 @@
 
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Infrastructure.Context;
+using FeedbackHub.Logging;
+using FeedbackHub.Server.DataSeeder;
+using FeedbackHub.Server.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System;
+using System.Text;
 
 namespace FeedbackHub.Server
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+    
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.Configure<DefaultUserCredentials>(builder.Configuration.GetSection("DefaultLoginCredentials"));
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
@@ -29,6 +40,32 @@ namespace FeedbackHub.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+                };
+            });
+            // Load configuration from appsettings.json
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            // Configure Serilog using the shared library
+            SerilogLogger.ConfigureLogger(configuration);
+            builder.Host.UseSerilog(SerilogLogger.Logger);
+
             var app = builder.Build();
             var supportedCultures = new[] { "en-US", "fr-FR", "de-DE" };
             var options = new RequestLocalizationOptions()
@@ -73,6 +110,9 @@ namespace FeedbackHub.Server
 
             app.MapFallbackToFile("/index.html");
 
+            var defaultUserCredentials = app.Services.GetRequiredService<IOptions<DefaultUserCredentials>>();
+            var seeder = new ApplicationDataSeeder(defaultUserCredentials);
+            await seeder.SeedAsync(app.Services);
             app.Run();
         }
     }

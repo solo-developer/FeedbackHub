@@ -13,6 +13,9 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.Property(ud => ud.AppUserId)
                 .IsRequired();
 
+            builder.Property(ud => ud.FullName)
+                .IsRequired().HasMaxLength(500);
+
             builder.Property(ud => ud.IsDeleted)
                 .HasDefaultValue(false);
 

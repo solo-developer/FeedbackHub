@@ -23,24 +23,22 @@ namespace FeedbackHub.Server.Endpoints.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IUserService _userService;
         private readonly JwtSettings _jwtSettings;
 
-        public LoginEndpoint(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserService userService,  IOptions<JwtSettings> jwtSettings)
+        public LoginEndpoint(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,   IOptions<JwtSettings> jwtSettings)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _userService = userService;
             _jwtSettings = jwtSettings.Value;
         }
 
 
         [HttpPost("/account/login")]
         [SwaggerOperation(
-        Summary = "Creates a new Author",
-        Description = "Creates a new Author",
-        OperationId = "Author_Create",
-        Tags = new[] { "AuthorEndpoint" })
+        Summary = "Sign in",
+        Description = "Sign in ",
+        OperationId = "Account_Login",
+        Tags = new[] { "LoginEndpoint" })
         ]
 
         public override async Task<IActionResult> HandleAsync(LoginRequestViewModel request, CancellationToken cancellationToken = default)
@@ -71,13 +69,13 @@ namespace FeedbackHub.Server.Endpoints.Account
             }
             catch (CustomException ex)
             {
-                return new JsonResult(JsonWrapper.BuildInfoJson(ex.Message));
+                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
             }
             catch (Exception ex)
             {
                 Log.Error("Failed to login", ex);
             }
-            return new JsonResult(JsonWrapper.BuildErrorJson("Failed to login"));
+            return Ok(JsonWrapper.BuildErrorJson("Failed to login"));
         }
         private string GenerateRefreshToken()
         {

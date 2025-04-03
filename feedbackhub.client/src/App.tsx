@@ -5,10 +5,14 @@ import AdminDashboardPage from "./pages/Admin/AdminDashboard";
 import DashboardPage from "./pages/Consumer/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import './App.css';
+import { ToastContainer } from 'react-toastify';
+import { ToastProvider } from './contexts/ToastContext'; // Import the ToastProvider
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
     const isAuthenticated = !!localStorage.getItem("access_token");
     return (
+        <ToastProvider>
         <Router>
             <Routes>
                 {/* Default Route - Redirect to login or dashboard */}
@@ -25,6 +29,8 @@ const App = () => {
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
         </Router>
+        <ToastContainer position="top-right"/>
+        </ToastProvider>
     );
 };
 

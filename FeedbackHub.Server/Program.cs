@@ -1,4 +1,4 @@
-
+using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Infrastructure.Context;
 using FeedbackHub.Logging;
@@ -38,8 +38,19 @@ namespace FeedbackHub.Server
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddControllers();
             builder.Services.AddSwaggerGen();
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -76,7 +87,7 @@ namespace FeedbackHub.Server
             app.UseRequestLocalization(options);
             app.UseDefaultFiles();
             app.UseStaticFiles();
-
+            app.UseCors("AllowReactApp");
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -88,26 +99,8 @@ namespace FeedbackHub.Server
 
             app.UseAuthorization();
 
-            var summaries = new[]
-            {
-                "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-            };
-
-            app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-            {
-                var forecast = Enumerable.Range(1, 5).Select(index =>
-                    new WeatherForecast
-                    {
-                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = summaries[Random.Shared.Next(summaries.Length)]
-                    })
-                    .ToArray();
-                return forecast;
-            })
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
-
+           
+            app.MapControllers();  // This maps the API endpoints
             app.MapFallbackToFile("/index.html");
 
             var defaultUserCredentials = app.Services.GetRequiredService<IOptions<DefaultUserCredentials>>();

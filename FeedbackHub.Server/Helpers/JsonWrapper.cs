@@ -13,13 +13,13 @@ namespace FeedbackHub.Server.Helpers
 
         public static string BuildErrorJson(string error)
         {
-            var apiMessage = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = error };
+            var apiMessage = new { ResponseMessageType = ResponseMessageType.Error.ToString(), Message = error };
             return JsonSerializer.Serialize(apiMessage);
         }
 
         public static string BuildInfoJson(string info)
         {
-            var apiMessage = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = info };
+            var apiMessage = new { ResponseMessageType = ResponseMessageType.Info.ToString(), Message = info };
             return JsonSerializer.Serialize(apiMessage);
         }
     }

@@ -23,13 +23,15 @@ namespace FeedbackHub.Server.Endpoints.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly JwtSettings _jwtSettings;
 
-        public LoginEndpoint(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,   IOptions<JwtSettings> jwtSettings)
+        public LoginEndpoint(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,   IOptions<JwtSettings> jwtSettings, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtSettings = jwtSettings.Value;
+            _roleManager = roleManager;
         }
 
 
@@ -55,7 +57,7 @@ namespace FeedbackHub.Server.Endpoints.Account
                         return new JsonResult(JsonWrapper.BuildErrorJson("Username/password is incorrect."));
                     }
 
-                    var token = GenerateJwtToken(user);
+                    var token = await GenerateJwtToken(user);
                     var refreshToken = GenerateRefreshToken();
 
                     await SaveRefreshTokenAsync(user, refreshToken); // Save in AspNetUserTokens
@@ -82,7 +84,7 @@ namespace FeedbackHub.Server.Endpoints.Account
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)); // Generates a secure random string
         }
 
-        private string GenerateJwtToken(ApplicationUser user)
+        private async Task<string> GenerateJwtToken(ApplicationUser user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -92,6 +94,7 @@ namespace FeedbackHub.Server.Endpoints.Account
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), 
+                new Claim("role", (await _userManager.GetRolesAsync(user)).First()), 
             };
 
             var token = new JwtSecurityToken(

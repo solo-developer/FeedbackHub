@@ -1,16 +1,15 @@
-using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Infrastructure.Context;
+using FeedbackHub.Infrastructure.Repository.Implementations;
 using FeedbackHub.Logging;
 using FeedbackHub.Server.DataSeeder;
 using FeedbackHub.Server.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using System;
 using System.Text;
 
 namespace FeedbackHub.Server
@@ -33,6 +32,8 @@ namespace FeedbackHub.Server
 
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => options.SignIn.RequireConfirmedAccount = false)
             .AddEntityFrameworkStores<AppDbContext>();
+
+            RegisterServices(builder.Services);
             // Add services to the container.
             builder.Services.AddAuthorization();
 
@@ -107,6 +108,15 @@ namespace FeedbackHub.Server
             var seeder = new ApplicationDataSeeder(defaultUserCredentials);
             await seeder.SeedAsync(app.Services);
             app.Run();
+        }
+        static void RegisterServices(IServiceCollection services)
+        {
+            services.Scan(scan => scan
+                     .FromAssembliesOf(typeof(IBaseRepository<>), typeof(BaseRepository<>))
+                     .AddClasses()
+                     .AsSelf()
+                      .AsImplementedInterfaces()
+                     .WithScopedLifetime());
         }
     }
 }

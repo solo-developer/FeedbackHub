@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import { Route, Routes } from 'react-router-dom';
 import DashboardPage from '../Consumer/Dashboard';
 import LoginPage from '../Login';
+import FeedbackTypeIndexPage from './FeedbackTypeIndex';
 
 const AdminDashboard = () => {
  
@@ -19,9 +20,10 @@ const AdminDashboard = () => {
          <Sidebar></Sidebar>
 
         {/* Main Content */}
-        <div className="col py-3" style={{ marginTop: '56px' }}>
+        <div className="col" style={{ marginTop: '56px' }}>
             <Routes>
               <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

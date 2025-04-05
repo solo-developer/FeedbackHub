@@ -56,9 +56,9 @@ const Sidebar = () => {
             </li>
 
             <li>
-              <a href="#" className="nav-link px-0 align-middle">
+            <Link to="/admin/feedback-type"  className="nav-link align-middle px-0">
                 <i className="fs-4 bi-table"></i> <span className="ms-1 d-none d-sm-inline">Feedback Type Setup</span>
-              </a>
+              </Link>
             </li>
            
             <li>

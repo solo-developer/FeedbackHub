@@ -14,7 +14,6 @@
     <Folder Include="src\styles\" />
     <Folder Include="src\pages\Admin\" />
     <Folder Include="src\pages\Consumer\" />
-    <Folder Include="src\types\" />
     <Folder Include="src\utils\" />
     <Folder Include="src\services\" />
   </ItemGroup>

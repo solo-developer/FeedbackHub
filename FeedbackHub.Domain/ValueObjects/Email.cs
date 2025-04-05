@@ -2,6 +2,10 @@
 {
     public sealed class Email : IEquatable<Email>
     {
+        protected Email()
+        {
+            
+        }
         public string Value { get; }
 
         private Email(string value) => Value = value;

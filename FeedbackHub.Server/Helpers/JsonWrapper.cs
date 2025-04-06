@@ -10,6 +10,11 @@ namespace FeedbackHub.Server.Helpers
             var apiData = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = string.Empty, Data = data };
             return JsonSerializer.Serialize(apiData);
         }
+        public static string BuildSuccessJson(string message)
+        {
+            var apiData = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = message, Data = new { } };
+            return JsonSerializer.Serialize(apiData);
+        }
 
         public static string BuildErrorJson(string error)
         {

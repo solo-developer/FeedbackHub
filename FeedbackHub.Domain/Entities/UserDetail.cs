@@ -6,7 +6,7 @@
         {
             return new UserDetail() { FullName =fullname };
         }
-        protected UserDetail()
+        public UserDetail()
         {
 
         }

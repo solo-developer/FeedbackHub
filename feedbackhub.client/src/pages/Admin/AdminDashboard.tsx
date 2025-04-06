@@ -20,7 +20,7 @@ const AdminDashboard = () => {
          <Sidebar></Sidebar>
 
         {/* Main Content */}
-        <div className="col" style={{ marginTop: '56px' }}>
+        <div className="col" style={{ marginTop: '2rem' }}>
             <Routes>
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />

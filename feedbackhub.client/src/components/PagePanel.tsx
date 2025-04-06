@@ -10,7 +10,7 @@ const PagePanel: React.FC<PanelProps> = ({ title, headerContent, children }) => 
   return (
     <div className="card">
       <div className="card-header d-flex justify-content-between align-items-center">
-        <h3>{title}</h3>
+        <div>{title}</div>
         {headerContent && <div>{headerContent}</div>}  {/* Render any custom content passed to headerContent */}
       </div>
       <div className="card-body">

@@ -5,7 +5,7 @@ namespace FeedbackHub.Domain.Entities
 {
     public class RegistrationRequest : BaseEntity
     {
-        protected RegistrationRequest() { }
+        public RegistrationRequest() { }
 
         public RegistrationRequest(Email email,int clientId,string fullname)
         {

@@ -52,6 +52,10 @@ const FeedbackTypeIndexPage: React.FC = () => {
         setColor('');
     };
 
+    const deleteFeedbackType = (id: number) => {
+    alert(id);
+    };
+
     const saveFeedbackType = async () => {
         try {
             setIsLoading(true);
@@ -87,6 +91,20 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 id: 'Color',
                 header: 'Color',
                 accessorKey: 'Color',
+            },
+            {
+                id: 'Action',
+                header: 'Action',
+                cell: ({ row  }) => (
+                    <div>                     
+                      <button
+                        className="btn btn-danger ml-2"
+                        onClick={() => deleteFeedbackType(row.original.Color)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ),
             }
         ],
         []

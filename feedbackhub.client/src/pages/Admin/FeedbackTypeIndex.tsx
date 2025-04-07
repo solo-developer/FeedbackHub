@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import { get, post } from '../../utils/HttpMiddleware';
+import { get, post ,del} from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
 import { isSuccess, parseMessage, parseData, parseResponseType } from '../../utils/HttpResponseParser';
 import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import Modal from '../../components/Modal';
+import ConfirmDialog from "../../components/ConfirmDialog";
 
 const FeedbackTypeIndexPage: React.FC = () => {
 
@@ -19,6 +20,27 @@ const FeedbackTypeIndexPage: React.FC = () => {
 
     const [typeName, setTypeName] = useState('');
     const [color, setColor] = useState('');
+
+    const [showDialog, setShowDialog] = useState(false);
+    const [selectedId, setSelectedId] = useState(0);
+    const handleDeleteConfirm =async () => {
+        setShowDialog(false);
+        try {
+            const response = await del(`/feedback-type/${selectedId}`);
+
+            showToast(parseMessage(response), parseResponseType(response), {
+                autoClose: 3000,
+                draggable: true
+            });
+
+            if (isSuccess(response)) {               
+                await fetchData();
+            }
+
+        } catch (err) {
+            showToast('Failed to delete feedback type', 'error');
+        }
+    };
 
 
     useEffect(() => {
@@ -53,7 +75,8 @@ const FeedbackTypeIndexPage: React.FC = () => {
     };
 
     const deleteFeedbackType = (id: number) => {
-    alert(id);
+        setSelectedId(id);
+        setShowDialog(true);
     };
 
     const saveFeedbackType = async () => {
@@ -95,16 +118,16 @@ const FeedbackTypeIndexPage: React.FC = () => {
             {
                 id: 'Action',
                 header: 'Action',
-                cell: ({ row  }) => (
-                    <div>                     
-                      <button
-                        className="btn btn-danger ml-2"
-                        onClick={() => deleteFeedbackType(row.original.Color)}
-                      >
-                        Delete
-                      </button>
+                cell: ({ row }) => (
+                    <div>
+                        <button
+                            className="btn btn-danger ml-2"
+                            onClick={() => deleteFeedbackType(row.original.Id)}
+                        >
+                            Delete
+                        </button>
                     </div>
-                  ),
+                ),
             }
         ],
         []
@@ -154,6 +177,17 @@ const FeedbackTypeIndexPage: React.FC = () => {
                     </div>
                 </form>
             </Modal>
+
+            <ConfirmDialog
+                show={showDialog}
+                onHide={() => setShowDialog(false)}
+                onConfirm={() => handleDeleteConfirm()}
+                title="Confirm Delete"
+                message="Are you sure you want to delete this item? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="danger"
+             />
         </>
     );
 };

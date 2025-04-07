@@ -124,12 +124,12 @@ namespace FeedbackHub.Infrastructure.Repository.Implementations
         /// </summary>
         /// <param name="id"> primary key value of table</param>
         /// <returns>single row with specified primary key value</returns>
-        public T GetById(long id)
+        public T GetById(int id)
         {
             return _context.Set<T>().Find(id);
         }
 
-        public virtual async Task<T> GetByIdAsync(long id)
+        public virtual async Task<T> GetByIdAsync(int id)
         {
             return await _context.Set<T>().FindAsync(id);
         }

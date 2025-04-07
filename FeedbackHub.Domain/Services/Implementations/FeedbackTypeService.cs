@@ -18,6 +18,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var feedbackTypes = await _feedbackTypeRepo.GetQueryableWithNoTracking().Where(a => !a.IsDeleted).ToListAsync();
 
             return feedbackTypes.Select(a=> new FeedbackTypeDto { 
+                Id= a.Id,
                 @Type = a.Type,
                 Color = a.Color
             }).ToList();

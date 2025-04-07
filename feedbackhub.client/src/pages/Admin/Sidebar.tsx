@@ -50,9 +50,9 @@ const Sidebar = () => {
             </li>
 
             <li>
-              <a href="#" className="nav-link px-0 align-middle">
+              <Link to="/admin/clients" className="nav-link px-0 align-middle">
                 <i className="fs-4 bi-table"></i> <span className="ms-1 d-none d-sm-inline">Client Organizations</span>
-              </a>
+              </Link>
             </li>
 
             <li>

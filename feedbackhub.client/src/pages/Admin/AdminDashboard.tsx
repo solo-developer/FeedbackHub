@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 import DashboardPage from '../Consumer/Dashboard';
 import LoginPage from '../Login';
 import FeedbackTypeIndexPage from './FeedbackTypeIndex';
+import ClientOrganizationIndexPage from './ClientOrganization';
 
 const AdminDashboard = () => {
  
@@ -24,6 +25,7 @@ const AdminDashboard = () => {
             <Routes>
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
+              <Route path="clients" element={<ClientOrganizationIndexPage />} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

@@ -32,7 +32,7 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson("Feedback Type deleted successfully."));
+                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
             }
             catch (Exception ex)
             {

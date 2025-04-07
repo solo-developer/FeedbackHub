@@ -1,0 +1,52 @@
+﻿using Ardalis.ApiEndpoints;
+using Azure.Core;
+using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Exceptions;
+using FeedbackHub.Domain.Repositories.Interface;
+using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Server.Helpers;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace FeedbackHub.Server.Endpoints.Client
+{
+    public class GetAllEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
+    {
+        private readonly IClientService _clientService;
+        public GetAllEndpoint(IClientService clientService)
+        {
+          _clientService = clientService;
+        }
+
+        [HttpGet("/client")]
+
+        [SwaggerOperation(
+        Summary = "Clients",
+        Description = "Gets all list of clients",
+        OperationId = "Client_getall",
+        Tags = new[] { "Client_GetAllEndpoint" })
+        ]
+        public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var clients = await _clientService.GetAllClientsAsync();
+
+                return Ok(JsonWrapper.BuildSuccessJson(clients));
+
+            }
+            catch (CustomException ex)
+            {
+                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to get clients", ex);
+            }
+            return Ok(JsonWrapper.BuildErrorJson("Failed to get clients"));
+        }
+    }
+}

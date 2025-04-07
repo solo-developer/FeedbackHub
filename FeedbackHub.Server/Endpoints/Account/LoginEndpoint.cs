@@ -54,7 +54,7 @@ namespace FeedbackHub.Server.Endpoints.Account
 
                     if (await _userManager.CheckPasswordAsync(user, request.Password) == false)
                     {
-                        return new JsonResult(JsonWrapper.BuildErrorJson("Username/password is incorrect."));
+                        return ApiResponse.Error("Username/password is incorrect.");
                     }
 
                     var token = await GenerateJwtToken(user);
@@ -62,22 +62,22 @@ namespace FeedbackHub.Server.Endpoints.Account
 
                     await SaveRefreshTokenAsync(user, refreshToken); // Save in AspNetUserTokens
 
-                    return Ok(JsonWrapper.BuildSuccessJson(new
+                    return ApiResponse.Success(new
                     {
                         Token = token,
                         RefreshToken = refreshToken
-                    }));
+                    });
                 }
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+                return ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {
                 Log.Error("Failed to login", ex);
             }
-            return Ok(JsonWrapper.BuildErrorJson("Failed to login"));
+            return ApiResponse.Error("Failed to Login");
         }
         private string GenerateRefreshToken()
         {

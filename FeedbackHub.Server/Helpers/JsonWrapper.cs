@@ -1,31 +1,61 @@
 ﻿using FeedbackHub.Server.Enums;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FeedbackHub.Server.Helpers
 {
-    public class JsonWrapper
+    public static class ApiResponse
     {
-        public static string BuildSuccessJson(object data)
+        private static readonly JsonSerializerOptions _jsonOptions = new()
         {
-            var apiData = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = string.Empty, Data = data };
-            return JsonSerializer.Serialize(apiData);
-        }
-        public static string BuildSuccessJson(string message)
-        {
-            var apiData = new { ResponseMessageType = ResponseMessageType.Success.ToString(), Message = message, Data = new { } };
-            return JsonSerializer.Serialize(apiData);
-        }
+           // PropertyNamingPolicy = JsonNamingPolicy.P,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = EnvironmentExtensions.IsDevelopment()
+        };
 
-        public static string BuildErrorJson(string error)
-        {
-            var apiMessage = new { ResponseMessageType = ResponseMessageType.Error.ToString(), Message = error };
-            return JsonSerializer.Serialize(apiMessage);
-        }
+        public record ApiResponseBase<T>(
+            [property: JsonConverter(typeof(JsonStringEnumConverter))]
+            ResponseMessageType ResponseMessageType,
+            string? Message = null,
+            T? Data = default);
 
-        public static string BuildInfoJson(string info)
-        {
-            var apiMessage = new { ResponseMessageType = ResponseMessageType.Info.ToString(), Message = info };
-            return JsonSerializer.Serialize(apiMessage);
-        }
+        // Success responses
+        public static IActionResult Success<T>(T data) =>
+            new JsonResult(
+                new ApiResponseBase<T>(ResponseMessageType.Success, Data: data),
+                _jsonOptions);
+
+        public static IActionResult Success(string message) =>
+            new JsonResult(
+                new ApiResponseBase<object>(ResponseMessageType.Success, message),
+                _jsonOptions);
+
+        public static IActionResult Success<T>(T data, string message) =>
+            new JsonResult(
+                new ApiResponseBase<T>(ResponseMessageType.Success, message, data),
+                _jsonOptions);
+
+        // Error responses
+        public static IActionResult Error(string errorMessage, object? additionalData = null) =>
+            new JsonResult(
+                new ApiResponseBase<object>(ResponseMessageType.Error, errorMessage, additionalData),
+                _jsonOptions)
+            {
+                StatusCode = StatusCodes.Status400BadRequest
+            };
+
+        // Info responses
+        public static IActionResult Info(string infoMessage, object? data = null) =>
+            new JsonResult(
+                new ApiResponseBase<object>(ResponseMessageType.Info, infoMessage, data),
+                _jsonOptions);
+
+    }
+
+    public static class EnvironmentExtensions
+    {
+        public static bool IsDevelopment() =>
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
     }
 }

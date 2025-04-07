@@ -21,7 +21,7 @@ namespace FeedbackHub.Server.Endpoints.Client
             var client = new Domain.Entities.Client(request.Name,request.Code) ;
             await _clientRepo.InsertAsync(client);
 
-            return Ok(JsonWrapper.BuildSuccessJson("Client Organization saved successfully."));
+            return ApiResponse.Success("Client Organization saved successfully.");
         }
     }
 }

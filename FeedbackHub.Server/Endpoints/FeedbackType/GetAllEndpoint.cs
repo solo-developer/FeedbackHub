@@ -34,18 +34,17 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
             {
                 var feedbackTypes = await _feedbackTypeService.GetFeedbackTypesAsync();
 
-                return Ok(JsonWrapper.BuildSuccessJson(feedbackTypes));
-
+                return ApiResponse.Success(feedbackTypes);
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+                return ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {
                 Log.Error("Failed to get feedback types", ex);
             }
-            return Ok(JsonWrapper.BuildErrorJson("Failed to get feedback types"));
+            return ApiResponse.Error("Failed to get feedback types");
         }
     }
 }

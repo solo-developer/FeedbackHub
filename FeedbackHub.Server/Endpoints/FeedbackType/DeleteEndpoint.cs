@@ -28,16 +28,16 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
 
                 await _feedbackTypeRepo.UpdateAsync(feedbackType,feedbackType.Id);
 
-                return Ok(JsonWrapper.BuildSuccessJson("Feedback Type deleted successfully."));
+                return ApiResponse.Success("Feedback Type deleted successfully.");
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+                return ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {
                 SerilogLogger.Logger.Error("Failed to delete feedback type", ex);
-                return Ok(JsonWrapper.BuildErrorJson("Failed to delete feedback type."));
+                return ApiResponse.Error("Failed to delete feedback type.");
             }
         }
     }

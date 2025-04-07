@@ -21,7 +21,7 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
             var feedbackType = new Domain.Entities.FeedbackType() { Type = request.Type, Color = request.Color };
             await _feedbackTypeRepo.InsertAsync(feedbackType);
 
-            return Ok(JsonWrapper.BuildSuccessJson("Feedback Type saved successfully."));
+            return ApiResponse.Success("Feedback Type saved successfully.");
         }
     }
 }

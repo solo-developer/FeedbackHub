@@ -5,6 +5,7 @@ using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Logging;
 using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Client
 {
@@ -28,16 +29,16 @@ namespace FeedbackHub.Server.Endpoints.Client
 
                 await _clientRepo.UpdateAsync(client,client.Id);
 
-                return Ok(JsonWrapper.BuildSuccessJson("Client deleted successfully."));
+                return ApiResponse.Success("Client deleted successfully");
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+                return ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {
-                SerilogLogger.Logger.Error("Failed to delete client", ex);
-                return Ok(JsonWrapper.BuildErrorJson("Failed to delete client."));
+                Log.Error("Failed to delete client", ex);
+                return ApiResponse.Error("Failed to delete client");
             }
         }
     }

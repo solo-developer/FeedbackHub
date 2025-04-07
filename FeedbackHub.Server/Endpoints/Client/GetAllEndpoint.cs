@@ -35,18 +35,18 @@ namespace FeedbackHub.Server.Endpoints.Client
             {
                 var clients = await _clientService.GetAllClientsAsync();
 
-                return Ok(JsonWrapper.BuildSuccessJson(clients));
+                return ApiResponse.Success(clients);
 
             }
             catch (CustomException ex)
             {
-                return Ok(JsonWrapper.BuildInfoJson(ex.Message));
+                ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {
                 Log.Error("Failed to get clients", ex);
             }
-            return Ok(JsonWrapper.BuildErrorJson("Failed to get clients"));
+            return ApiResponse.Error("Failed to get clients");
         }
     }
 }

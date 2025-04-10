@@ -49,6 +49,7 @@ namespace FeedbackHub.Server.DataSeeder
                 await userManager.CreateAsync(adminUser, _defaultUserCredentials.Password);
                 await userManager.AddToRoleAsync(adminUser, Constants.ADMIN_ROLE);
             }
+
         }
     }
 }

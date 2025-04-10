@@ -184,6 +184,30 @@ namespace FeedbackHub.Infrastructure.Repository.Implementations
             }
         }
 
+        public virtual async Task<T> AddOrUpdateAsync(T entity, object key)
+        {
+            // Check if the entity already exists by its primary key (assuming key is the primary key)
+            T existingEntity = await _context.Set<T>().FindAsync(key);
+
+            if (existingEntity != null)
+            {
+                // If the entity exists, update it
+                _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                // If the entity does not exist, add it
+                await _context.Set<T>().AddAsync(entity);
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Return the updated or inserted entity
+            return entity;
+        }
+
+
         public virtual async Task<T> UpdateAsync(T t, object key)
         {
             if (t == null)

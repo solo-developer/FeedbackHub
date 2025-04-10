@@ -28,5 +28,6 @@ namespace FeedbackHub.Domain.Repositories.Interface
         T GetById(int id);
         IQueryable<T> GetQueryable();
         IQueryable<T> GetQueryableWithNoTracking();
+        Task<T> AddOrUpdateAsync(T entity, object key);
     }
 }

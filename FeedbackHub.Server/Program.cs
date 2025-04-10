@@ -1,4 +1,5 @@
 ﻿using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Infrastructure.Context;
 using FeedbackHub.Infrastructure.Repository.Implementations;
@@ -37,7 +38,6 @@ namespace FeedbackHub.Server
             // Add services to the container.
             builder.Services.AddAuthorization();
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddControllers();
             builder.Services.AddSwaggerGen();
@@ -58,59 +58,59 @@ namespace FeedbackHub.Server
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-   .AddJwtBearer(options =>
-   {
-       var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-
-       options.TokenValidationParameters = new TokenValidationParameters
-       {
-           ValidateIssuer = true,
-           ValidateAudience = true,
-           ValidateLifetime = true,
-           ValidateIssuerSigningKey = true,
-           ValidIssuer = jwtSettings.Issuer,
-           ValidAudience = jwtSettings.Audience,
-           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-           ClockSkew = TimeSpan.Zero // To detect exact expiry
-       };
-
-       options.Events = new JwtBearerEvents
-       {
-           OnAuthenticationFailed = context =>
+           .AddJwtBearer(options =>
            {
-               if (context.Exception is SecurityTokenExpiredException)
+               var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+               options.TokenValidationParameters = new TokenValidationParameters
                {
-                   // Add header to let frontend know to refresh token
-                   context.Response.Headers.Add("Token-Expired", "true");
-               }
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
+                   ValidIssuer = jwtSettings.Issuer,
+                   ValidAudience = jwtSettings.Audience,
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                   ClockSkew = TimeSpan.Zero // To detect exact expiry
+               };
 
-               return Task.CompletedTask;
-           },
+               options.Events = new JwtBearerEvents
+               {
+                   OnAuthenticationFailed = context =>
+                   {
+                       if (context.Exception is SecurityTokenExpiredException)
+                       {
+                           // Add header to let frontend know to refresh token
+                           context.Response.Headers.Add("Token-Expired", "true");
+                       }
 
-           OnChallenge = context =>
-           {
-               context.HandleResponse();
+                       return Task.CompletedTask;
+                   },
 
-               var isExpired = context.Response.Headers.ContainsKey("Token-Expired");
+                   OnChallenge = context =>
+                   {
+                       context.HandleResponse();
 
-               context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-               context.Response.ContentType = "application/json";
+                       var isExpired = context.Response.Headers.ContainsKey("Token-Expired");
 
-               var errorResponse = isExpired
-                   ? "{\"error\":\"Token expired\"}"
-                   : "{\"error\":\"Unauthorized\"}";
+                       context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                       context.Response.ContentType = "application/json";
 
-               return context.Response.WriteAsync(errorResponse);
-           },
+                       var errorResponse = isExpired
+                           ? "{\"error\":\"Token expired\"}"
+                           : "{\"error\":\"Unauthorized\"}";
 
-           OnForbidden = context =>
-           {
-               context.Response.StatusCode = StatusCodes.Status403Forbidden;
-               context.Response.ContentType = "application/json";
-               return context.Response.WriteAsync("{\"error\":\"Forbidden\"}");
-           }
-       };
-   });
+                       return context.Response.WriteAsync(errorResponse);
+                   },
+
+                   OnForbidden = context =>
+                   {
+                       context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                       context.Response.ContentType = "application/json";
+                       return context.Response.WriteAsync("{\"error\":\"Forbidden\"}");
+                   }
+               };
+           });
 
             // Load configuration from appsettings.json
             var configuration = new ConfigurationBuilder()
@@ -120,6 +120,17 @@ namespace FeedbackHub.Server
             // Configure Serilog using the shared library
             SerilogLogger.ConfigureLogger(configuration);
             builder.Host.UseSerilog(SerilogLogger.Logger);
+
+            builder.Services.AddSingleton(serviceProvider =>
+            {
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var encryptionSettings = configuration.GetSection("EncryptionSettings");
+
+                string key = encryptionSettings.GetValue<string>("Key")!;
+                string iv = encryptionSettings.GetValue<string>("IV")!;
+
+                return new AESEncryptionHelper(key, iv); 
+            });
 
             var app = builder.Build();
             var supportedCultures = new[] { "en-US", "fr-FR", "de-DE" };

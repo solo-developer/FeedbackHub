@@ -6,6 +6,7 @@ import DashboardPage from '../Consumer/Dashboard';
 import LoginPage from '../Login';
 import FeedbackTypeIndexPage from './FeedbackTypeIndex';
 import ClientOrganizationIndexPage from './ClientOrganization';
+import EmailConfiguration from './EmailConfiguration';
 
 const AdminDashboard = () => {
  
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
               <Route path="clients" element={<ClientOrganizationIndexPage />} />
+              <Route path="email-configuration" element={<EmailConfiguration />} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

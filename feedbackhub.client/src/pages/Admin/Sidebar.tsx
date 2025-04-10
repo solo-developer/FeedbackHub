@@ -62,9 +62,9 @@ const Sidebar = () => {
             </li>
            
             <li>
-              <a href="#submenu3" data-bs-toggle="collapse" className="nav-link px-0 align-middle">
+              <Link to="/admin/email-configuration" className="nav-link px-0 align-middle">
                 <i className="fs-4 bi-grid"></i> <span className="ms-1 d-none d-sm-inline">Email Configration</span>
-              </a>
+              </Link>
               
             </li>           
           </ul>

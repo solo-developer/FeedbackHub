@@ -1,18 +1,16 @@
 ﻿using Ardalis.ApiEndpoints;
-using Azure.Core;
-using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain;
 using FeedbackHub.Domain.Exceptions;
-using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Server.Helpers;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace FeedbackHub.Server.Endpoints.FeedbackType
 {
+    [Authorize(Roles = Constants.ADMIN_ROLE)]
     public class GetAllEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
     {
         private readonly IFeedbackTypeService _feedbackTypeService;

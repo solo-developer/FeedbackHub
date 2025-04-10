@@ -2,7 +2,7 @@
 {
     public class Constants
     {
-        public static string CLIENT_ROLE = "application_client";
-        public static string ADMIN_ROLE = "superadmin";
+        public const string CLIENT_ROLE = "application_client";
+        public const string ADMIN_ROLE = "superadmin";
     }
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import { get, post ,del} from '../../utils/HttpMiddleware';
+import api  from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
 import { isSuccess, parseMessage, parseData, parseResponseType } from '../../utils/HttpResponseParser';
 import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
@@ -26,7 +26,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const handleDeleteConfirm =async () => {
         setShowDialog(false);
         try {
-            const response = await del(`/feedback-type/${selectedId}`);
+            const response = await api.del(`/feedback-type/${selectedId}`);
 
             showToast(parseMessage(response), parseResponseType(response), {
                 autoClose: 3000,
@@ -50,7 +50,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await get('/feedback-type');
+            const response = await api.get('/feedback-type');
 
             if (isSuccess(response)) {
                 setData(parseData<FeedbackTypeDto[]>(response));
@@ -82,7 +82,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const saveFeedbackType = async () => {
         try {
             setIsLoading(true);
-            const response = await post('/feedback-type', {
+            const response = await api.post('/feedback-type', {
                 'Color': color,
                 'Type': typeName
             });

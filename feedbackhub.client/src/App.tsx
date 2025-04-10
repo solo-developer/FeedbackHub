@@ -11,6 +11,7 @@ import DashboardPage from "./pages/Consumer/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import "react-toastify/dist/ReactToastify.css";
 import './App.css';
+import AccessDenied from './components/AccessDenied';
 
 const App = () => {
   return (
@@ -56,6 +57,7 @@ const AppRoutes = () => {
           <Route path="/admin/*" element={<AdminDashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
+        <Route path="/access-denied" element={<AccessDenied/>} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

@@ -1,12 +1,14 @@
 ﻿using Ardalis.ApiEndpoints;
+using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
-using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Server.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FeedbackHub.Server.Endpoints.FeedbackType
 {
+    [Authorize(Roles = Constants.ADMIN_ROLE)]
     public class SaveEndpoint : EndpointBaseAsync.WithRequest<FeedbackTypeDto>.WithResult<IActionResult>
     {
         private readonly IBaseRepository<Domain.Entities.FeedbackType> _feedbackTypeRepo;

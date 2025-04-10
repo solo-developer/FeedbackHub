@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from "./../styles/Login.module.css";
-import { post } from '../utils/HttpMiddleware';
+import api  from '../utils/HttpMiddleware';
 import { useToast } from '../contexts/ToastContext';
 import {isSuccess,parseMessage,parseData,parseResponseType}  from '../utils/HttpResponseParser';
 import {LoginResponseDto} from '../types/account/LoginResponseDto';
@@ -24,7 +24,7 @@ const LoginPage = () => {
       setError('');
   
       try {
-        const response = await post('/account/login', {
+        const response = await api.post('/account/login', {
           username,
           password,
         });
@@ -92,8 +92,7 @@ const LoginPage = () => {
 
                       <button
                           type="submit"
-                          className="form-control login-btn btn-primary"
-                      >
+                          className="form-control login-btn btn-primary">
                           Login
                       </button>
                   </form>

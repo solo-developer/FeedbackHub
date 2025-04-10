@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import { get, post ,del} from '../../utils/HttpMiddleware';
+import api  from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
 import { isSuccess, parseMessage, parseData, parseResponseType } from '../../utils/HttpResponseParser';
 import { ClientDto } from '../../types/client/ClientDto';
@@ -26,7 +26,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const handleDeleteConfirm =async () => {
         setShowDialog(false);
         try {
-            const response = await del(`/client/${selectedId}`);
+            const response = await api.del(`/client/${selectedId}`);
 
             showToast(parseMessage(response), parseResponseType(response), {
                 autoClose: 3000,
@@ -50,7 +50,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await get('/client');
+            const response = await api.get('/client');
 
             if (isSuccess(response)) {
                 setData(parseData<ClientDto[]>(response));
@@ -82,7 +82,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const save = async () => {
         try {
             setIsLoading(true);
-            const response = await post('/client', {
+            const response = await api.post('/client', {
                 'Name': name,
                 'Code': code
             });

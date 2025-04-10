@@ -1,4 +1,4 @@
-using FeedbackHub.Domain.Entities;
+﻿using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Infrastructure.Context;
 using FeedbackHub.Infrastructure.Repository.Implementations;
@@ -53,22 +53,65 @@ namespace FeedbackHub.Server
                     });
             });
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            builder.Services.AddAuthentication(options =>
             {
-                var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+   .AddJwtBearer(options =>
+   {
+       var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
-                };
-            });
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuer = true,
+           ValidateAudience = true,
+           ValidateLifetime = true,
+           ValidateIssuerSigningKey = true,
+           ValidIssuer = jwtSettings.Issuer,
+           ValidAudience = jwtSettings.Audience,
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+           ClockSkew = TimeSpan.Zero // To detect exact expiry
+       };
+
+       options.Events = new JwtBearerEvents
+       {
+           OnAuthenticationFailed = context =>
+           {
+               if (context.Exception is SecurityTokenExpiredException)
+               {
+                   // Add header to let frontend know to refresh token
+                   context.Response.Headers.Add("Token-Expired", "true");
+               }
+
+               return Task.CompletedTask;
+           },
+
+           OnChallenge = context =>
+           {
+               context.HandleResponse();
+
+               var isExpired = context.Response.Headers.ContainsKey("Token-Expired");
+
+               context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+               context.Response.ContentType = "application/json";
+
+               var errorResponse = isExpired
+                   ? "{\"error\":\"Token expired\"}"
+                   : "{\"error\":\"Unauthorized\"}";
+
+               return context.Response.WriteAsync(errorResponse);
+           },
+
+           OnForbidden = context =>
+           {
+               context.Response.StatusCode = StatusCodes.Status403Forbidden;
+               context.Response.ContentType = "application/json";
+               return context.Response.WriteAsync("{\"error\":\"Forbidden\"}");
+           }
+       };
+   });
+
             // Load configuration from appsettings.json
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -98,6 +141,7 @@ namespace FeedbackHub.Server
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
            

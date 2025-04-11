@@ -12,14 +12,14 @@ namespace FeedbackHub.Domain.Dto
             this.Port = port;
             this.Username = username;
             this.Password = password;
-            if (Enum.IsDefined(typeof(EmailEncryptionMethod), encryptionMethod)) throw new InvalidValueException("Value of encryption method is invalid.");
+            if (!Enum.IsDefined(typeof(EmailEncryptionMethod), encryptionMethod)) throw new InvalidValueException("Value of encryption method is invalid.");
             this.EncryptionMethod =(EmailEncryptionMethod) Enum.Parse(typeof(EmailEncryptionMethod), encryptionMethod);
         }
-        public string Host { get; protected set; }
-        public  int Port { get; protected set; }
-        public EmailEncryptionMethod EncryptionMethod { get;protected set; }
+        public string? Host { get; set; }
+        public  int Port { get; set; }
+        public EmailEncryptionMethod EncryptionMethod { get; set; } = EmailEncryptionMethod.None;
 
-        public string Username { get;protected set; }
-        public string Password { get;protected set; }
+        public string? Username { get; set; }
+        public string? Password { get; set; }
     }
 }

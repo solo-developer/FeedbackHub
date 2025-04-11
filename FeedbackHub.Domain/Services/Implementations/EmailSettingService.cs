@@ -1,5 +1,6 @@
 ﻿using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
@@ -28,7 +29,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var username = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_USERNAME_SETTINGS_KEY))?.Value;
             var password = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY))?.Value;
 
-            return new EmailSettingDto(emailHost, emailPort == default ? 0 : int.Parse(emailPort), emailEncryptionMethod, username, string.IsNullOrEmpty(password) ? string.Empty : _aESEncryptionHelper.Decrypt(password));
+            return new EmailSettingDto(emailHost, emailPort == default ? 0 : int.Parse(emailPort), string.IsNullOrEmpty(emailEncryptionMethod) ? EmailEncryptionMethod.None.ToString() : emailEncryptionMethod, username, string.IsNullOrEmpty(password) ? string.Empty : _aESEncryptionHelper.Decrypt(password));
         }
 
         public async Task SaveAsync(EmailSettingDto emailSettingDto)
@@ -55,7 +56,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                 await _settingRepo.AddOrUpdateAsync(usernameSetting, usernameSetting.Id);
 
                 var passwordSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY)) ?? new Setting();
-                CopyValues(ref passwordSetting, Constants.EMAIL_PASSWORD_SETTINGS_KEY,_aESEncryptionHelper.Encrypt(emailSettingDto.Password), Constants.EMAIL_SETTING_GROUP);
+                CopyValues(ref passwordSetting, Constants.EMAIL_PASSWORD_SETTINGS_KEY, _aESEncryptionHelper.Encrypt(emailSettingDto.Password), Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(passwordSetting, passwordSetting.Id);
 
                 tx.Complete();

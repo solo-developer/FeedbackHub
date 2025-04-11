@@ -10,10 +10,10 @@ using Serilog;
 namespace FeedbackHub.Server.Endpoints.EmailSetting
 {
     [Authorize(Roles = Constants.ADMIN_ROLE)]
-    public class GetAllEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
+    public class GetEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
     {
         private readonly IEmailSettingService _emailSettingService;
-        public GetAllEndpoint(IEmailSettingService emailSettingService)
+        public GetEndpoint(IEmailSettingService emailSettingService)
         {
             _emailSettingService =  emailSettingService;
         }

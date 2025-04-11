@@ -63,7 +63,7 @@ const Sidebar = () => {
            
             <li>
               <Link to="/admin/email-configuration" className="nav-link px-0 align-middle">
-                <i className="fs-4 bi-grid"></i> <span className="ms-1 d-none d-sm-inline">Email Configration</span>
+                <i className="fs-4 bi-grid"></i> <span className="ms-1 d-none d-sm-inline">Email Configuration</span>
               </Link>
               
             </li>           

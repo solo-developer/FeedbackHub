@@ -20,6 +20,7 @@ type EmailEncryptionMethod = {
 const EmailConfiguration: React.FC = () => {
 
     useEffect(() => {
+
         fetchData();
         fetchEmailEncryptionMethods();
     }, []);

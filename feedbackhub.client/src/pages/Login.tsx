@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from "./../styles/Login.module.css";
 import api  from '../utils/HttpMiddleware';
 import { useToast } from '../contexts/ToastContext';
 import {isSuccess,parseMessage,parseData,parseResponseType}  from '../utils/HttpResponseParser';
@@ -61,7 +60,7 @@ const LoginPage = () => {
     };
 
     return (
-      <div className={styles.loginCard} style={{ marginTop: '20%' }}>
+      <div style={{ marginTop: '20%' }}>
 
           <div className="d-flex justify-content-center">
               <div className="card shadow-sm p-4 w-100">

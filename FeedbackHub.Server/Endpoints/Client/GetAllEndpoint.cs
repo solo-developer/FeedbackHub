@@ -10,7 +10,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace FeedbackHub.Server.Endpoints.Client
 {
-    [Authorize(Roles = Constants.ADMIN_ROLE)]
+    //[Authorize(Roles = Constants.ADMIN_ROLE)]
+    [AllowAnonymous]
     public class GetAllEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
     {
         private readonly IClientService _clientService;

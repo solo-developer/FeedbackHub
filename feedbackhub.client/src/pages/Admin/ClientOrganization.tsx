@@ -3,10 +3,11 @@ import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
 import api  from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
-import { isSuccess, parseMessage, parseData, parseResponseType } from '../../utils/HttpResponseParser';
+import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResponseParser';
 import { ClientDto } from '../../types/client/ClientDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { fetchClients } from '../../services/ClientService';
 
 const ClientOrganizationIndexPage: React.FC = () => {
 
@@ -50,13 +51,13 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await api.get('/client');
+            const response = await fetchClients();
 
-            if (isSuccess(response)) {
-                setData(parseData<ClientDto[]>(response));
+            if (response.Success) {
+                setData(response.Data);
             }
             else {
-                showToast(parseMessage(response), parseResponseType(response), {
+                showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
                 });

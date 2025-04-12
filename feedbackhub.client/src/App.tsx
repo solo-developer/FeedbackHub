@@ -5,13 +5,14 @@ import { ToastContainer } from "react-toastify";
 import { ToastProvider } from "./contexts/ToastContext"; // Import the ToastProvider
 import { AuthProvider, useAuth } from "./contexts/AuthContext"; // Import Auth Context
 
-import LoginPage from "./pages/Login";
 import AdminDashboardPage from "./pages/Admin/AdminDashboard";
 import DashboardPage from "./pages/Consumer/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import "react-toastify/dist/ReactToastify.css";
 import './App.css';
 import AccessDenied from './components/AccessDenied';
+import HomeScreenPage from './pages/HomeScreen';
+import RegistrationRequestPage from './pages/Consumer/RegistrationRequest';
 
 const App = () => {
   return (
@@ -45,19 +46,20 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Navigate to={isAuthenticated ? (role === "superadmin" ? "/admin-dashboard" : "/dashboard") : "/login"} />
-          }
-        />
-        <Route path="/login" element={<LoginPage />} />
+       
+        <Route path="/login" element={<HomeScreenPage />} />
+        <Route path="/register" element={<RegistrationRequestPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/*" element={<AdminDashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
         <Route path="/access-denied" element={<AccessDenied/>} />
+        <Route
+          path="/" element={
+            <Navigate to={isAuthenticated ? (role === "superadmin" ? "/admin-dashboard" : "/dashboard") : "/login"} />
+          }
+        />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

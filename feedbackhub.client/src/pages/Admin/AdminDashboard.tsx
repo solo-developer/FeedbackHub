@@ -8,6 +8,7 @@ import FeedbackTypeIndexPage from './FeedbackTypeIndex';
 import ClientOrganizationIndexPage from './ClientOrganization';
 import EmailConfiguration from './EmailConfiguration';
 import RegistrationRequestPage from './RegistrationRequest';
+import ApplicationIndexPage from './ApplicationIndex';
 
 const AdminDashboard = () => {
  
@@ -30,6 +31,7 @@ const AdminDashboard = () => {
               <Route path="registration-requests" element={<RegistrationRequestPage />} />
               <Route path="clients" element={<ClientOrganizationIndexPage />} />
               <Route path="email-configuration" element={<EmailConfiguration />} />
+              <Route path="applications" element={<ApplicationIndexPage />} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

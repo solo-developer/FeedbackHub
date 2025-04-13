@@ -1,14 +1,17 @@
 ﻿using Ardalis.ApiEndpoints;
+using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Implementations;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Server.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Registration
 {
+    [Authorize(Roles = Constants.ADMIN_ROLE)]
     public class GetAllEndpoint : EndpointBaseAsync.WithRequest<RegistrationRequestFilterDto>.WithResult<IActionResult>
     {
         private readonly IRegistrationRequestService _registrationRequestService;

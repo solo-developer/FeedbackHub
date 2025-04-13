@@ -11,7 +11,7 @@ export const fetchClients = async (): Promise<ServiceResponseType<ClientDto[]>> 
         return  {Success:true, Data: parseData<ClientDto[]>(response) } as ServiceResponseType<ClientDto[]>;
       } 
       else {
-        return { Success: false,  ResponseType : parseResponseType(response)} as ServiceResponseType<ClientDto[]>;
+        return { Success: false,  ResponseType : parseResponseType(response), Message : parseMessage(response)} as ServiceResponseType<ClientDto[]>;
       }
     } catch (err) {
       return { Success: false, Message: 'Failed to load client organizations', ResponseType:'error' };

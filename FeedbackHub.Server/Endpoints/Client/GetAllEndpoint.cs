@@ -39,7 +39,7 @@ namespace FeedbackHub.Server.Endpoints.Client
             }
             catch (CustomException ex)
             {
-                ApiResponse.Info(ex.Message);
+              return  ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {

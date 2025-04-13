@@ -7,6 +7,7 @@ import LoginPage from '../Login';
 import FeedbackTypeIndexPage from './FeedbackTypeIndex';
 import ClientOrganizationIndexPage from './ClientOrganization';
 import EmailConfiguration from './EmailConfiguration';
+import RegistrationRequestPage from './RegistrationRequest';
 
 const AdminDashboard = () => {
  
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
             <Routes>
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
+              <Route path="registration-requests" element={<RegistrationRequestPage />} />
               <Route path="clients" element={<ClientOrganizationIndexPage />} />
               <Route path="email-configuration" element={<EmailConfiguration />} />
               <Route path="*" element={<LoginPage />} />

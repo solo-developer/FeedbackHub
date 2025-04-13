@@ -31,7 +31,7 @@ namespace FeedbackHub.Server.Endpoints.EmailSetting
             }
             catch (CustomException ex)
             {
-                ApiResponse.Info(ex.Message);
+              return  ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {

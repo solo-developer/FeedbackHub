@@ -31,10 +31,12 @@ namespace FeedbackHub.Domain.Entities
         public virtual Client Client { get; set; }
         public virtual UserDetail User { get; set; }
 
-        public void AcceptRegistration()
+        public async Task AcceptRegistration()
         {
             if (this.ConvertedUserId.HasValue) throw new InvalidStateTransitionException("The Registration request is already accepted.");
             this.User = UserDetail.Create(this.FullName);
+
+            await _repo.UpdateAsync(this, this.Id);
            
         }
 

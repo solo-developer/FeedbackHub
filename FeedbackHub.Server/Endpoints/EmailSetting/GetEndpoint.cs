@@ -15,7 +15,7 @@ namespace FeedbackHub.Server.Endpoints.EmailSetting
         private readonly IEmailSettingService _emailSettingService;
         public GetEndpoint(IEmailSettingService emailSettingService)
         {
-            _emailSettingService =  emailSettingService;
+            _emailSettingService = emailSettingService;
         }
 
         [HttpGet("/email-setting")]
@@ -30,7 +30,7 @@ namespace FeedbackHub.Server.Endpoints.EmailSetting
             }
             catch (CustomException ex)
             {
-                ApiResponse.Info(ex.Message);
+                return ApiResponse.Info(ex.Message);
             }
             catch (Exception ex)
             {

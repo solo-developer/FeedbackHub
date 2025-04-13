@@ -24,7 +24,7 @@ const Sidebar = () => {
             </li>
 
             <li className="nav-item">
-              <Link to="/admin/dashboard"  className="nav-link align-middle px-0">
+              <Link to="/admin/registration-requests"  className="nav-link align-middle px-0">
                 <i className="fs-4 bi-house"></i> <span className="ms-1 d-none d-sm-inline">Registration Requests</span>
               </Link>
             </li>
@@ -52,6 +52,11 @@ const Sidebar = () => {
             <li>
               <Link to="/admin/clients" className="nav-link px-0 align-middle">
                 <i className="fs-4 bi-table"></i> <span className="ms-1 d-none d-sm-inline">Client Organizations</span>
+              </Link>
+            </li>
+            <li>
+            <Link to="/admin/applications"  className="nav-link align-middle px-0">
+                <i className="fs-4 bi-table"></i> <span className="ms-1 d-none d-sm-inline">Applications</span>
               </Link>
             </li>
 

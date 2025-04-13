@@ -1,9 +1,14 @@
-﻿namespace FeedbackHub.Domain.Dto
+﻿using FeedbackHub.Domain.ValueObjects;
+
+namespace FeedbackHub.Domain.Dto
 {
     public class RegistrationRequestDto
     {
-        public int ClientId { get; set; }
-        public string FullName { get; set; }
-        public string Email { get; set; }
+        public required int Id { get; set; }
+        public required string Name { get; set; }
+        public required bool IsUser { get; set; }
+        public required DateTime RequestedAt { get; set; }
+        public required Email Email { get; set; }
+        public required ClientDto Client { get; set; }
     }
 }

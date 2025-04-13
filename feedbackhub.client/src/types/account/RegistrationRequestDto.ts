@@ -1,5 +1,10 @@
+import { ClientDto } from "../client/ClientDto";
+
 export interface RegistrationRequestDto {
-  ClientId: number;
-  FullName: string;
-  Email: string;
-}
+    Id: number;
+    Name: string;
+    Email: string;
+    IsUser: boolean;
+    RequestedAt : Date;
+    Client : ClientDto
+  }

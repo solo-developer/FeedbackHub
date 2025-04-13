@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../../styles/LoginStyle';
-import { RegistrationRequestDto } from '../../types/account/RegistrationRequestDto';
+import { RegistrationSaveRequestDto } from '../../types/account/RegistrationSaveRequestDto';
 import { ClientDto } from '../../types/client/ClientDto';
 import { fetchClients } from '../../services/ClientService';
 import { useToast } from '../../contexts/ToastContext';
@@ -11,7 +11,7 @@ const RegistrationPage: React.FC = () => {
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [clients, setClients] = useState<ClientDto[]>([]);
-    const [formData, setFormData] = useState<RegistrationRequestDto>({
+    const [formData, setFormData] = useState<RegistrationSaveRequestDto>({
         ClientId: 0,
         FullName: '',
         Email: '',
@@ -74,7 +74,6 @@ const RegistrationPage: React.FC = () => {
             navigate('/login');
         }
         else{
-            debugger;
              showToast(response.Message, response.ResponseType, {
                             autoClose: 3000,
                             draggable: true

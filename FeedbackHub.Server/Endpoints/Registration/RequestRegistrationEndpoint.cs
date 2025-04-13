@@ -12,7 +12,7 @@ using System.Transactions;
 namespace FeedbackHub.Server.Endpoints.Registration
 {
     [AllowAnonymous]
-    public class RequestRegistrationEndpoint : EndpointBaseAsync.WithRequest<RegistrationRequestDto>.WithResult<IActionResult>
+    public class RequestRegistrationEndpoint : EndpointBaseAsync.WithRequest<RegistrationRequestSaveDto>.WithResult<IActionResult>
     {
         private readonly IBaseRepository<RegistrationRequest> _registrationRequestRepo;
         public RequestRegistrationEndpoint(IBaseRepository<RegistrationRequest> registrationRequestRepo)
@@ -21,7 +21,7 @@ namespace FeedbackHub.Server.Endpoints.Registration
         }
 
         [HttpPost("registration-request")]
-        public override async Task<IActionResult> HandleAsync([FromBody]RegistrationRequestDto request, CancellationToken cancellationToken = default)
+        public override async Task<IActionResult> HandleAsync([FromBody]RegistrationRequestSaveDto request, CancellationToken cancellationToken = default)
         {
             try
             {

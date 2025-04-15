@@ -34,11 +34,11 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .HasForeignKey(rr => rr.ClientId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(rr => rr.User)
-                .WithMany() 
-                .HasForeignKey(rr => rr.ConvertedUserId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(rr => rr.User) // One-to-one relationship with User
+         .WithOne(ud=>ud.RegistrationRequest) // This indicates one-to-one relationship on User side
+         .HasForeignKey<RegistrationRequest>(rr => rr.ConvertedUserId) // Foreign key in RegistrationRequest
+         .IsRequired(false) // Nullable since registration request might not be converted yet
+         .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

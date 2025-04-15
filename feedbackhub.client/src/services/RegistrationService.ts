@@ -1,6 +1,7 @@
 import { RegistrationRequestDto } from '../types/account/RegistrationRequestDto';
 import { RegistrationRequestFilterDto } from '../types/account/RegistrationRequestFilterDto';
 import { RegistrationSaveRequestDto } from '../types/account/RegistrationSaveRequestDto';
+import { UserConversionDto } from '../types/account/UserConversionDto';
 import { ClientDto } from '../types/client/ClientDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
@@ -19,6 +20,21 @@ export const requestRegistration = async (dto: RegistrationSaveRequestDto): Prom
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to request registration', ResponseType: 'error' };
+    }
+};
+
+export const convertToUser = async (dto: UserConversionDto): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/registration-request/convert-to-user', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to convert to user', ResponseType: 'error' };
     }
 };
 

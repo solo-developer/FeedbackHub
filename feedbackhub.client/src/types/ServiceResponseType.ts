@@ -14,7 +14,6 @@
   export type ServiceError = {
     Success: false;
     Message: string;
-    Data: undefined;
     ResponseType : 'info' | 'error';
   };
   

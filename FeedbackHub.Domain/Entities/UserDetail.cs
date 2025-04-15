@@ -1,11 +1,26 @@
-﻿namespace FeedbackHub.Domain.Entities
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace FeedbackHub.Domain.Entities
 {
     public class UserDetail : BaseEntity
     {
-        public static UserDetail Create(string fullname)
+        public static UserDetail Create(string fullName, string email, List<int> applicationIds)
         {
-            return new UserDetail() { FullName =fullname };
+            return new UserDetail
+            {
+                FullName = fullName,
+                ApplicationUser = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email
+                },
+                Subscriptions = applicationIds.Select(id => new UserSubscription
+                {
+                    ApplicationId = id
+                }).ToList()
+            };
         }
+
         public UserDetail()
         {
 
@@ -15,7 +30,7 @@
         public bool IsDeleted { get; private set; }
 
         public virtual ApplicationUser ApplicationUser { get; private set; }
-        public virtual RegistrationRequest RegistrationRequest { get;private set; }
+        public virtual RegistrationRequest RegistrationRequest { get; private set; }
         public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
 
         public void MarkDeleted()

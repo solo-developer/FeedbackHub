@@ -12,7 +12,7 @@ import Select from 'react-select';
 import { UserConversionDto } from '../../types/account/UserConversionDto';
 
 const RegistrationRequestPage: React.FC = () => {
-
+    const pageSize = 10;
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -25,44 +25,44 @@ const RegistrationRequestPage: React.FC = () => {
         const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
         const numberChars = "0123456789";
         const specialChars = "!@#$%^&*()_+";
-        
+
         const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
         let password = "";
-    
+
         // Ensure that password meets the constraints
         password += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length)); // At least one uppercase
         password += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length)); // At least one lowercase
         password += numberChars.charAt(Math.floor(Math.random() * numberChars.length)); // At least one number
         password += specialChars.charAt(Math.floor(Math.random() * specialChars.length)); // At least one special character
-    
+
         // Fill the remaining length with random characters from all categories
         for (let i = password.length; i < length; i++) {
             password += allChars.charAt(Math.floor(Math.random() * allChars.length));
         }
-    
+
         // Shuffle the password to ensure the order is random
         password = password.split('').sort(() => Math.random() - 0.5).join('');
-    
+
         return password;
     };
-    
+
     const [userConversionDto, setUserConversionData] = useState<UserConversionDto>({
         RegistrationRequestId: selectedRegistrationRequest?.Id ?? 0,
         Password: '',
         ApplicationIds: [],
-      });
+    });
 
-      const openModal = () => {
+    const openModal = () => {
         if (selectedRegistrationRequest) {
-          setUserConversionData({
-            RegistrationRequestId: selectedRegistrationRequest.Id,
-            Password: generateRandomPassword(),
-            ApplicationIds: []
-          });
+            setUserConversionData({
+                RegistrationRequestId: selectedRegistrationRequest.Id,
+                Password: generateRandomPassword(),
+                ApplicationIds: []
+            });
         }
         setShowModal(true);
-      };
-      
+    };
+
     const closeModal = () => setShowModal(false);
 
 
@@ -75,39 +75,39 @@ const RegistrationRequestPage: React.FC = () => {
 
     useEffect(() => {
         if (selectedRegistrationRequest) {
-          openModal();
+            openModal();
         }
-      }, [selectedRegistrationRequest]);
+    }, [selectedRegistrationRequest]);
     useEffect(() => {
         fetchData();
         getApplications();
-    }, [currentPage, filterDto,selectedRegistrationRequest]);
+    }, [currentPage, filterDto, selectedRegistrationRequest]);
 
     const convertToUserClicked = async (registrationRequest: RegistrationRequestDto) => {
         setSelectedRegistrationRequest(registrationRequest);
-       // openModal();
+        // openModal();
     };
 
     const convertToUserConfirmed = async () => {
-    try{
-        
-       var response= await convertToUser(userConversionDto);
-       if(response.Success){
-        closeModal();
-         showToast('Registration request converted to user successfully.','success');
-         await fetchData();
-       }
-       else{
-        showToast(response.Message, response.ResponseType, {
-            autoClose: 3000,
-            draggable: true
-        });
-       }
+        try {
 
-    }
-    catch(ex){
-        showToast('Failed to conver to user', 'error');
-    }
+            var response = await convertToUser(userConversionDto);
+            if (response.Success) {
+                closeModal();
+                showToast('Registration request converted to user successfully.', 'success');
+                await fetchData();
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        }
+        catch (ex) {
+            showToast('Failed to conver to user', 'error');
+        }
     };
 
     const getApplications = async () => {
@@ -136,7 +136,7 @@ const RegistrationRequestPage: React.FC = () => {
 
             if (response.Success) {
                 setData(response.Data.Data);
-                setTotalPages(response.Data.TotalCount)
+                setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -153,21 +153,21 @@ const RegistrationRequestPage: React.FC = () => {
     };
 
     const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
-  const [inputValue, setInputValue] = useState('');
+    const [inputValue, setInputValue] = useState('');
 
-  const handleChange = (selectedOptions: any[]) => {
-    const selectedIds = selectedOptions.map(opt => opt.Id);
-    setSelectedOptions(selectedOptions);
-    setUserConversionData(prev => ({
-        ...prev!,
-        ApplicationIds: selectedIds
-      }));
-      
-  };
+    const handleChange = (selectedOptions: any[]) => {
+        const selectedIds = selectedOptions.map(opt => opt.Id);
+        setSelectedOptions(selectedOptions);
+        setUserConversionData(prev => ({
+            ...prev!,
+            ApplicationIds: selectedIds
+        }));
 
-  const handleInputChange = (newInputValue: string) => {
-    setInputValue(newInputValue);
-  };
+    };
+
+    const handleInputChange = (newInputValue: string) => {
+        setInputValue(newInputValue);
+    };
     const modalFooter = (
         <div>
             <button onClick={closeModal} style={{ marginRight: '10px' }} className='pull-left'>
@@ -243,7 +243,7 @@ const RegistrationRequestPage: React.FC = () => {
             <PagePanel title='Registration Requests'>
                 <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination
                     paginationType="server"
-                    pageSize={10}
+                    pageSize={pageSize}
                     serverPaginationProps={{
                         currentPage: currentPage - 1,
                         totalPages,
@@ -298,33 +298,33 @@ const RegistrationRequestPage: React.FC = () => {
                                 className="form-control"
                                 onChange={(e) =>
                                     setUserConversionData(prev => ({
-                                      ...prev,
-                                      Password: e.target.value
+                                        ...prev,
+                                        Password: e.target.value
                                     }))
-                                  }
+                                }
                             />
                         </div>
 
                         {/* dropdown for applications */}
                         <div className="form-group">
-  <label>Select Applications</label>
-  {
-    applications.length > 0 && <Select
-    isMulti
-    options={applications}
-    getOptionLabel={(e) => e.Name}
-    getOptionValue={(e) => e.Id.toString()}
-    value={selectedOptions}
-    onChange={handleChange}
-    inputValue={inputValue}
-     onInputChange={handleInputChange}
-    onMenuOpen={() => console.log('Menu opened')}
-    onMenuClose={() => console.log('Menu closed')}
-  />
-  }
-  
+                            <label>Select Applications</label>
+                            {
+                                applications.length > 0 && <Select
+                                    isMulti
+                                    options={applications}
+                                    getOptionLabel={(e) => e.Name}
+                                    getOptionValue={(e) => e.Id.toString()}
+                                    value={selectedOptions}
+                                    onChange={handleChange}
+                                    inputValue={inputValue}
+                                    onInputChange={handleInputChange}
+                                    onMenuOpen={() => console.log('Menu opened')}
+                                    onMenuClose={() => console.log('Menu closed')}
+                                />
+                            }
 
-</div>
+
+                        </div>
                     </form>
                 </Modal>
             }

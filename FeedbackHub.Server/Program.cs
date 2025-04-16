@@ -1,11 +1,14 @@
 ﻿using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
+using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Domain.Templating;
 using FeedbackHub.Infrastructure.Context;
 using FeedbackHub.Infrastructure.Repository.Implementations;
 using FeedbackHub.Logging;
 using FeedbackHub.Server.DataSeeder;
 using FeedbackHub.Server.Models;
+using FeedbackHub.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -160,7 +163,8 @@ namespace FeedbackHub.Server
             app.MapFallbackToFile("/index.html");
 
             var defaultUserCredentials = app.Services.GetRequiredService<IOptions<DefaultUserCredentials>>();
-            var seeder = new ApplicationDataSeeder(defaultUserCredentials);
+            var webHostEnv = app.Services.GetRequiredService<IWebHostEnvironment>();
+            var seeder = new ApplicationDataSeeder(defaultUserCredentials,webHostEnv);
             await seeder.SeedAsync(app.Services);
             app.Run();
         }
@@ -172,6 +176,11 @@ namespace FeedbackHub.Server
                      .AsSelf()
                       .AsImplementedInterfaces()
                      .WithScopedLifetime());
+
+            //services.AddScoped<ITokenValueProvider, GenericTokenProvider>();
+            //services.AddScoped<ITokenValueProvider, RegistrationRequestApprovedTokenProvider>();
+            services.AddScoped<TokenProviderResolver>();
+            services.AddScoped<IApplicationInfoProvider,ApplicationInfoProvider>();
         }
     }
 }

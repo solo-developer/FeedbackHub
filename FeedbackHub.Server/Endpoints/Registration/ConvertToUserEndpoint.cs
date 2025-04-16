@@ -26,7 +26,7 @@ namespace FeedbackHub.Server.Endpoints.Registration
         {
             try
             {
-                await _registrationRequestService.AcceptRegistrationAsync(request.RegistrationRequestId,request.Password,request.ApplicationIds);
+                await _registrationRequestService.AcceptRegistrationAsync(request);
                
                 return ApiResponse.Success("Registration request converted to user successfully.");
 

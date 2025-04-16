@@ -4,6 +4,7 @@ using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Domain.Templating;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
@@ -16,35 +17,49 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly IRoleRepository _roleRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IEmailSenderService _emailSenderService;
+        private readonly IEmailContentComposer _emailContentComposer;
 
-
-        public RegistrationRequestService(IBaseRepository<RegistrationRequest> registrationRequestRepo, IRoleRepository roleRepo, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public RegistrationRequestService(IBaseRepository<RegistrationRequest> registrationRequestRepo, IRoleRepository roleRepo, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IEmailSenderService emailSenderService, IEmailContentComposer emailContentComposer)
         {
             _registrationRequestRepo = registrationRequestRepo;
             _roleRepo = roleRepo;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSenderService = emailSenderService;
+            _emailContentComposer = emailContentComposer;
         }
 
-        public async Task AcceptRegistrationAsync(int registrationId, string password, List<int> appIds)
+        public async Task AcceptRegistrationAsync(ConvertRegistrationRequestToUserDto dto)
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var regRequest = await _registrationRequestRepo.GetByIdAsync(registrationId);
+                var regRequest = await _registrationRequestRepo.GetByIdAsync(dto.RegistrationRequestId);
                 if (regRequest == null) throw new ItemNotFoundException("Registration not found");
 
-                var userDetail = UserDetail.Create(regRequest.FullName, regRequest.Email.Value, appIds);
+                var userDetail = UserDetail.Create(regRequest.FullName, regRequest.Email.Value, dto.ApplicationIds);
 
                 var appUser = userDetail.ApplicationUser;
-                var result = await _userManager.CreateAsync(appUser, password);
+                var result = await _userManager.CreateAsync(appUser, dto.Password);
                 if (!result.Succeeded) throw new Exception("User creation failed");
 
-                
+
                 await _userManager.AddToRoleAsync(appUser, Constants.CLIENT_ROLE);
 
                 regRequest.AcceptRegistration(userDetail);
                 await _registrationRequestRepo.UpdateAsync(regRequest, regRequest.Id);
                 tx.Complete();
+
+                var (subject, body) = await _emailContentComposer.ComposeAsync(TemplateType.RegistrationRequestAccepted, dto);
+
+                _emailSenderService.SendEmailAsync(new EmailMessageDto
+                {
+                    Body = body,
+                    Subject = subject,
+                    IsHtml = true,
+                    To = new List<string> { regRequest.Email.Value }
+                });
+
             }
         }
 

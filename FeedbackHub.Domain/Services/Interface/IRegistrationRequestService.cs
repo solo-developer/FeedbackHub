@@ -6,6 +6,6 @@ namespace FeedbackHub.Domain.Services.Interface
     {
         Task<PaginatedDataResponseDto<RegistrationRequestDto>> GetAsync(RegistrationRequestFilterDto filter);
 
-        Task AcceptRegistrationAsync(int registrationId, string password, List<int> appIds);
+        Task AcceptRegistrationAsync(ConvertRegistrationRequestToUserDto dto);
     }
 }

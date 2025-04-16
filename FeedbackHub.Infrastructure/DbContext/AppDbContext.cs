@@ -25,6 +25,7 @@ namespace FeedbackHub.Infrastructure.Context
             builder.ApplyConfiguration(new FeedbackTypeConfiguration());
             builder.ApplyConfiguration(new RegistrationRequestConfiguration());
             builder.ApplyConfiguration(new SettingConfiguration());
+            builder.ApplyConfiguration(new TemplateConfiguration());
             builder.ApplyConfiguration(new TicketSequenceConfiguration());
             builder.ApplyConfiguration(new UserDetailConfiguration());
             builder.ApplyConfiguration(new UserSubscriptionConfiguration());
@@ -38,6 +39,7 @@ namespace FeedbackHub.Infrastructure.Context
         public DbSet<FeedbackType> FeedbackTypes { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        public DbSet<Template> Templates { get; set; }
         public DbSet<TicketSequence> TicketSequences { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }

@@ -9,15 +9,18 @@ using FeedbackHub.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using FeedbackHub.Server.Models;
+using Serilog;
 
 namespace FeedbackHub.Server.DataSeeder
 {
     public class ApplicationDataSeeder
     {
         private readonly DefaultUserCredentials _defaultUserCredentials;
-        public ApplicationDataSeeder(IOptions<DefaultUserCredentials> options)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ApplicationDataSeeder(IOptions<DefaultUserCredentials> options, IWebHostEnvironment webHostEnvironment)
         {
             _defaultUserCredentials = options.Value;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task SeedAsync(IServiceProvider serviceProvider)
@@ -29,15 +32,41 @@ namespace FeedbackHub.Server.DataSeeder
 
             context.Database.Migrate();
 
-            string[] roles = { Constants.ADMIN_ROLE, Constants.CLIENT_ROLE };
-            foreach (var role in roles)
+            await SeedRoles(roleManager);
+            await SeedUsers(userManager);
+
+            await SeedEmailTemplates(context);
+
+        }
+
+        private async Task SeedEmailTemplates(AppDbContext context)
+        {
+            var registrationRequestApprovalTemplate = await context.Templates.SingleOrDefaultAsync(a => a.TemplateType == Domain.Enums.TemplateType.RegistrationRequestAccepted);
+            if (registrationRequestApprovalTemplate is not null)
+                return;
+
+            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Templates", "ApprovalOfRegistrationRequest.html");
+
+            if (!File.Exists(filePath))
             {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new ApplicationRole() { Name= role,NormalizedName= role.ToUpper()});
-                }
+                Log.Error("ApprovalOfRegistrationRequest.html is not present in Templates folder");
+                return;
             }
 
+            var templateContent = await File.ReadAllTextAsync(filePath);
+
+            context.Templates.Add(new Template
+            {
+                Subject = "Registration request approved",
+                EmailTemplate = templateContent,
+                TemplateType = Domain.Enums.TemplateType.RegistrationRequestAccepted
+            });
+
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SeedUsers(UserManager<ApplicationUser> userManager)
+        {
             if (await userManager.FindByEmailAsync(_defaultUserCredentials.Email) == null)
             {
                 var adminUser = new ApplicationUser
@@ -49,7 +78,18 @@ namespace FeedbackHub.Server.DataSeeder
                 await userManager.CreateAsync(adminUser, _defaultUserCredentials.Password);
                 await userManager.AddToRoleAsync(adminUser, Constants.ADMIN_ROLE);
             }
+        }
 
+        private static async Task SeedRoles(RoleManager<ApplicationRole> roleManager)
+        {
+            string[] roles = { Constants.ADMIN_ROLE, Constants.CLIENT_ROLE };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new ApplicationRole() { Name = role, NormalizedName = role.ToUpper() });
+                }
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import ClientOrganizationIndexPage from './ClientOrganization';
 import EmailConfiguration from './EmailConfiguration';
 import RegistrationRequestPage from './RegistrationRequest';
 import ApplicationIndexPage from './ApplicationIndex';
+import UsersPage from '../Users';
 
 const AdminDashboard = () => {
  
@@ -32,6 +33,8 @@ const AdminDashboard = () => {
               <Route path="clients" element={<ClientOrganizationIndexPage />} />
               <Route path="email-configuration" element={<EmailConfiguration />} />
               <Route path="applications" element={<ApplicationIndexPage />} />
+              <Route path="/admin-users" element={<UsersPage userType="Admin"/>} />
+              <Route path="/client-users" element={<UsersPage userType="Client"/>} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

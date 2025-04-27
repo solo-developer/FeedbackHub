@@ -37,14 +37,14 @@ const Sidebar = () => {
               </a>
               <ul className="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
                 <li className="w-100">
-                  <a href="#" className="nav-link px-0">
-                    <span className="d-none d-sm-inline">Clients</span>
-                  </a>
+                  <Link to="/admin/client-users" className="nav-link px-0">
+                    <span className="d-none d-sm-inline">Client Users</span>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="nav-link px-0">
+                  <Link to="/admin/admin-users" className="nav-link px-0">
                     <span className="d-none d-sm-inline">Admin Users</span>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </li>

@@ -4,10 +4,11 @@ namespace FeedbackHub.Domain.Entities
 {
     public class UserDetail : BaseEntity
     {
-        public static UserDetail Create(string fullName, string email, List<int> applicationIds)
+        public static UserDetail Create(int registrationRequestId, string fullName, string email, List<int> applicationIds)
         {
             return new UserDetail
             {
+                RegistrationRequestId= registrationRequestId,
                 FullName = fullName,
                 ApplicationUser = new ApplicationUser
                 {
@@ -28,6 +29,8 @@ namespace FeedbackHub.Domain.Entities
         public string FullName { get; set; }
         public int AppUserId { get; set; }
         public bool IsDeleted { get; private set; }
+
+        public int? RegistrationRequestId { get; private set; }
 
         public virtual ApplicationUser ApplicationUser { get; private set; }
         public virtual RegistrationRequest RegistrationRequest { get; private set; }

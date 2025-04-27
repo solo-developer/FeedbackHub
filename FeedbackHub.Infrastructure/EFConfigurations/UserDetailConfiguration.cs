@@ -26,9 +26,10 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .OnDelete(DeleteBehavior.Restrict); // Prevent accidental deletion of ApplicationUser
 
             builder.HasOne(ud => ud.RegistrationRequest)
-          .WithOne(rr => rr.User) // This ensures that each user is mapped to exactly one registration request
-          .HasForeignKey<RegistrationRequest>(rr => rr.ConvertedUserId) // Foreign key to UserDetail
-          .OnDelete(DeleteBehavior.Cascade);
+        .WithOne(rr => rr.User)
+        .HasForeignKey<UserDetail>(ud => ud.RegistrationRequestId) // FK is in UserDetail
+        .IsRequired(false)
+        .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasMany(ud => ud.Subscriptions)
                 .WithOne(us => us.User)

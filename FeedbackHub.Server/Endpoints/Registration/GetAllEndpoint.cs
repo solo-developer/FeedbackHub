@@ -1,6 +1,7 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
+using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Implementations;
 using FeedbackHub.Domain.Services.Interface;
@@ -25,6 +26,7 @@ namespace FeedbackHub.Server.Endpoints.Registration
         {
             try
             {
+                request.State = (int)RegistrationRequestState.UnconvertedRequest;
                 var requests = await _registrationRequestService.GetAsync(request);
 
                 return ApiResponse.Success(requests);

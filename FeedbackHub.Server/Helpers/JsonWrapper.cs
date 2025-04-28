@@ -42,7 +42,7 @@ namespace FeedbackHub.Server.Helpers
                 new ApiResponseBase<object>(ResponseMessageType.Error, errorMessage, additionalData),
                 _jsonOptions)
             {
-                StatusCode = StatusCodes.Status400BadRequest
+                StatusCode = StatusCodes.Status200OK
             };
 
         // Info responses

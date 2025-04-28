@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Runtime.CompilerServices;
 
 namespace FeedbackHub.Domain.Entities
 {
@@ -56,6 +57,12 @@ namespace FeedbackHub.Domain.Entities
         {
             var subscribedApp = Subscriptions.Find(a => a.ApplicationId == applicationId);
             Subscriptions.Remove(subscribedApp);
+        }
+
+        internal void ChangePassword(string newPassword)
+        {
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
+            this.ApplicationUser.PasswordHash = passwordHasher.HashPassword(this.ApplicationUser, newPassword);
         }
     }
 }

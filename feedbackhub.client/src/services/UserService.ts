@@ -51,3 +51,19 @@ export const undoDeleteUserAsync = async (userId: number): Promise<ServiceRespon
         return { Success: false, Message: 'Failed to restore user', ResponseType: 'error' };
     }
   };
+
+  
+  export const resetPasswordAsync = async (userId: number): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.patch(`/users/${userId}/reset-password`);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to reset password', ResponseType: 'error' };
+    }
+  };

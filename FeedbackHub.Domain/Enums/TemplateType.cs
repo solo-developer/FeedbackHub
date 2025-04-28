@@ -2,6 +2,7 @@
 {
     public enum TemplateType
     {
-        RegistrationRequestAccepted=1
+        RegistrationRequestAccepted=1,
+        PasswordReset=2,
     }
 }

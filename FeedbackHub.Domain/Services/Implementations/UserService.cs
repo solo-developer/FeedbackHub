@@ -2,9 +2,13 @@
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
+using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Domain.Templating;
+using FeedbackHub.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -12,14 +16,20 @@ namespace FeedbackHub.Domain.Services.Implementations
     public class UserService : IUserService
     {
         private readonly IBaseRepository<UserDetail> _userRepo;
-        public UserService(IBaseRepository<UserDetail> userRepo)
+        private readonly IEmailContentComposer _emailContentComposerService;
+        private readonly IEmailSenderService _emailSenderService;
+
+        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService)
         {
             _userRepo = userRepo;
+            _emailContentComposerService = emailContentComposer;
+            _emailSenderService = emailSenderService;
+
         }
 
         public async Task DeleteAsync(int id)
         {
-            using(TransactionScope tx=new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var user = await _userRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("User not found.");
 
@@ -66,6 +76,36 @@ namespace FeedbackHub.Domain.Services.Implementations
                 TotalCount = totalCount,
                 Data = users
             };
+        }
+
+        public async Task ResetPasswordAsync(int id)
+        {
+            var newPassword = PasswordGenerator.GeneratePassword();
+            var user = await _userRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("User not found.");
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {          
+
+                user.ChangePassword(newPassword);
+                await _userRepo.UpdateAsync(user, id);
+                tx.Complete();
+            }
+
+            var emailData = new SystemGeneratedPasswordResetDto
+            {
+                FullName = user.FullName,
+                Email=Email.Create(user.ApplicationUser.Email),
+                Password=newPassword
+            };
+            var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.PasswordReset, emailData);
+
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { user.ApplicationUser.Email }
+            });
+
         }
 
         public async Task UndoDeleteAsync(int id)

@@ -4,7 +4,6 @@ namespace FeedbackHub.Domain.Repositories.Interface
 {
     public interface IBaseRepository<T>
     {
-        void Dispose();
         Task InsertAsync(T t);
         int Count();
         Task<int> CountAsync();

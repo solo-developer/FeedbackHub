@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PagePanel from '../components/PagePanel';
 import GenericTable from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
-import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync } from '../services/UserService';
+import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync ,resetPasswordAsync} from '../services/UserService';
 import { ClientUserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -43,6 +43,29 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const [showUndoDeleteDialog, setShowUndoDeleteDialog] = useState(false);
 
     const [selectedUserId, setSelectedUserId] = useState(0);
+
+    const ResetPasswordClicked = async (userId:number) => {
+        try {
+            const response = await resetPasswordAsync(userId);
+         
+            if (response.Success) {
+                showToast("Password reset successfully. Password is sent in email", response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+            else{
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        } catch (err) {
+            showToast('Failed to reset password', 'error');
+        }
+    }
+
     const UndoDeleteClicked = async (userId : number) => {
         setSelectedUserId(userId);
         setShowUndoDeleteDialog(true);
@@ -154,30 +177,47 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 id: 'Action',
                 header: 'Action',
                 cell: ({ row }) => {
-                    if (row.original.IsDeleted) {
-                        return (
-                            <div>
-                                <button
-                                    className="btn btn-primary ml-2"
+                    return (
+                        <div className="d-flex gap-2">
+                            {/* Conditional Delete or Undo Delete */}
+                            {row.original.IsDeleted ? (
+                                <span
+                                    role="button"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Undo Delete"
                                     onClick={() => UndoDeleteClicked(row.original.Id)}
                                 >
-                                    Undo Delete
-                                </button>
-                            </div>
-                        );
-                    }
-                    return (
-                        <div>
-                            <button
-                                className="btn btn-danger ml-2"
-                                onClick={() => DeleteClicked(row.original.Id)}
+                                    <i className="fas fa-undo text-primary"></i>
+                                </span>
+                            ) : (
+                                <span
+                                    role="button"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Delete"
+                                    onClick={() => DeleteClicked(row.original.Id)}
+                                >
+                                    <i className="fas fa-trash-alt text-danger"></i>
+                                </span>
+                            )}
+            
+                            {/* Always show Reset Password */}
+                            <span
+                                role="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Reset Password"
+                                onClick={() => ResetPasswordClicked(row.original.Id)}
                             >
-                                Delete
-                            </button>
+                                <i className="fas fa-key text-warning"></i>
+                            </span>
                         </div>
                     );
                 }
             }
+            
+            
         ],
         []
     );

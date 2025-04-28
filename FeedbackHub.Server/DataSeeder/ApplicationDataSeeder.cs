@@ -41,15 +41,22 @@ namespace FeedbackHub.Server.DataSeeder
 
         private async Task SeedEmailTemplates(AppDbContext context)
         {
-            var registrationRequestApprovalTemplate = await context.Templates.SingleOrDefaultAsync(a => a.TemplateType == Domain.Enums.TemplateType.RegistrationRequestAccepted);
-            if (registrationRequestApprovalTemplate is not null)
+            await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.RegistrationRequestAccepted, "Registration request approved", "ApprovalOfRegistrationRequest.html");
+
+            await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.PasswordReset, "Password Reset", "PasswordReset.html");
+
+        }
+        private async Task AddEmailTemplateIfNotExists(AppDbContext context, Domain.Enums.TemplateType templateType, string subject, string templateFileName)
+        {
+            var existingTemplate = await context.Templates.SingleOrDefaultAsync(a => a.TemplateType == templateType);
+            if (existingTemplate is not null)
                 return;
 
-            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Templates", "ApprovalOfRegistrationRequest.html");
+            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, "Templates", templateFileName);
 
             if (!File.Exists(filePath))
             {
-                Log.Error("ApprovalOfRegistrationRequest.html is not present in Templates folder");
+                Log.Error($"{templateFileName} is not present in Templates folder");
                 return;
             }
 
@@ -57,9 +64,9 @@ namespace FeedbackHub.Server.DataSeeder
 
             context.Templates.Add(new Template
             {
-                Subject = "Registration request approved",
+                Subject = subject,
                 EmailTemplate = templateContent,
-                TemplateType = Domain.Enums.TemplateType.RegistrationRequestAccepted
+                TemplateType = templateType
             });
 
             await context.SaveChangesAsync();

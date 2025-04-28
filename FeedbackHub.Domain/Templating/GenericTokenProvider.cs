@@ -14,9 +14,11 @@ namespace FeedbackHub.Domain.Templating
         public async Task<Dictionary<string, string>> GetTokensAsync(object context)
         {
             var siteUrl = await _applicationInfoProvider.GetSiteUrl();
+            var loginUrl = await _applicationInfoProvider.GetLoginPageUrl();
             return new Dictionary<string, string>
             {
-                ["SiteUrl"] = siteUrl
+                ["SiteUrl"] = siteUrl,
+                ["LoginUrl"] = loginUrl,
             };
         }
     }

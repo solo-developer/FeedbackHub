@@ -21,14 +21,11 @@ const LoginPage = () => {
       e.preventDefault();
       setIsLoading(true);
       setError('');
-  
       try {
         const response = await api.post('/account/login', {
           username,
           password,
         });
-        
-
         if(isSuccess(response)){
          let obj= parseData<LoginResponseDto>(response);
         

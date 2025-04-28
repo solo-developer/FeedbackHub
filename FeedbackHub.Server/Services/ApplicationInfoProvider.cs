@@ -10,6 +10,15 @@ namespace FeedbackHub.Server.Services
         {
             _httpContextAccessor = httpContextAccessor;
         }
+
+        public async Task<string> GetLoginPageUrl()
+        {
+            var request = _httpContextAccessor.HttpContext?.Request;
+            if (request == null) return string.Empty;
+
+            return $"{request.Scheme}://{request.Host}/login";
+        }
+
         public async Task<string> GetSiteUrl()
         {
             var request = _httpContextAccessor.HttpContext?.Request;

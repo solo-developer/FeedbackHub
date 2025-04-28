@@ -7,6 +7,7 @@ using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Domain.Templating;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -32,9 +33,10 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task AcceptRegistrationAsync(ConvertRegistrationRequestToUserDto dto)
         {
+            RegistrationRequest regRequest = null;
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var regRequest = await _registrationRequestRepo.GetByIdAsync(dto.RegistrationRequestId);
+                regRequest = await _registrationRequestRepo.GetByIdAsync(dto.RegistrationRequestId);
                 if (regRequest == null) throw new ItemNotFoundException("Registration not found");
 
                 var userDetail = UserDetail.Create(regRequest.Id, regRequest.FullName, regRequest.Email.Value, dto.ApplicationIds);
@@ -49,18 +51,17 @@ namespace FeedbackHub.Domain.Services.Implementations
                 regRequest.AcceptRegistration(userDetail);
                 await _registrationRequestRepo.UpdateAsync(regRequest, regRequest.Id);
                 tx.Complete();
-
-                var (subject, body) = await _emailContentComposer.ComposeAsync(TemplateType.RegistrationRequestAccepted, dto);
-
-                _emailSenderService.SendEmailAsync(new EmailMessageDto
-                {
-                    Body = body,
-                    Subject = subject,
-                    IsHtml = true,
-                    To = new List<string> { regRequest.Email.Value }
-                });
-
             }
+
+            var (subject, body) = await _emailContentComposer.ComposeAsync(TemplateType.RegistrationRequestAccepted, dto);
+
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { regRequest.Email.Value }
+            });
         }
 
         public async Task<PaginatedDataResponseDto<RegistrationRequestDto>> GetAsync(RegistrationRequestFilterDto filter)

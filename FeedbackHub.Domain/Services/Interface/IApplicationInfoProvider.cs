@@ -3,5 +3,6 @@
     public interface IApplicationInfoProvider
     {
         Task<string> GetSiteUrl();
+        Task<string> GetLoginPageUrl();
     }
 }

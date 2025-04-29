@@ -33,7 +33,7 @@ const LoginPage = () => {
          localStorage.setItem('refresh_token', obj.RefreshToken);
          try {
           const decodedToken: any = jwtDecode(obj.Token);
-          setAuthState(true, decodedToken.role); 
+          setAuthState(true, decodedToken.Role); 
         } catch (error) {
           console.error("Error decoding token:", error);
           setAuthState(false, null); // Handle error if decoding fails

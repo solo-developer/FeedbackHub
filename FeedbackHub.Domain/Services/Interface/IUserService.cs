@@ -5,6 +5,9 @@ namespace FeedbackHub.Domain.Services.Interface
     public interface IUserService
     {
         Task<PaginatedDataResponseDto<UserDetailDto>> GetAllUsersAsync(UserFilterDto dto);
+        Task<UserDetailDto> GetUserDetailByAspUserIdAsync(int aspUserId);
+
+        Task<List<ApplicationDto>> GetSubscriptionsOfUser(int userId);
 
         Task DeleteAsync(int id);
         Task UndoDeleteAsync(int id);

@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { handleLogout } from '../../services/AuthService';
 
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.clear(); 
-    navigate('/login');   
+  const logoutButtonClicked = () => {
+   handleLogout();
   };
 
   return (
@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ms-auto">          
           <li className="nav-item">
-            <a className="nav-link" href="#" onClick={handleLogout}>Logout</a>
+            <a className="nav-link" href="#" onClick={logoutButtonClicked}>Logout</a>
           </li>
         </ul>
       </div>

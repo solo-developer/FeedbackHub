@@ -78,12 +78,41 @@ namespace FeedbackHub.Domain.Services.Implementations
             };
         }
 
+        public async Task<List<ApplicationDto>> GetSubscriptionsOfUser(int userId)
+        {
+            var user = await _userRepo.GetQueryableWithNoTracking().SingleOrDefaultAsync(a => a.Id == userId) ?? throw new ItemNotFoundException("User not found");
+
+            return user.Subscriptions.Select(a => new ApplicationDto
+            {
+                Id = a.ApplicationId,
+                Name = a.Application.Name,
+                ShortName = a.Application.ShortName,
+                Logo = a.Application.Logo
+            }).ToList();
+        }
+
+        public async Task<UserDetailDto> GetUserDetailByAspUserIdAsync(int aspUserId)
+        {
+            var user = await _userRepo.GetQueryableWithNoTracking().Where(a => a.AppUserId == aspUserId).Select(a => new UserDetailDto
+            {
+                Id = a.Id,
+                Name = a.FullName,
+                Email = a.ApplicationUser.Email,
+                Client = a.RegistrationRequest == null ? string.Empty : a.RegistrationRequest.Client.Name,
+                ClientId = a.RegistrationRequest == null ? null : a.RegistrationRequest.ClientId,
+                IsDeleted = a.IsDeleted,
+                Applications = a.Subscriptions.Select(b => b.Application.Name).ToList()
+            }).FirstOrDefaultAsync();
+
+            return user;
+        }
+
         public async Task ResetPasswordAsync(int id)
         {
             var newPassword = PasswordGenerator.GeneratePassword();
             var user = await _userRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("User not found.");
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {          
+            {
 
                 user.ChangePassword(newPassword);
                 await _userRepo.UpdateAsync(user, id);
@@ -93,8 +122,8 @@ namespace FeedbackHub.Domain.Services.Implementations
             var emailData = new SystemGeneratedPasswordResetDto
             {
                 FullName = user.FullName,
-                Email=Email.Create(user.ApplicationUser.Email),
-                Password=newPassword
+                Email = Email.Create(user.ApplicationUser.Email),
+                Password = newPassword
             };
             var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.PasswordReset, emailData);
 

@@ -181,6 +181,7 @@ namespace FeedbackHub.Server
             //services.AddScoped<ITokenValueProvider, RegistrationRequestApprovedTokenProvider>();
             services.AddScoped<TokenProviderResolver>();
             services.AddScoped<IApplicationInfoProvider,ApplicationInfoProvider>();
+            services.AddScoped<IUserContext,UserContext>();
         }
     }
 }

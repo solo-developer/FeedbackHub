@@ -6,7 +6,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const logoutButtonClicked = () => {
-   handleLogout();
+   handleLogout(navigate);
   };
 
   return (

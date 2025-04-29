@@ -13,6 +13,7 @@ import './App.css';
 import AccessDenied from './components/AccessDenied';
 import HomeScreenPage from './pages/HomeScreen';
 import RegistrationRequestPage from './pages/Consumer/RegistrationRequest';
+import { AppSwitcherProvider } from './contexts/AppSwitcherContext';
 
 const App = () => {
   return (
@@ -52,12 +53,12 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/*" element={<AdminDashboardPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/consumer/*" element={ <AppSwitcherProvider><DashboardPage /></AppSwitcherProvider>} />
         </Route>
         <Route path="/access-denied" element={<AccessDenied/>} />
         <Route
           path="/" element={
-            <Navigate to={isAuthenticated ? (role === "superadmin" ? "/admin-dashboard" : "/dashboard") : "/login"} />
+            <Navigate to={isAuthenticated ? (role === "superadmin" ? "/admin-dashboard" : "/consumer") : "/login"} />
           }
         />
         <Route path="*" element={<Navigate to="/login" />} />

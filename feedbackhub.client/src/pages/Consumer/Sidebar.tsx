@@ -11,16 +11,19 @@ const ConsumerSidebar = () => {
         >
             <ul className="nav flex-column">
                 <li className="nav-item">
-                    <a className="nav-link fw-semibold text-dark active" href="#">Dashboard</a>
+                    <Link to='/consumer/dashboard' className="nav-link fw-semibold text-dark active">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link text-dark" href="#">Feedbacks</a>
+                    <a className="nav-link text-dark" href="#">Add Feedback</a>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link text-dark" href="#">Users</a>
+                    <a className="nav-link text-dark" href="#">Open Feedbacks</a>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link text-dark" href="#">Settings</a>
+                    <a className="nav-link text-dark" href="#">Resolved Feedbacks</a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link text-danger" href="#">Declined Feedbacks </a>
                 </li>
             </ul>
         </nav>

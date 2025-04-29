@@ -97,7 +97,7 @@ namespace FeedbackHub.Server.Endpoints.Account
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, applicationUser.Email),
                 new Claim("Client", user.Client), 
-                new Claim("ClientId", user.ClientId?.ToString()), 
+                new Claim("ClientId", user.ClientId?.ToString() ?? string.Empty), 
                 new Claim("role", (await _userManager.GetRolesAsync(applicationUser)).First()), 
             };
 

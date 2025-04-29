@@ -33,7 +33,7 @@ namespace FeedbackHub.Server.DataSeeder
             context.Database.Migrate();
 
             await SeedRoles(roleManager);
-            await SeedUsers(userManager);
+            await SeedUsers(userManager,context);
 
             await SeedEmailTemplates(context);
 
@@ -72,7 +72,7 @@ namespace FeedbackHub.Server.DataSeeder
             await context.SaveChangesAsync();
         }
 
-        private async Task SeedUsers(UserManager<ApplicationUser> userManager)
+        private async Task SeedUsers(UserManager<ApplicationUser> userManager, AppDbContext context)
         {
             if (await userManager.FindByEmailAsync(_defaultUserCredentials.Email) == null)
             {
@@ -84,6 +84,16 @@ namespace FeedbackHub.Server.DataSeeder
                 };
                 await userManager.CreateAsync(adminUser, _defaultUserCredentials.Password);
                 await userManager.AddToRoleAsync(adminUser, Constants.ADMIN_ROLE);
+
+                context.UserDetails.Add(new UserDetail
+                {
+                    AppUserId= adminUser.Id,
+                    FullName="Contact User",
+
+                });
+
+                await context.SaveChangesAsync();
+                
             }
         }
 

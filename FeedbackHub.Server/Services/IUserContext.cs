@@ -7,6 +7,7 @@
         string? Role { get; }
 
         int? ClientId { get; }
+        int? ApplicationId { get; }
     }
 
 }

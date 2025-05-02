@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ApplicationDto } from '../types/application/ApplicationDto';
 import { fetchApplicationsAsync } from '../services/Consumer/SubscriptionService';
 import { useToast } from '../contexts/ToastContext';
+import { setGlobalSelectedApp } from '../utils/AddContextStore';
 
 interface AppSwitcherContextType {
   selectedApp?: ApplicationDto;
@@ -12,15 +13,22 @@ interface AppSwitcherContextType {
 const AppSwitcherContext = createContext<AppSwitcherContextType | undefined>(undefined);
 
 export const AppSwitcherProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedApp, setSelectedApp] = useState<ApplicationDto>();
+  const [selectedApp, setSelectedAppState] = useState<ApplicationDto>();
   const [apps, setApps] = useState<ApplicationDto[]>([]);
   const { showToast } = useToast();
+
+  const setSelectedApp = (app: ApplicationDto) => {
+    setSelectedAppState(app);
+    setGlobalSelectedApp(app); // Sync with global store
+  };
+
   const fetchApps = async () => {
     try {
       const res = await fetchApplicationsAsync();
       if (res.Success) {
         setApps(res.Data);
         setSelectedApp(res.Data[0]);
+        
       } else {
         showToast(res.Message, res.ResponseType);
       }
@@ -32,6 +40,12 @@ export const AppSwitcherProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     fetchApps();
   }, []);
+
+   useEffect(() => {
+    if (selectedApp) {
+      setGlobalSelectedApp(selectedApp);
+    }
+  }, [selectedApp]);
 
   return (
     <AppSwitcherContext.Provider value={{ selectedApp, setSelectedApp, apps }}>

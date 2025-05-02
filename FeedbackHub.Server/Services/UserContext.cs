@@ -16,7 +16,7 @@ namespace FeedbackHub.Server.Services
         {
             get
             {
-                var userId= _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userId == null) return null;
                 return Convert.ToInt32(userId);
             }
@@ -31,6 +31,19 @@ namespace FeedbackHub.Server.Services
                 return Convert.ToInt32(clientId);
             }
         }
+
+        public int? ApplicationId
+        {
+            get
+            {
+                var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+                if (headers == null || !headers.TryGetValue("ApplicationId", out var applicationIdValue))
+                    return null;
+
+                return int.TryParse(applicationIdValue, out var appId) ? appId : null;
+            }
+        }
+
 
         public string? Email => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
 

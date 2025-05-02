@@ -21,7 +21,7 @@ namespace FeedbackHub.Domain.Entities
         private void ComputeAttachmentIdentifier()
         {
             this.DisplayName = this._file.FileName;
-            this.AttachmentIdentifier = Guid.NewGuid().ToString();
+            this.AttachmentIdentifier = $"{Guid.NewGuid().ToString()}{Path.GetExtension(this._file.FileName)?.ToLower()}";
         }
     }
 }

@@ -5,6 +5,7 @@ import ConsumerNavbar from './Navbar';
 import ConsumerSidebar from './Sidebar';
 import { Route, Routes } from 'react-router-dom';
 import LandingPage from './LandingPage';
+import AddFeedbackPage from './Feedback/AddFeedback';
 
 
 const ConsumerDashboardPage: React.FC = () => {
@@ -17,7 +18,8 @@ const ConsumerDashboardPage: React.FC = () => {
 
                     {/* Main Content */}
                     <main className="col-lg-10 px-4">
-                    <Routes>                       
+                    <Routes> 
+                         <Route path="/feedback/new" element={<AddFeedbackPage />} />                      
                         <Route path="*" element={<LandingPage />} />
                     </Routes>
                     </main>

@@ -1,4 +1,5 @@
-﻿using FeedbackHub.Domain.Entities;
+﻿using FeedbackHub.Domain;
+using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
@@ -26,6 +27,7 @@ namespace FeedbackHub.Server
     
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
             builder.Services.Configure<DefaultUserCredentials>(builder.Configuration.GetSection("DefaultLoginCredentials"));
+            builder.Services.Configure<FileStorageOptions>(builder.Configuration.GetSection("FileStorage"));
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {

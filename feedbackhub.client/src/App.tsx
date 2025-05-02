@@ -14,6 +14,7 @@ import AccessDenied from './components/AccessDenied';
 import HomeScreenPage from './pages/HomeScreen';
 import RegistrationRequestPage from './pages/Consumer/RegistrationRequest';
 import { AppSwitcherProvider } from './contexts/AppSwitcherContext';
+import { ADMIN_ROLE } from './utils/Constants';
 
 const App = () => {
   return (
@@ -58,7 +59,7 @@ const AppRoutes = () => {
         <Route path="/access-denied" element={<AccessDenied/>} />
         <Route
           path="/" element={
-            <Navigate to={isAuthenticated ? (role === "superadmin" ? "/admin-dashboard" : "/consumer") : "/login"} />
+            <Navigate to={isAuthenticated ? (role === ADMIN_ROLE ? "/admin-dashboard" : "/consumer") : "/login"} />
           }
         />
         <Route path="*" element={<Navigate to="/login" />} />

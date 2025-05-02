@@ -1,19 +1,36 @@
 import axios from 'axios';
+import { CLIENT_ROLE } from './Constants';
+import { jwtDecode } from 'jwt-decode';
+import { getApplicationId } from './AddContextStore';
 
 // Create an Axios instance for all API requests
 const api = axios.create({
   baseURL: 'https://localhost:7230', // Your backend API URL here
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 // Request interceptor: Add the JWT token to the Authorization header
 api.interceptors.request.use(
-  (config) => {
+ async (config) => {
     const token = localStorage.getItem('access_token'); // Get the access token from localStorage
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`; // Attach token if exists
+
+      try {
+        const decoded : any = jwtDecode(token);
+
+        // Check if role is 'application_client'
+        if (decoded.role === CLIENT_ROLE) {
+          const applicationId = await getApplicationId(); 
+          if (applicationId) {
+            config.headers['ApplicationId'] = applicationId.toString();
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to decode token or fetch ApplicationId', err);
+      }
     }
     return config;
   },

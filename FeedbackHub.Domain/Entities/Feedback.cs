@@ -6,7 +6,7 @@ namespace FeedbackHub.Domain.Entities
     {
         public Feedback() { }
 
-        public Feedback(int userId, int feedbackTypeId, int applicationId, int priority, string title, string description, bool regenerateTicketId= true)
+        public Feedback(int userId, int feedbackTypeId, int applicationId, int priority, string title, string description)
         {
             this.Priority = priority;
             this.FeedbackTypeId = feedbackTypeId;
@@ -15,15 +15,11 @@ namespace FeedbackHub.Domain.Entities
             this.Description = description;
             this.UserId = userId;
             this.CreatedDate = DateTime.Now;
-            if (regenerateTicketId)
-            {
-
-            }            
         }
 
         public void UpdateFeedback(int feedbackTypeId, int applicationId, int priority, string title, string description)
         {
-            var feedback = new Feedback(this.UserId, feedbackTypeId, applicationId, priority, title, description, false);
+            var feedback = new Feedback(this.UserId, feedbackTypeId, applicationId, priority, title, description);
             feedback.ParentFeedbackId = this.Id;
             feedback.TicketId = this.TicketId;
             this.ChildFeedbacks.Add(feedback);
@@ -36,7 +32,7 @@ namespace FeedbackHub.Domain.Entities
         public TicketStatus Status { get; private set; } = TicketStatus.Open;
         public string Title { get; private set; }
         public string Description { get; private set; }
-        public int TicketId { get; private set; }
+        public int TicketId { get; set; }
         public int? ParentFeedbackId { get; private set; }
         public DateTime CreatedDate { get; private set; }
         public bool IsDeleted { get; private set; }

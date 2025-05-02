@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace FeedbackHub.Server.Endpoints.FeedbackType
 {
-    [Authorize(Roles = Constants.ADMIN_ROLE)]
+    [Authorize]
     public class GetAllEndpoint : EndpointBaseAsync.WithoutRequest.WithResult<IActionResult>
     {
         private readonly IFeedbackTypeService _feedbackTypeService;

@@ -7,6 +7,7 @@ import { isSuccess, parseMessage, parseData, parseResponseType } from '../../uti
 import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { getAllFeedbackTypesAsync } from '../../services/FeedbackTypeService';
 
 const FeedbackTypeIndexPage: React.FC = () => {
 
@@ -26,7 +27,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const handleDeleteConfirm =async () => {
         setShowDialog(false);
         try {
-            const response = await api.del(`/feedback-type/${selectedId}`);
+            const response = await api.delete(`/feedback-type/${selectedId}`);
 
             showToast(parseMessage(response), parseResponseType(response), {
                 autoClose: 3000,
@@ -42,7 +43,6 @@ const FeedbackTypeIndexPage: React.FC = () => {
         }
     };
 
-
     useEffect(() => {
         fetchData();
     }, []);
@@ -50,13 +50,13 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await api.get('/feedback-type');
+            const response =await getAllFeedbackTypesAsync();
 
-            if (isSuccess(response)) {
-                setData(parseData<FeedbackTypeDto[]>(response));
+            if (response.Success) {
+                setData(response.Data);
             }
             else {
-                showToast(parseMessage(response), parseResponseType(response), {
+                showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
                 });

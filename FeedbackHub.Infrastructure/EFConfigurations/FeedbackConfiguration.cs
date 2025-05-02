@@ -20,6 +20,9 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.Property(f => f.TicketId)
                 .IsRequired();
 
+            builder.HasIndex(f => f.TicketId)
+             .IsUnique(); // 
+
             builder.Property(f => f.CreatedDate)
                 .HasDefaultValueSql("GETDATE()");
 

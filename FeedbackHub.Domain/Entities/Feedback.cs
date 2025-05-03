@@ -15,13 +15,14 @@ namespace FeedbackHub.Domain.Entities
             this.Description = description;
             this.UserId = userId;
             this.CreatedDate = DateTime.Now;
+            this.ModifiedDate = DateTime.Now;
         }
 
         public void UpdateFeedback(int feedbackTypeId, int applicationId, int priority, string title, string description)
         {
             var feedback = new Feedback(this.UserId, feedbackTypeId, applicationId, priority, title, description);
             feedback.ParentFeedbackId = this.Id;
-            feedback.TicketId = this.TicketId;
+            feedback.TicketId = this.TicketId;            
             this.ChildFeedbacks.Add(feedback);
         }
 
@@ -36,6 +37,8 @@ namespace FeedbackHub.Domain.Entities
         public int? ParentFeedbackId { get; private set; }
         public DateTime CreatedDate { get; private set; }
         public bool IsDeleted { get; private set; }
+
+        public DateTime ModifiedDate { get; private set; }
         public virtual UserDetail User { get; set; }
         public virtual FeedbackType FeedbackType { get; set; }
         public virtual List<Attachment> Attachments { get; set; } = new();

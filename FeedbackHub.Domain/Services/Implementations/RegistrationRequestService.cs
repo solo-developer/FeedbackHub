@@ -1,4 +1,5 @@
 ﻿using FeedbackHub.Domain.Dto;
+using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;

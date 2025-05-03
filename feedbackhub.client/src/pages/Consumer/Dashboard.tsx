@@ -6,6 +6,7 @@ import ConsumerSidebar from './Sidebar';
 import { Route, Routes } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import AddFeedbackPage from './Feedback/AddFeedback';
+import OpenFeedbacksPage from '../Shared/Feedback/OpenFeedbacks';
 
 
 const ConsumerDashboardPage: React.FC = () => {
@@ -19,7 +20,8 @@ const ConsumerDashboardPage: React.FC = () => {
                     {/* Main Content */}
                     <main className="col-lg-10 px-4">
                     <Routes> 
-                         <Route path="/feedback/new" element={<AddFeedbackPage />} />                      
+                         <Route path="/feedback/new" element={<AddFeedbackPage />} />         
+                         <Route path="/open-feedbacks" element={<OpenFeedbacksPage />} />                   
                         <Route path="*" element={<LandingPage />} />
                     </Routes>
                     </main>

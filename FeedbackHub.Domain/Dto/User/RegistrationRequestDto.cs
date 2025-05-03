@@ -1,6 +1,6 @@
 ﻿using FeedbackHub.Domain.ValueObjects;
 
-namespace FeedbackHub.Domain.Dto
+namespace FeedbackHub.Domain.Dto.User
 {
     public class RegistrationRequestDto
     {

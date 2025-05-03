@@ -1,4 +1,4 @@
-﻿namespace FeedbackHub.Domain.Dto
+﻿namespace FeedbackHub.Domain.Dto.User
 {
     public class RegistrationRequestSaveDto
     {

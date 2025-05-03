@@ -8,6 +8,7 @@
 
         int? ClientId { get; }
         int? ApplicationId { get; }
-    }
 
+        Task<bool> IsAdminUser();
+    }
 }

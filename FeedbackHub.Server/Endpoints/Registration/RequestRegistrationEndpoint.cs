@@ -1,5 +1,5 @@
 ﻿using Ardalis.ApiEndpoints;
-using FeedbackHub.Domain.Dto;
+using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;

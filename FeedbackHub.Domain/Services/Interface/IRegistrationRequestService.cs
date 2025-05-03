@@ -1,4 +1,5 @@
 ﻿using FeedbackHub.Domain.Dto;
+using FeedbackHub.Domain.Dto.User;
 
 namespace FeedbackHub.Domain.Services.Interface
 {

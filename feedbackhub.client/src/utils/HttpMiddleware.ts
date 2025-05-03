@@ -20,7 +20,6 @@ api.interceptors.request.use(
 
       try {
         const decoded : any = jwtDecode(token);
-
         // Check if role is 'application_client'
         if (decoded.role === CLIENT_ROLE) {
           const applicationId = await getApplicationId(); 

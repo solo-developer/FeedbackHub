@@ -7,7 +7,7 @@ import { getAllFeedbackTypesAsync } from '../../../services/FeedbackTypeService'
 import PagePanel from '../../../components/PagePanel';
 import { buildFormData } from '../../../utils/FormDataHelper';
 import { SaveFeedbackDto } from '../../../types/feedback/SaveFeedbackDto';
-import { saveNewFeedbackAsync } from '../../../services/Consumer/FeedbackService';
+import { saveNewFeedbackAsync } from '../../../services/FeedbackService';
 import { useNavigate } from 'react-router-dom';
 
 

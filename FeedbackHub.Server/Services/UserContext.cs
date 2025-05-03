@@ -1,15 +1,23 @@
 ﻿using System.Security.Claims;
+using FeedbackHub.Domain;
+using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Services.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace FeedbackHub.Server.Services
 {
     public class UserContext : IUserContext
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
 
-        public UserContext(IHttpContextAccessor httpContextAccessor)
+        public UserContext(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, IUserService userService)
         {
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
+            _userService = userService;
         }
 
         public int? UserId
@@ -20,6 +28,16 @@ namespace FeedbackHub.Server.Services
                 if (userId == null) return null;
                 return Convert.ToInt32(userId);
             }
+        }
+
+        public async Task<bool> IsAdminUser()
+        {
+
+            var aspUserId = await _userService.GetAspUserByUserDetailId(this.UserId.GetValueOrDefault());
+            var aspUser = await _userManager.FindByIdAsync(aspUserId.ToString());
+
+            return await _userManager.IsInRoleAsync(aspUser, Constants.ADMIN_ROLE);
+
         }
 
         public int? ClientId

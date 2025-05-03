@@ -9,11 +9,15 @@ namespace FeedbackHub.Server.Extensions
         {
             var loggedInUserId = userContext.UserId;
             var applicationId = userContext.ApplicationId;
+            var clientId = userContext.ClientId;
+            var isAdminUser = userContext.IsAdminUser().GetAwaiter().GetResult();
 
             return new GenericDto<T>
             {
                 LoggedInUserId = loggedInUserId.GetValueOrDefault(), 
                 ApplicationId = applicationId,
+                ClientId = clientId,
+                IsAdminUser = isAdminUser,
                 Model = request
             };
         }

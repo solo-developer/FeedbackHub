@@ -1,4 +1,5 @@
 ﻿using FeedbackHub.Domain.Dto;
+using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
@@ -76,6 +77,13 @@ namespace FeedbackHub.Domain.Services.Implementations
                 TotalCount = totalCount,
                 Data = users
             };
+        }
+
+        public async Task<int> GetAspUserByUserDetailId(int userDetailId)
+        {
+            var user = await _userRepo.GetQueryableWithNoTracking().SingleOrDefaultAsync(a => a.Id == userDetailId) ?? throw new ItemNotFoundException("User not found");
+
+            return user.AppUserId;
         }
 
         public async Task<List<ApplicationDto>> GetSubscriptionsOfUser(int userId)

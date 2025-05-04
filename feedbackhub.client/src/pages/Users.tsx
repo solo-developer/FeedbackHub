@@ -145,6 +145,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 id: 'Name',
                 header: 'Name',
                 accessorKey: 'Name',
+                enableSorting: true,
             },
             {
                 id: 'Email',
@@ -236,6 +237,10 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                             setCurrentPage(newPage);
                         },
                     }}
+                    onSortChange={(sortedColumns) => {
+                        console.log('Sorted columns:', sortedColumns);
+                        // You can use this data to make an API request for sorted data
+                      }}
                 />
             </PagePanel>
             <ConfirmDialog

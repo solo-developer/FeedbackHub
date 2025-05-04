@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   useReactTable,
   ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
 } from '@tanstack/react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -29,6 +31,9 @@ interface GenericTableProps<T> {
 
   // Optional custom UI section (e.g., filters, actions)
   renderFilters?: () => React.ReactNode;
+
+  // Callback for sorting
+  onSortChange?: (sortedColumn: { id: string; desc: boolean }) => void;
 }
 
 const GenericTable = <T extends object>({
@@ -40,50 +45,48 @@ const GenericTable = <T extends object>({
   pageSize = 10,
   serverPaginationProps,
   renderFilters,
+  onSortChange,
 }: GenericTableProps<T>) => {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Provide default value for columns if enableSorting is not provided
+  const updatedColumns = columns.map((column) => ({
+    ...column,
+    enableSorting: column.enableSorting ?? false, // Default to false if not provided
+  }));
+
   const table = useReactTable({
     data,
-    columns,
+    columns: updatedColumns,
     getCoreRowModel: getCoreRowModel(),
-    ...(enablePagination && paginationType === 'client' && {
-      getPaginationRowModel: getPaginationRowModel(),
-      initialState: {
-        pagination: {
-          pageSize,
-        },
-      },
-    }),
+    getSortedRowModel: getSortedRowModel(),
     manualPagination: enablePagination && paginationType === 'server',
     pageCount:
       paginationType === 'server' && serverPaginationProps
         ? serverPaginationProps.totalPages
         : undefined,
     state: {
-      ...(enablePagination &&
-        paginationType === 'server' &&
-        serverPaginationProps && {
-          pagination: {
-            pageIndex: serverPaginationProps.currentPage,
-            pageSize,
-          },
-        }),
+      sorting,
     },
-    ...(enablePagination &&
-      paginationType === 'server' &&
-      serverPaginationProps && {
-        onPaginationChange: (updater) => {
-          if (typeof updater === 'function') {
-            const next = updater({
-              pageIndex: serverPaginationProps.currentPage,
-              pageSize,
-            });
-            serverPaginationProps.onPageChange(next.pageIndex);
-          } else {
-            serverPaginationProps.onPageChange(updater.pageIndex);
-          }
-        },
-      }),
+    onSortingChange: (updater) => {
+      const updated = typeof updater === 'function' ? updater(sorting) : updater;
+    
+      if (updated.length > 0) {
+        setSorting([updated[0]]); // Only keep the first sort (single column sorting)
+      } else {
+        setSorting([]);
+      }
+    }
+    ,
   });
+
+  // Call the onSortChange callback with the sorted column whenever sorting changes
+  useEffect(() => {
+    if (onSortChange && sorting.length > 0) {
+      const sortedColumn = sorting[0]; // Only pass the first sorting object
+      onSortChange(sortedColumn);
+    }
+  }, [sorting, onSortChange]);
 
   return (
     <div className="container mt-3">
@@ -100,8 +103,23 @@ const GenericTable = <T extends object>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id}>
+                    <th
+                      key={header.id}
+                      {...{
+                        className: header.column.getCanSort() ? 'cursor-pointer' : '',
+                        onClick: header.column.getToggleSortingHandler(),
+                      }}
+                    >
                       {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && (
+                        <span>
+                          {header.column.getIsSorted()
+                            ? header.column.getIsSorted() === 'desc'
+                              ? ' ↓'
+                              : ' ↑'
+                            : ''}
+                        </span>
+                      )}
                     </th>
                   ))}
                 </tr>

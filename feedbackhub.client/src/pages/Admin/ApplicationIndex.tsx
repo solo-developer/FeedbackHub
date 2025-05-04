@@ -213,7 +213,7 @@ const ApplicationIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Applications' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} />
+                <GenericTable columns={columns} data={data} isLoading={isLoading}  />
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add application" footer={modalFooter}>
                 <form onSubmit={save}>

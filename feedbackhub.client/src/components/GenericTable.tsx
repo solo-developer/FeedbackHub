@@ -36,7 +36,7 @@ interface GenericTableProps<T> {
   renderFilters?: () => React.ReactNode;
   onSortChange?: (sortedColumn: { id: string; desc: boolean }) => void;
 
-  getRowId: (row: T) => string | number;
+  getRowId?: (row: T) => string | number;
 }
 
 export interface GenericTableHandle {
@@ -54,7 +54,12 @@ const GenericTable = forwardRef(<T extends object>(
     serverPaginationProps,
     renderFilters,
     onSortChange,
-    getRowId,
+    getRowId = (row: T) => {
+      if (!(row as any)._internalId) {
+        (row as any)._internalId = crypto.randomUUID();
+      }
+      return (row as any)._internalId;
+    },
   }: GenericTableProps<T>,
   ref: React.Ref<GenericTableHandle>
 ) => {

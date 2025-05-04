@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PagePanel from '../components/PagePanel';
 import GenericTable from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
@@ -19,7 +19,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
+    const tableRef = useRef<{ getSelectedIds: () => (string | number)[] }>(null);
     const [data, setData] = useState<ClientUserDetailDto[]>([]);
     const [filterDto, setFilter] = useState<UserFilterDto>({
         Take: 10,
@@ -43,7 +43,10 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const [showUndoDeleteDialog, setShowUndoDeleteDialog] = useState(false);
 
     const [selectedUserId, setSelectedUserId] = useState(0);
-
+    // const getSelectedUserIds = () => {
+    //     const selectedIds = tableRef.current?.getSelectedIds() || [];
+    //     console.log('Selected row IDs:', selectedIds);
+    //   };
     const ResetPasswordClicked = async (userId:number) => {
         try {
             const response = await resetPasswordAsync(userId);
@@ -142,9 +145,9 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const columns = React.useMemo(
         () => [
             {
-                id: 'Name',
+                id: 'Fullname',
                 header: 'Name',
-                accessorKey: 'Name',
+                accessorKey: 'Fullname',
                 enableSorting: true,
             },
             {
@@ -230,6 +233,8 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination
                     paginationType="server"
                     pageSize={pageSize}
+                    getRowId={(row)=> row.Id.toString()}
+                    ref={tableRef}
                     serverPaginationProps={{
                         currentPage: currentPage - 1,
                         totalPages,
@@ -239,7 +244,6 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                     }}
                     onSortChange={(sortedColumns) => {
                         console.log('Sorted columns:', sortedColumns);
-                        // You can use this data to make an API request for sorted data
                       }}
                 />
             </PagePanel>

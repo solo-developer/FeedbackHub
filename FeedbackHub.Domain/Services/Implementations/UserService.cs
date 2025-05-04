@@ -65,7 +65,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var users = await queryable.Select(a => new UserDetailDto
             {
                 Id = a.Id,
-                Name = a.FullName,
+                Fullname = a.FullName,
                 Email = a.ApplicationUser.Email,
                 Client = a.RegistrationRequest == null ? string.Empty : a.RegistrationRequest.Client.Name,
                 IsDeleted = a.IsDeleted,
@@ -104,7 +104,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var user = await _userRepo.GetQueryableWithNoTracking().Where(a => a.AppUserId == aspUserId).Select(a => new UserDetailDto
             {
                 Id = a.Id,
-                Name = a.FullName,
+                Fullname = a.FullName,
                 Email = a.ApplicationUser.Email,
                 Client = a.RegistrationRequest == null ? string.Empty : a.RegistrationRequest.Client.Name,
                 ClientId = a.RegistrationRequest == null ? null : a.RegistrationRequest.ClientId,

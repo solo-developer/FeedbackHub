@@ -15,6 +15,7 @@ export const isInfo = (axiosResponse : AxiosResponse<any,any>) : boolean => {
 }
 
 export const parseData = <T>(axiosResponse: AxiosResponse<any, any>): T => {
+
     return axiosResponse.data.Data as T;
 }
 

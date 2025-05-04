@@ -120,12 +120,15 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 header: 'Action',
                 cell: ({ row }) => (
                     <div>
-                        <button
-                            className="btn btn-danger ml-2"
-                            onClick={() => deleteFeedbackType(row.original.Id)}
-                        >
-                            Delete
-                        </button>
+                          <span
+                                role="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Delete Feedback Type"
+                                onClick={() => deleteFeedbackType(row.original.Id)}
+                            >
+                                <i className="fas fa-trash text-danger"></i>
+                            </span>                         
                     </div>
                 ),
             }

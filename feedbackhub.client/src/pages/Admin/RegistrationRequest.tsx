@@ -221,12 +221,15 @@ const RegistrationRequestPage: React.FC = () => {
                     if (!row.original.IsUser) {
                         return (
                             <div>
-                                <button
-                                    className="btn btn-primary ml-2"
-                                    onClick={() => convertToUserClicked(row.original)}
-                                >
-                                    Convert to User
-                                </button>
+                                  <span
+                                role="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Convert to User"
+                                onClick={() => convertToUserClicked(row.original)}
+                            >
+                                <i className="fas fa-exchange text-primary"></i>
+                            </span>   
                             </div>
                         );
                     }

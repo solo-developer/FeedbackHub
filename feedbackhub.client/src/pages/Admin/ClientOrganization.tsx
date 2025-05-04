@@ -121,12 +121,15 @@ const ClientOrganizationIndexPage: React.FC = () => {
                 header: 'Action',
                 cell: ({ row }) => (
                     <div>
-                        <button
-                            className="btn btn-danger ml-2"
-                            onClick={() => disableClient(row.original.Id)}
-                        >
-                            Disable
-                        </button>
+                        <span
+                                role="button"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Disable Client"
+                                onClick={() => disableClient(row.original.Id)}
+                            >
+                                <i className="fas fa-ban text-danger"></i>
+                            </span>                      
                     </div>
                 ),
             }

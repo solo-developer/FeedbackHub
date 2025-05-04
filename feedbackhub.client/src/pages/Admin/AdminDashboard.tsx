@@ -10,6 +10,7 @@ import EmailConfiguration from './EmailConfiguration';
 import RegistrationRequestPage from './RegistrationRequest';
 import ApplicationIndexPage from './ApplicationIndex';
 import UsersPage from '../Users';
+import Board from './Board';
 
 const AdminDashboard = () => {
  
@@ -27,6 +28,7 @@ const AdminDashboard = () => {
         {/* Main Content */}
         <div className="col" style={{ marginTop: '2rem' }}>
             <Routes>
+              <Route path="board" element={<Board />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
               <Route path="registration-requests" element={<RegistrationRequestPage />} />

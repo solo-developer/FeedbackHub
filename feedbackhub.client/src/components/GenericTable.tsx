@@ -89,7 +89,7 @@ const GenericTable = <T extends object>({
   }, [sorting, onSortChange]);
 
   return (
-    <div className="container mt-3">
+    <div className="container-fluid mt-3">
       {renderFilters && <div className="mb-3">{renderFilters()}</div>}
 
       {isLoading ? (
@@ -110,6 +110,7 @@ const GenericTable = <T extends object>({
                         onClick: header.column.getToggleSortingHandler(),
                       }}
                     >
+                      <small>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
                         <span>
@@ -120,6 +121,8 @@ const GenericTable = <T extends object>({
                             : ''}
                         </span>
                       )}
+                      </small>
+                     
                     </th>
                   ))}
                 </tr>
@@ -134,7 +137,7 @@ const GenericTable = <T extends object>({
                 </tr>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} className="text-sm">
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

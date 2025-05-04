@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\feedbackhub.client\feedbackhub.client.esproj" />
     <ProjectReference Include="..\FeedbackHub.Domain\FeedbackHub.Domain.csproj" />
     <ProjectReference Include="..\FeedbackHub.Infrastructure\FeedbackHub.Infrastructure.csproj" />
     <ProjectReference Include="..\FeedbackHub.Logging\FeedbackHub.Logging.csproj" />

@@ -47,6 +47,11 @@ namespace FeedbackHub.Domain.Services.Implementations
                 queryable = queryable.Where(a => a.ApplicationId == request.ApplicationId);
             }
 
+            if (request.ClientId > 0)
+            {
+                queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == request.ClientId);
+            }
+
             var totalCount = await queryable.CountAsync();
 
             var feedbacks = await queryable.OrderByDescending(a => a.ModifiedDate).Skip(request.Model.Skip).Take(request.Model.Take).Select(a => new FeedbackBasicDetailDto

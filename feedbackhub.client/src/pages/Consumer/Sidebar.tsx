@@ -17,13 +17,13 @@ const ConsumerSidebar = () => {
                     <Link to='/consumer/feedback/new' className="nav-link text-dark" >Add Feedback</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to='/consumer/open-feedbacks' className="nav-link text-dark">Open Feedbacks</Link>
+                    <Link to='/consumer/feedbacks/Open' className="nav-link text-dark">Open Feedbacks</Link>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link text-dark" href="#">Resolved Feedbacks</a>
+                    <Link to='/consumer/feedbacks/Resolved' className="nav-link text-dark">Resolved Feedbacks</Link>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link text-danger" href="#">Declined Feedbacks </a>
+                    <Link to='/consumer/feedbacks/Declined' className="nav-link text-danger">Declined Feedbacks </Link>
                 </li>
             </ul>
         </nav>

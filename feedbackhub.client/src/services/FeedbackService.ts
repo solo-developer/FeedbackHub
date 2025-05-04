@@ -22,7 +22,7 @@ export const saveNewFeedbackAsync = async (dto: FormData): Promise<ServiceRespon
 
 export const getAsync = async (dto: FeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
   try {
-      const response = await api.post('/feedbacks/open', dto);
+      const response = await api.post('/feedbacks', dto);
 
       if (isSuccess(response)) {
           return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;

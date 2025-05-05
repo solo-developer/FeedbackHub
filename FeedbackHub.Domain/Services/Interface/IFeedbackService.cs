@@ -7,6 +7,6 @@ namespace FeedbackHub.Domain.Services.Interface
     {
         Task SaveAsync(GenericDto<SaveFeedbackDto> dto);
 
-        Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync(GenericDto<FeedbackFilterDto> request);
+        Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto: FeedbackFilterDto;
     }
 }

@@ -36,7 +36,7 @@ const Sidebar = () => {
           </li>
 
           <li className="nav-item">
-            <NavLink to="/admin/feedbacks/open" className={({ isActive }) => `nav-link px-0 align-middle ${isActive ? activeClass : ' text-white'}`}>
+            <NavLink to="/admin/feedbacks" className={({ isActive }) => `nav-link px-0 align-middle ${isActive ? activeClass : ' text-white'}`}>
               <FontAwesomeIcon icon={faComments} className="me-2" />
               <span className="d-none d-sm-inline">Feedbacks</span>
             </NavLink>

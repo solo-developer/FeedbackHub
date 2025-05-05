@@ -7,3 +7,9 @@ export interface FeedbackFilterDto{
     Take: Number;
     Status? : TicketStatus
 }
+
+export interface AdminFeedbackFilterDto extends FeedbackFilterDto{
+    UserId? : Number;
+    ClientId? : Number;
+    ApplicationId? : Number;
+}

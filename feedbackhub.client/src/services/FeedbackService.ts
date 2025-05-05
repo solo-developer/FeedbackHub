@@ -1,5 +1,5 @@
 import { FeedbackBasicDetailDto } from '../types/feedback/FeedbackBasicDetailDto';
-import { FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
+import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
 import api from '../utils/HttpMiddleware';
@@ -34,3 +34,18 @@ export const getAsync = async (dto: FeedbackFilterDto): Promise<ServiceResponseT
       return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
   }
 };
+
+export const getForAdminAsync = async (dto: AdminFeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
+    try {
+        const response = await api.post('/admin/feedbacks', dto);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
+    }
+  };

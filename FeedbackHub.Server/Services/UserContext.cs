@@ -25,7 +25,7 @@ namespace FeedbackHub.Server.Services
             get
             {
                 var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null) return null;
+                if (string.IsNullOrEmpty(userId)) return null;
                 return Convert.ToInt32(userId);
             }
         }
@@ -45,7 +45,7 @@ namespace FeedbackHub.Server.Services
             get
             {
                 var clientId = _httpContextAccessor.HttpContext?.User?.FindFirst("ClientId")?.Value;
-                if (clientId == null) return null;
+                if (string.IsNullOrEmpty(clientId)) return null;
                 return Convert.ToInt32(clientId);
             }
         }

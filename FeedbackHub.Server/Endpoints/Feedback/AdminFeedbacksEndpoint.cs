@@ -1,4 +1,5 @@
 ﻿using Ardalis.ApiEndpoints;
+using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
@@ -11,19 +12,19 @@ using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Feedback
 {
-    [Authorize]
-    public class FeedbacksEndpoint : EndpointBaseAsync.WithRequest<FeedbackFilterDto>.WithResult<IActionResult>
+    [Authorize(Roles =Constants.ADMIN_ROLE)]
+    public class AdminFeedbacksEndpoint : EndpointBaseAsync.WithRequest<AdminFeedbackFilterDto>.WithResult<IActionResult>
     {
-        private readonly IUserContext _userContext;
         private readonly IFeedbackService _feedbackService;
-        public FeedbacksEndpoint(IUserContext userContext, IFeedbackService feedbackService)
+        private readonly IUserContext _userContext;
+        public AdminFeedbacksEndpoint(IFeedbackService feedbackService,IUserContext userContext)
         {
-            _userContext = userContext;
             _feedbackService = feedbackService;
+            _userContext =  userContext;
         }
 
-        [HttpPost("/feedbacks")]
-        public override async Task<IActionResult> HandleAsync([FromBody]FeedbackFilterDto request, CancellationToken cancellationToken = default)
+        [HttpPost("/admin/feedbacks")]
+        public override async Task<IActionResult> HandleAsync([FromBody]AdminFeedbackFilterDto request, CancellationToken cancellationToken = default)
         {
             try
             {

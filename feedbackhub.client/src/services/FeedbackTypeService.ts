@@ -17,3 +17,4 @@ export const getAllFeedbackTypesAsync = async (): Promise<ServiceResponseType<Fe
       return { Success: false, Message: 'Failed to load feedback types', ResponseType:'error' };
     }
   };
+  

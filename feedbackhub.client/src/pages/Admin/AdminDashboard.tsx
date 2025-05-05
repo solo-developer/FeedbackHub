@@ -13,6 +13,7 @@ import UsersPage from '../Users';
 import Board from './Board';
 import NewAdminUser from './NewAdminUser';
 import NewAdminUserPage from './NewAdminUser';
+import AdminFeedbackListPage from './AdminFeedbackList';
 
 const AdminDashboard = () => {
  
@@ -32,6 +33,7 @@ const AdminDashboard = () => {
             <Routes>
               <Route path="board" element={<Board />} />
               <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="feedbacks" element={<AdminFeedbackListPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
               <Route path="registration-requests" element={<RegistrationRequestPage />} />
               <Route path="clients" element={<ClientOrganizationIndexPage />} />

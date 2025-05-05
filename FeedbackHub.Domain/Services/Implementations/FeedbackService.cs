@@ -1,7 +1,6 @@
 ﻿using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Dto.Feedback;
 using FeedbackHub.Domain.Entities;
-using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
@@ -24,11 +23,42 @@ namespace FeedbackHub.Domain.Services.Implementations
             _registrationRequestRepo = registrationRequestRepo;
         }
 
-        public async Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync(GenericDto<FeedbackFilterDto> request)
+        public async Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto : FeedbackFilterDto
         {
-            await ValidRequest(request);
-
             var queryable = _repo.GetQueryable().Where(a => a.ParentFeedbackId == null);
+
+            if (request is GenericDto<FeedbackFilterDto> clientFilter)
+            {
+                await ValidRequest(clientFilter);
+
+                if (request.ApplicationId > 0)
+                {
+                    queryable = queryable.Where(a => a.ApplicationId == request.ApplicationId);
+                }
+
+                if (request.ClientId > 0)
+                {
+                    queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == request.ClientId);
+                }
+            }
+            else
+            {
+                var adminFilter = request as GenericDto<AdminFeedbackFilterDto>;
+                if (adminFilter!.Model.UserId.HasValue)
+                {
+                    queryable = queryable.Where(a => a.UserId == adminFilter.Model.UserId);
+                }
+
+                if (adminFilter.Model.ApplicationId > 0)
+                {
+                    queryable = queryable.Where(a => a.ApplicationId == adminFilter.Model.ApplicationId);
+                }
+
+                if (adminFilter.Model.ClientId > 0)
+                {
+                    queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == adminFilter.Model.ClientId);
+                }
+            }
 
             if (request.Model.Status.HasValue)
             {
@@ -41,15 +71,6 @@ namespace FeedbackHub.Domain.Services.Implementations
             if (request.Model.ToDate.HasValue)
             {
                 queryable = queryable.Where(a => a.CreatedDate.Date <= request.Model.ToDate.Value.Date);
-            }
-            if(request.ApplicationId > 0)
-            {
-                queryable = queryable.Where(a => a.ApplicationId == request.ApplicationId);
-            }
-
-            if (request.ClientId > 0)
-            {
-                queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == request.ClientId);
             }
 
             var totalCount = await queryable.CountAsync();

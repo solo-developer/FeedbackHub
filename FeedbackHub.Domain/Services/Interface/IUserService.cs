@@ -15,5 +15,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task DeleteAsync(int id);
         Task UndoDeleteAsync(int id);
         Task ResetPasswordAsync(int userId);
+
+        Task CreateAdminUserAsync(CreateUserDto dto);
     }
 }

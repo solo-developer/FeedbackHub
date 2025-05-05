@@ -8,8 +8,8 @@ using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Domain.Templating;
 using FeedbackHub.Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -19,12 +19,46 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly IBaseRepository<UserDetail> _userRepo;
         private readonly IEmailContentComposer _emailContentComposerService;
         private readonly IEmailSenderService _emailSenderService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService)
+        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService, UserManager<ApplicationUser> userManager)
         {
             _userRepo = userRepo;
             _emailContentComposerService = emailContentComposer;
             _emailSenderService = emailSenderService;
+            _userManager = userManager;
+        }
+
+        public async Task CreateAdminUserAsync(CreateUserDto dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email);
+
+                var appUser = userDetail.ApplicationUser;
+                var result = await _userManager.CreateAsync(appUser, dto.Password);
+                if (!result.Succeeded) throw new Exception("User creation failed");
+
+                var roleAdditionResult = await _userManager.AddToRoleAsync(appUser, Constants.ADMIN_ROLE);
+
+                if (!roleAdditionResult.Succeeded)
+                    throw new Exception("There were some issues in assigning role to the user");
+
+                await _userRepo.InsertAsync(userDetail);
+                
+                tx.Complete();
+            }
+
+            var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.AccountCreated, dto);
+
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { dto.Email.Value }
+            });
+
 
         }
 

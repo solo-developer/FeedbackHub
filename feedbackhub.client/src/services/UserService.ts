@@ -1,3 +1,4 @@
+import { CreateAdminUserDto } from '../types/account/CreateAdminUserDto';
 import { ClientUserDetailDto, UserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
@@ -65,5 +66,21 @@ export const undoDeleteUserAsync = async (userId: number): Promise<ServiceRespon
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to reset password', ResponseType: 'error' };
+    }
+  };
+
+
+  export const createAdminUserAsync = async (dto: CreateAdminUserDto): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/admin/user', dto);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to create user', ResponseType: 'error' };
     }
   };

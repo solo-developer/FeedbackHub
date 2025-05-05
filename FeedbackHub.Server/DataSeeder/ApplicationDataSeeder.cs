@@ -45,6 +45,8 @@ namespace FeedbackHub.Server.DataSeeder
 
             await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.PasswordReset, "Password Reset", "PasswordReset.html");
 
+            await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.AccountCreated, "Account Created", "AccountCreated.html");
+
         }
         private async Task AddEmailTemplateIfNotExists(AppDbContext context, Domain.Enums.TemplateType templateType, string subject, string templateFileName)
         {

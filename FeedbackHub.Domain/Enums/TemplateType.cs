@@ -4,5 +4,6 @@
     {
         RegistrationRequestAccepted=1,
         PasswordReset=2,
+        AccountCreated=3,
     }
 }

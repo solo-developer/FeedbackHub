@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FeedbackHub.Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using System.Runtime.CompilerServices;
 
 namespace FeedbackHub.Domain.Entities
 {
     public class UserDetail : BaseEntity
     {
-        public static UserDetail Create(int registrationRequestId, string fullName, string email, List<int> applicationIds)
+        public static UserDetail CreateClientUser(int registrationRequestId, string fullName, string email, List<int> applicationIds)
         {
             return new UserDetail
             {
@@ -22,6 +23,21 @@ namespace FeedbackHub.Domain.Entities
                 }).ToList()
             };
         }
+
+        public static UserDetail CreateAdminUser( string fullName, Email email)
+        {
+            return new UserDetail
+            {
+                FullName = fullName,
+                ApplicationUser = new ApplicationUser
+                {
+                    UserName = email.Value,
+                    Email = email.Value
+                },            
+            };
+        }
+
+
 
         public UserDetail()
         {

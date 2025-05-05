@@ -86,7 +86,7 @@ const EmailConfiguration: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-debugger;
+
         if (!config.Host || !config.SenderEmail || !config.Username || !config.Password) {
             setError('All fields are required');
             return;
@@ -109,7 +109,7 @@ debugger;
 
     return (
         <PagePanel title='Email Setting'>
-            <div className="container" style={{ padding: '20px' }}>
+            <div className="container-fluid">
 
                 <form onSubmit={handleSubmit} className="mt-4">
                     {error && <div className="alert alert-danger">{error}</div>}

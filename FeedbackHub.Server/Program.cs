@@ -1,10 +1,12 @@
 ﻿using FeedbackHub.Domain;
+using FeedbackHub.Domain.Converters;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Domain.Templating;
 using FeedbackHub.Infrastructure.Context;
+using FeedbackHub.Infrastructure.Converters;
 using FeedbackHub.Infrastructure.Repository.Implementations;
 using FeedbackHub.Logging;
 using FeedbackHub.Server.DataSeeder;
@@ -44,7 +46,10 @@ namespace FeedbackHub.Server
             builder.Services.AddAuthorization();
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new EmailJsonConverter());
+            }); ;
             builder.Services.AddSwaggerGen();
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
             builder.Services.AddCors(options =>

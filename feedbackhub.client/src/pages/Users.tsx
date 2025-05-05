@@ -7,6 +7,7 @@ import { ClientUserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import ConfirmDialog from "../components/ConfirmDialog";
 import { parseMessage, parseResponseType } from '../utils/HttpResponseParser';
+import { useNavigate } from 'react-router-dom';
 
 interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';
@@ -27,7 +28,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         UserType: userType
     });
     const { showToast } = useToast();
-
+    const navigate= useNavigate();
     useEffect(() => {
         setFilter(prev => ({
             ...prev,
@@ -140,8 +141,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
+    };    
     const columns = React.useMemo(
         () => [
             {
@@ -155,12 +155,12 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 header: 'Email',
                 accessorFn: (row) => row.Email || ''
             },
-            {
+          userType!='Admin' &&  {
                 id: 'Client',
                 header: 'Client',
                 accessorFn: (row) => row.Client || ''
             },
-            {
+          userType!='Admin' &&  {
                 id: 'Applications',
                 header: 'Applications',
                 cell: ({ row }) => {
@@ -222,13 +222,19 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
             }
             
             
-        ],
-        []
+        ].filter(Boolean),
+        [userType]
+    );
+
+    const headerContent = (
+        <div>
+            <button onClick={()=>{navigate('/admin/users/new')}} className="btn btn-primary btn-sm"><i className='fas fa-plus'></i>&nbsp; Add</button>
+        </div>
     );
 
     return (
         <>
-            <PagePanel title={`${userType} Users`} >
+            <PagePanel title={`${userType} Users`} headerContent={userType=='Admin' && headerContent}>
 
                 <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination
                     paginationType="server"

@@ -11,6 +11,7 @@ import RegistrationRequestPage from './RegistrationRequest';
 import ApplicationIndexPage from './ApplicationIndex';
 import UsersPage from '../Users';
 import Board from './Board';
+import NewAdminUser from './NewAdminUser';
 
 const AdminDashboard = () => {
  
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
               <Route path="applications" element={<ApplicationIndexPage />} />
               <Route path="/admin-users" element={<UsersPage userType="Admin"/>} />
               <Route path="/client-users" element={<UsersPage userType="Client"/>} />
+              <Route path="/users/new" element={<NewAdminUser/>} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
         </div>

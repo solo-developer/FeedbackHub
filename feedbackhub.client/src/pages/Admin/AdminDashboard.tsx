@@ -11,26 +11,16 @@ import RegistrationRequestPage from './RegistrationRequest';
 import ApplicationIndexPage from './ApplicationIndex';
 import UsersPage from '../Users';
 import Board from './Board';
-import NewAdminUser from './NewAdminUser';
 import NewAdminUserPage from './NewAdminUser';
 import AdminFeedbackListPage from './AdminFeedbackList';
+import AdminLayout from './AdminLayout';
 
 const AdminDashboard = () => {
  
 
   return (
-    <div className="container-fluid" style={{position: 'absolute',top:0,left:0,right:0}}>
-      {/* Top Navbar */}
-    <Navbar></Navbar>
-
-      {/* Content Row */}
-      <div className="row flex-nowrap" style={{ marginTop: '3.5rem' }}>
-        {/* Sidebar */}
-         <Sidebar></Sidebar>
-
-        {/* Main Content */}
-        <div className="col" style={{ marginTop: '2rem' }}>
-            <Routes>
+    <AdminLayout>
+     <Routes>
               <Route path="board" element={<Board />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="feedbacks" element={<AdminFeedbackListPage />} />
@@ -44,9 +34,8 @@ const AdminDashboard = () => {
               <Route path="/users/new" element={<NewAdminUserPage/>} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
-        </div>
-      </div>
-    </div>
+    </AdminLayout>
+   
   );
 };
 

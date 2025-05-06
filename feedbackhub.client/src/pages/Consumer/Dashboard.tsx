@@ -7,27 +7,20 @@ import { Route, Routes } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import AddFeedbackPage from './Feedback/AddFeedback';
 import FeedbacksPage from '../Shared/Feedback/Feedbacks';
+import ConsumerLayout from './ConsumerLayout';
 
 
 const ConsumerDashboardPage: React.FC = () => {
     return (
         <>
-            <ConsumerNavbar></ConsumerNavbar>
-            <div className="container-fluid" style={{ marginTop: '4.5rem' }}>
-                <div className="row">
-                    <ConsumerSidebar></ConsumerSidebar>
-
-                    {/* Main Content */}
-                    <main className="col-lg-10 px-4">
-                    <Routes> 
+         <ConsumerLayout>
+                   <Routes> 
                          <Route path="/feedback/new" element={<AddFeedbackPage />} />         
                          <Route path="/feedbacks/:ticketstatus" element={<FeedbacksPage />} />                   
                         <Route path="*" element={<LandingPage />} />
                     </Routes>
-                    </main>
-                </div>
-            </div>
-
+         </ConsumerLayout>
+           
         </>
     );
 };

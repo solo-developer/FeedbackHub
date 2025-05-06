@@ -118,6 +118,23 @@ const FeedbacksPage: React.FC = () => {
       header: 'Title',
       accessorFn: (row: FeedbackBasicDetailDto) => row.Title
     },
+    {
+      id: 'Action',
+      header: 'Action',
+      cell: ({ row }) => (
+          <div>
+               <span
+                      role="button"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="View Feedback"
+                      onClick={() => navigate(`/feedback/${row.original.Id}`)}
+                  >
+                     <i className="fas fa-edit text-primary"></i>
+                  </span>
+          </div>
+      ),
+  }
   ], []);
 
   return (

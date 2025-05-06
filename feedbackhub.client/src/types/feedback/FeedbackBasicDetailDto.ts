@@ -1,6 +1,7 @@
 import { TicketStatus } from "./TicketStatus";
 
 export interface FeedbackBasicDetailDto {
+    Id : number;
     TicketId: number;
     Title: string;
     CreatedBy: string;

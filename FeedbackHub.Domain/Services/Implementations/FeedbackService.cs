@@ -77,6 +77,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var feedbacks = await queryable.OrderByDescending(a => a.ModifiedDate).Skip(request.Model.Skip).Take(request.Model.Take).Select(a => new FeedbackBasicDetailDto
             {
+                Id=a.Id,
                 TicketId= a.TicketId,
                 Title =a.Title,
                 CreatedBy= a.User.FullName,

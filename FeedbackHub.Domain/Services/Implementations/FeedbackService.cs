@@ -5,6 +5,7 @@ using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -25,7 +26,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto : FeedbackFilterDto
         {
-            var queryable = _repo.GetQueryable().Where(a => a.ParentFeedbackId == null);
+            var queryable = _repo.GetQueryable();
 
             if (request is GenericDto<FeedbackFilterDto> clientFilter)
             {
@@ -75,18 +76,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var totalCount = await queryable.CountAsync();
 
-            var feedbacks = await queryable.OrderByDescending(a => a.ModifiedDate).Skip(request.Model.Skip).Take(request.Model.Take).Select(a => new FeedbackBasicDetailDto
-            {
-                Id=a.Id,
-                TicketId= a.TicketId,
-                Title =a.Title,
-                CreatedBy= a.User.FullName,
-                CreatedDate= a.CreatedDate,
-                FeedbackType = a.FeedbackType.Type,
-                Application = a.Application.Name,
-                Priority= a.Priority,
-                Status= a.Status
-            }).ToListAsync();
+            var feedbacks = await queryable.OrderByDescending(a => a.ModifiedDate).Skip(request.Model.Skip).Take(request.Model.Take).Select(MapToFeedbackBasicDetail()).ToListAsync();
 
             return new PaginatedDataResponseDto<FeedbackBasicDetailDto>
             {
@@ -94,6 +84,42 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Data = feedbacks
             };
 
+        }
+
+        private Expression<Func<Feedback, FeedbackBasicDetailDto>> MapToFeedbackBasicDetail()
+        {
+            return a => new FeedbackBasicDetailDto
+            {
+                Id = a.Id,
+                TicketId = a.TicketId,
+                Title = a.Title,
+                CreatedBy = a.User.FullName,
+                CreatedDate = a.CreatedDate,
+                FeedbackType = a.FeedbackType.Type,
+                Client= a.User.RegistrationRequest.Client.Name,
+                Application = a.Application.Name,
+                Priority = a.Priority,
+                Status = a.Status
+            };
+        }
+
+        private  Expression<Func<Feedback, FeedbackDetailDto>> MapToFeedbackDetail()
+        {
+            return a => new FeedbackDetailDto
+            {
+                Id = a.Id,
+                TicketId = a.TicketId,
+                Title = a.Title,
+                CreatedBy = a.User.FullName,
+                CreatedDate = a.CreatedDate,
+                FeedbackTypeId = a.FeedbackTypeId,
+                FeedbackType = a.FeedbackType.Type,
+                Client = a.User.RegistrationRequest.Client.Name,
+                Application = a.Application.Name,
+                Priority = a.Priority,
+                Status = a.Status,
+                Description= a.Description
+            };
         }
 
         private async Task ValidRequest(GenericDto<FeedbackFilterDto> request)
@@ -121,6 +147,26 @@ namespace FeedbackHub.Domain.Services.Implementations
                 await _repo.InsertAsync(entity);
 
                 await _attachmentService.SaveAsync(entity.Id, dto.Model.Attachments);
+
+                tx.Complete();
+            }
+        }
+
+        public async Task<FeedbackDetailDto> GetByIdAsync(int id)
+        {
+            var feedback =await _repo.GetQueryable().Where(a => a.Id == id).Select(MapToFeedbackDetail()).FirstOrDefaultAsync();
+            if (feedback == null) throw new ItemNotFoundException("Feedback detail not found.");
+            return feedback;
+        }
+
+        public async Task UpdateAsync(GenericDto<FeedbackUpdateDto> dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var entity = await _repo.GetByIdAsync(dto.Model.Id) ?? throw new ItemNotFoundException("Feedback not found.");
+                entity.UpdateFeedback(dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
+                
+                await _repo.UpdateAsync(entity,entity.Id);
 
                 tx.Complete();
             }

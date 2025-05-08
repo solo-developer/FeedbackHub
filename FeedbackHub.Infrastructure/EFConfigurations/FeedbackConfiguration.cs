@@ -8,7 +8,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
     {
         public void Configure(EntityTypeBuilder<Feedback> builder)
         {
-            builder.HasKey(f => f.Id); // Assuming Id is in BaseEntity
+            builder.HasKey(f => f.Id);
 
             builder.Property(f => f.Title)
                 .IsRequired()
@@ -49,15 +49,15 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .HasForeignKey(f => f.ApplicationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(f => f.ParentFeedback)
-                .WithMany(f => f.ChildFeedbacks)
-                .HasForeignKey(f => f.ParentFeedbackId)
-                .OnDelete(DeleteBehavior.Restrict); 
-
             builder.HasMany(f => f.Attachments)
                 .WithOne(a => a.Feedback)
                 .HasForeignKey(a => a.FeedbackId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(f => f.Histories)
+           .WithOne(h => h.Feedback)
+           .HasForeignKey(h => h.FeedbackId)
+           .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

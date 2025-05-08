@@ -5,10 +5,16 @@ export interface FeedbackBasicDetailDto {
     TicketId: number;
     Title: string;
     CreatedBy: string;
-    CreatedDate: string; // ISO string for DateTime
-    FeedbackType: string;
+    CreatedDate: Date; 
+    FeedbackType: string; 
+    Client : string;  
     Application: string;
     Priority: number;
-    Status: TicketStatus; // You should define this enum in TS as well
+    Status: TicketStatus; 
+  }
+
+  export interface FeedbackDto extends FeedbackBasicDetailDto{
+    Description : string;
+    FeedbackTypeId : number;
   }
   

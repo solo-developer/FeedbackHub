@@ -22,6 +22,7 @@ namespace FeedbackHub.Infrastructure.Context
             builder.ApplyConfiguration(new AttachmentConfiguration());
             builder.ApplyConfiguration(new ClientConfiguration());
             builder.ApplyConfiguration(new FeedbackConfiguration());
+            builder.ApplyConfiguration(new FeedbackHistoryConfiguration());
             builder.ApplyConfiguration(new FeedbackTypeConfiguration());
             builder.ApplyConfiguration(new RegistrationRequestConfiguration());
             builder.ApplyConfiguration(new SettingConfiguration());

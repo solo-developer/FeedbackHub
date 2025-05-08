@@ -10,9 +10,17 @@ namespace FeedbackHub.Domain.Dto.Feedback
         public required string CreatedBy { get; set; }
         public required DateTime CreatedDate { get; set; }
         public required string FeedbackType { get; set; }
+        public required string Client { get; set; }
         public required string Application { get; set; }
         public int Priority { get; set; }
         public TicketStatus Status { get; set; }
 
+    }
+
+    public class FeedbackDetailDto : FeedbackBasicDetailDto
+    {
+        public required int FeedbackTypeId { get; set; }
+
+        public required string Description { get; set; }
     }
 }

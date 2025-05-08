@@ -88,6 +88,11 @@ const AdminFeedbackListPage: React.FC = () => {
       accessorFn: (row: FeedbackBasicDetailDto) => row.FeedbackType
     },
     {
+      id: 'Client',
+      header: 'Client',
+      accessorFn: (row: FeedbackBasicDetailDto) => row.Client
+    },
+    {
       id: 'Application',
       header: 'Application',
       accessorFn: (row: FeedbackBasicDetailDto) => row.Application

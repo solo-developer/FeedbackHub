@@ -34,9 +34,11 @@ const LoginPage = () => {
          try {
           const decodedToken: any = jwtDecode(obj.Token);
           setAuthState(true, decodedToken.Role); 
+          setIsLoading(false); // Set loading to false after auth state update
         } catch (error) {
           console.error("Error decoding token:", error);
           setAuthState(false, null); // Handle error if decoding fails
+          setIsLoading(false); 
         }
          navigate('/');
         }

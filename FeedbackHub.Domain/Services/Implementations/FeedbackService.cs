@@ -146,7 +146,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 await _repo.InsertAsync(entity);
 
-                await _attachmentService.SaveAsync(entity.Id, dto.Model.Attachments);
+                await _attachmentService.SaveAsync(entity.Id, dto.LoggedInUserId, dto.Model.Attachments);
 
                 tx.Complete();
             }
@@ -194,6 +194,31 @@ namespace FeedbackHub.Domain.Services.Implementations
                 EnteredDate = a.CreatedDate,
                 EnteredBy = a.User.FullName
             }).ToList();
+        }
+
+        public async Task<List<FeedbackAttachmentDto>> GetAttachmentsAsync(int feedbackId)
+        {
+            var feedback = await _repo.GetQueryableWithNoTracking().FirstOrDefaultAsync(a => a.Id == feedbackId) ?? throw new ItemNotFoundException("Feedback not found");
+
+            return feedback.Attachments.OrderByDescending(a => a.CreatedDate).Select(a => new FeedbackAttachmentDto
+            {
+                Id = a.Id,
+                FeedbackId = a.FeedbackId,
+                AttachmentIdentifier= a.AttachmentIdentifier,
+                DisplayName =a.DisplayName,
+                EnteredDate = a.CreatedDate,
+                EnteredBy = a.User.FullName
+            }).ToList();
+        }
+
+        public async Task AddAttachmentsAsync(GenericDto<SaveFeedbackAttachmentDto> dto)
+        {
+            using(TransactionScope tx= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                await _attachmentService.SaveAsync(dto.Model.FeedbackId, dto.LoggedInUserId, dto.Model.Attachments);
+
+                tx.Complete();
+            }
         }
     }
 }

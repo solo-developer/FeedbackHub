@@ -73,5 +73,7 @@ namespace FeedbackHub.Domain.Helpers
 
             return zipPath;
         }
+
+        public string GetBasePath() => _attachmentBasePath;
     }
 }

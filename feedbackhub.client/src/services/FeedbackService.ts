@@ -1,3 +1,4 @@
+import { FeedbackAttachmentDto } from '../types/feedback/FeedbackAttachmentDto';
 import { FeedbackBasicDetailDto, FeedbackDto } from '../types/feedback/FeedbackBasicDetailDto';
 import { FeedbackCommentDto } from '../types/feedback/FeedbackCommentDto';
 import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
@@ -100,18 +101,49 @@ export const addFeedbackCommentAsync = async (dto: any): Promise<ServiceResponse
     }
 };
 
-export const getCommentsAsync = async (feedbackId: number): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>> => {
+export const getCommentsAsync = async (feedbackId: number): Promise<ServiceResponseType<FeedbackCommentDto[]>> => {
     try {
         const response = await api.get(`/feedbacks/${feedbackId}/comments`);
   
         if (isSuccess(response)) {
-            return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackCommentDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>;
+            return { Success: true, Data: parseData<FeedbackCommentDto[]>(response) } as ServiceResponseType<FeedbackCommentDto[]>;
         }
         else {
-            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>;
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<FeedbackCommentDto[]>;
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to get comments', ResponseType: 'error' };
     }
   };
 
+
+  export const getAttachmentsAsync = async (feedbackId: number): Promise<ServiceResponseType<FeedbackAttachmentDto[]>> => {
+    try {
+        const response = await api.get(`/feedbacks/${feedbackId}/attachments`);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<FeedbackAttachmentDto[]>(response) } as ServiceResponseType<FeedbackAttachmentDto[]>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<FeedbackAttachmentDto[]>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get attachments', ResponseType: 'error' };
+    }
+  };
+
+  
+export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/feedback/attachments', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to upload attachments', ResponseType: 'error' };
+    }
+};

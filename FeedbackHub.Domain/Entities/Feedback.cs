@@ -50,5 +50,10 @@ namespace FeedbackHub.Domain.Entities
         {
             this.IsDeleted = true;
         }
+
+        public void AddComment(string comment, int userId)
+        {
+            this.Histories.Add(new FeedbackHistory(this.Id,userId,comment,DateTime.Now));
+        }
     }
 }

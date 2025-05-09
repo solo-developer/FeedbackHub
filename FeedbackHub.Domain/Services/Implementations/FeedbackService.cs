@@ -171,5 +171,29 @@ namespace FeedbackHub.Domain.Services.Implementations
                 tx.Complete();
             }
         }
+
+        public async Task AddCommentAsync(GenericDto<AddFeedbackCommentDto> dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var entity = await _repo.GetByIdAsync(dto.Model.FeedbackId) ?? throw new ItemNotFoundException("Feedback not found.");
+                entity.AddComment(dto.Model.Comment, dto.LoggedInUserId);
+                await _repo.UpdateAsync(entity, entity.Id);
+
+                tx.Complete();
+            }
+        }
+
+        public async Task<List<FeedbackCommentDto>> GetCommentsAsync(int feedbackId)
+        {
+            var feedback = await _repo.GetQueryableWithNoTracking().FirstOrDefaultAsync(a => a.Id == feedbackId) ?? throw new ItemNotFoundException("Feedback not found");
+
+            return feedback.Histories.OrderByDescending(a=>a.CreatedDate).Select(a => new FeedbackCommentDto
+            {
+                Comment = a.Comment,
+                EnteredDate = a.CreatedDate,
+                EnteredBy = a.User.FullName
+            }).ToList();
+        }
     }
 }

@@ -1,4 +1,5 @@
 import { FeedbackBasicDetailDto, FeedbackDto } from '../types/feedback/FeedbackBasicDetailDto';
+import { FeedbackCommentDto } from '../types/feedback/FeedbackCommentDto';
 import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
 import { FeedbackUpdateDto } from '../types/feedback/FeedbackUpdateDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
@@ -82,4 +83,35 @@ export const updateFeedbackAsync = async (dto: FeedbackUpdateDto): Promise<Servi
         return { Success: false, Message: 'Failed to update feedback', ResponseType: 'error' };
     }
 };
+
+ 
+export const addFeedbackCommentAsync = async (dto: any): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/feedback/comment', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to save comment', ResponseType: 'error' };
+    }
+};
+
+export const getCommentsAsync = async (feedbackId: number): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>> => {
+    try {
+        const response = await api.get(`/feedbacks/${feedbackId}/comments`);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackCommentDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackCommentDto>>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get comments', ResponseType: 'error' };
+    }
+  };
 

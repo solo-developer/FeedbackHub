@@ -20,26 +20,20 @@ namespace FeedbackHub.Server.Endpoints.Account
         }
 
         [HttpPost("/admin/user")]
-        public override async Task<IActionResult> HandleAsync([FromBody]CreateUserDto request, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync([FromBody] CreateUserDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
                 {
-                    await _userService.CreateAdminUserAsync(request);
-
-                    return ApiResponse.Success("Admin user created successfully. An email will be sent to registered email for login credentials.");
+                    throw new CustomException("Invalid input data.");
                 }
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to create user", ex);
-            }
-            return ApiResponse.Error("Failed to create user");
+
+                await _userService.CreateAdminUserAsync(request);
+
+                return "Admin user created successfully. An email will be sent to the registered email for login credentials.";
+            }, "Failed to create user");
         }
+
     }
 }

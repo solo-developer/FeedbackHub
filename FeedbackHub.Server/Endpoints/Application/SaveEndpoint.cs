@@ -1,13 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
-using FeedbackHub.Domain.Exceptions;
-using FeedbackHub.Domain.Services.Implementations;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Application
 {
@@ -20,25 +16,14 @@ namespace FeedbackHub.Server.Endpoints.Application
             _applicationService = applicationService;
         }
         [HttpPost("/application")]
-        public override async Task<IActionResult> HandleAsync([FromBody] ApplicationDto request, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync([FromBody] ApplicationDto request, CancellationToken cancellationToken = default)
         {
-
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _applicationService.SaveAsync(request);
-
-                return ApiResponse.Success("Application saved successfully");
-
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to save application", ex);
-            }
-            return ApiResponse.Error("Failed to save application");
+                return "Application saved successfully";
+            }, "Failed to save application");
         }
+
     }
 }

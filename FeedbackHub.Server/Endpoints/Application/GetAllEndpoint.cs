@@ -1,12 +1,6 @@
 ﻿using Ardalis.ApiEndpoints;
-using FeedbackHub.Domain.Dto;
-using FeedbackHub.Domain.Exceptions;
-using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Application
 {
@@ -19,24 +13,14 @@ namespace FeedbackHub.Server.Endpoints.Application
         }
 
         [HttpGet("/applications")]
-        public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var applications = await _applicationService.GetAllAsync();
-
-                return ApiResponse.Success(applications);
-
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get applications", ex);
-            }
-            return ApiResponse.Error("Failed to get applications");
+                return applications;
+            }, "Failed to get applications");
         }
+
     }
 }

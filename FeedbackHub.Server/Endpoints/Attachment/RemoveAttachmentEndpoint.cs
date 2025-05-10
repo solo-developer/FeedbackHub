@@ -20,24 +20,14 @@ namespace FeedbackHub.Server.Endpoints.Attachment
         }
 
         [HttpDelete("/attachments/{identifier}/remove")]
-        public override async Task<IActionResult> HandleAsync(string identifier, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(string identifier, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _attachmentService.RemoveAsync(identifier);
-
-                return ApiResponse.Success("Attachment removed successfully");
-
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to remove attachment", ex);
-            }
-            return ApiResponse.Error("Failed to remove attachment");
+                return "Attachment removed successfully";
+            }, "Failed to remove attachment");
         }
+
     }
 }

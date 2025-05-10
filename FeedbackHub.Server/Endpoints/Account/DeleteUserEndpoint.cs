@@ -20,23 +20,14 @@ namespace FeedbackHub.Server.Endpoints.Account
         }
 
         [HttpDelete("/users/{userId}")]
-        public override async Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _userService.DeleteAsync(userId);
-
-                return ApiResponse.Success("User deleted successfully");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to delete user", ex);
-            }
-            return ApiResponse.Error("Failed to delete user");
+                return "User deleted successfully";
+            }, "Failed to delete user");
         }
+
     }
 }

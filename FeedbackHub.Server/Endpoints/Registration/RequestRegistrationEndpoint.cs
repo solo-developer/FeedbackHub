@@ -1,12 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.Entities;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using System.Transactions;
 
 namespace FeedbackHub.Server.Endpoints.Registration
@@ -21,30 +18,26 @@ namespace FeedbackHub.Server.Endpoints.Registration
         }
 
         [HttpPost("registration-request")]
-        public override async Task<IActionResult> HandleAsync([FromBody]RegistrationRequestSaveDto request, CancellationToken cancellationToken = default)
+        public override async Task<IActionResult> HandleAsync([FromBody] RegistrationRequestSaveDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return await ApiHandler.HandleAsync(async () =>
             {
-                using(TransactionScope tx= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    var requestEntity = new RegistrationRequest(_registrationRequestRepo, Domain.ValueObjects.Email.Create(request.Email), request.ClientId, request.FullName);
+                    var requestEntity = new RegistrationRequest(
+                        _registrationRequestRepo,
+                        Domain.ValueObjects.Email.Create(request.Email),
+                        request.ClientId,
+                        request.FullName
+                    );
 
                     await _registrationRequestRepo.InsertAsync(requestEntity);
-                    tx.Complete();
+                    tx.Complete(); 
                 }
-               
-                return ApiResponse.Success("Registration request submitted successfully.");
 
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to submit registration request", ex);
-            }
-            return ApiResponse.Error("Failed to submit registration request");
+                return "Registration request submitted successfully."; 
+            }, "Failed to submit registration request");
         }
+
     }
 }

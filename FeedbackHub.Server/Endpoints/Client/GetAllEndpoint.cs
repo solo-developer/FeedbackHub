@@ -28,24 +28,15 @@ namespace FeedbackHub.Server.Endpoints.Client
         OperationId = "Client_getall",
         Tags = new[] { "Client_GetAllEndpoint" })
         ]
-        public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
+        [HttpGet("/clients")]
+        public override Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var clients = await _clientService.GetAllClientsAsync();
-
-                return ApiResponse.Success(clients);
-
-            }
-            catch (CustomException ex)
-            {
-              return  ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get clients", ex);
-            }
-            return ApiResponse.Error("Failed to get clients");
+                return clients; 
+            }, "Failed to get clients"); 
         }
+
     }
 }

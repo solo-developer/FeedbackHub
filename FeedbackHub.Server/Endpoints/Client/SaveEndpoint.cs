@@ -18,12 +18,16 @@ namespace FeedbackHub.Server.Endpoints.Client
         }
 
         [HttpPost("/client")]
-        public override async Task<IActionResult> HandleAsync([FromBody] ClientDto request, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync([FromBody] ClientDto request, CancellationToken cancellationToken = default)
         {
-            var client = new Domain.Entities.Client(request.Name,request.Code) ;
-            await _clientRepo.InsertAsync(client);
+            return ApiHandler.HandleAsync(async () =>
+            {
+                var client = new Domain.Entities.Client(request.Name, request.Code);
+                await _clientRepo.InsertAsync(client);
 
-            return ApiResponse.Success("Client Organization saved successfully.");
+                return "Client Organization saved successfully.";
+            }, "Failed to save client"); 
         }
+
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using FeedbackHub.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Application
 {
@@ -22,26 +19,15 @@ namespace FeedbackHub.Server.Endpoints.Application
         }
 
         [HttpGet("/consumer/applications")]
-        public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
-        {           
-            try
+        public override Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
+        {
+            return ApiHandler.HandleAsync(async () =>
             {
-                var userId = _userContext.UserId;
-
-                var applications =await _userService.GetSubscriptionsOfUser(userId ?? 0);
-
-
-                return ApiResponse.Success(applications);
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get subscribed applications", ex);
-                return ApiResponse.Error("Failed to get subscribed applications");
-            }
+                var userId = _userContext.UserId ?? 0;
+                var applications = await _userService.GetSubscriptionsOfUser(userId);
+                return applications;
+            }, "Failed to get subscribed applications");
         }
+
     }
 }

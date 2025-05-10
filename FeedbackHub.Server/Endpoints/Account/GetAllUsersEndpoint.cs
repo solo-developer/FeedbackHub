@@ -22,23 +22,14 @@ namespace FeedbackHub.Server.Endpoints.Account
         }
 
         [HttpPost("/users")]
-        public override async Task<IActionResult> HandleAsync([FromBody] UserFilterDto request, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync([FromBody] UserFilterDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var data = await _userService.GetAllUsersAsync(request);
-
-                return ApiResponse.Success(data);
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get users", ex);
-            }
-            return ApiResponse.Error("Failed to get users");
+                return data;
+            }, "Failed to get users");
         }
+
     }
 }

@@ -1,10 +1,7 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
-using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
-using FeedbackHub.Logging;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,25 +20,18 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
         [HttpDelete("/feedback-type/{id}")]
         public override async Task<IActionResult> HandleAsync(int id, CancellationToken cancellationToken = default)
         {
-            try
+            return await ApiHandler.HandleAsync(async () =>
             {
-                var feedbackType = await _feedbackTypeRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("Feedback type not found");
+                var feedbackType = await _feedbackTypeRepo.GetByIdAsync(id)
+                                    ?? throw new ItemNotFoundException("Feedback type not found");
 
                 feedbackType.MarkDeleted();
 
-                await _feedbackTypeRepo.UpdateAsync(feedbackType,feedbackType.Id);
+                await _feedbackTypeRepo.UpdateAsync(feedbackType, feedbackType.Id);
 
-                return ApiResponse.Success("Feedback Type deleted successfully.");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                SerilogLogger.Logger.Error("Failed to delete feedback type", ex);
-                return ApiResponse.Error("Failed to delete feedback type.");
-            }
+                return "Feedback Type deleted successfully."; 
+            }, "Failed to delete feedback type");
         }
+
     }
 }

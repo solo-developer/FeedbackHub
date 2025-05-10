@@ -20,29 +20,20 @@ namespace FeedbackHub.Server.Endpoints.Client
         {
             _clientRepo = feedbackTypeRepo;
         }
-
         [HttpDelete("/client/{id}")]
-        public override async Task<IActionResult> HandleAsync(int id, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(int id, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var client = await _clientRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("Client Organization not found");
 
                 client.Disable();
 
-                await _clientRepo.UpdateAsync(client,client.Id);
+                await _clientRepo.UpdateAsync(client, client.Id);
 
-                return ApiResponse.Success("Client deleted successfully");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to delete client", ex);
-                return ApiResponse.Error("Failed to delete client");
-            }
+                return "Client deleted successfully";
+            }, "Failed to delete client");
         }
+
     }
 }

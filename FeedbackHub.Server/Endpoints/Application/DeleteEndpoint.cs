@@ -19,9 +19,9 @@ namespace FeedbackHub.Server.Endpoints.Application
         }
 
         [HttpDelete("/application/{id}")]
-        public override async Task<IActionResult> HandleAsync(int id, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(int id, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var application = await _applicationRepo.GetByIdAsync(id) ?? throw new ItemNotFoundException("Application not found");
 
@@ -29,17 +29,9 @@ namespace FeedbackHub.Server.Endpoints.Application
 
                 await _applicationRepo.UpdateAsync(application, application.Id);
 
-                return ApiResponse.Success("Application deleted successfully");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to delete application", ex);
-                return ApiResponse.Error("Failed to delete application");
-            }
+                return "Application deleted successfully";
+            }, "Failed to delete application");
         }
+
     }
 }

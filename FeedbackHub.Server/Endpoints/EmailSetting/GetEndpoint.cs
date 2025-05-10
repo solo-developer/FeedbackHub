@@ -19,24 +19,14 @@ namespace FeedbackHub.Server.Endpoints.EmailSetting
         }
 
         [HttpGet("/email-setting")]
-        public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 var emailSetting = await _emailSettingService.GetEmailSettingAsync();
-
-                return ApiResponse.Success(emailSetting);
-
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get email setting", ex);
-            }
-            return ApiResponse.Error("Failed to get email setting");
+                return emailSetting; 
+            }, "Failed to get email setting"); 
         }
+
     }
 }

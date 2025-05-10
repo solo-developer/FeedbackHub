@@ -62,7 +62,7 @@ namespace FeedbackHub.Server.Endpoints.Account
                     var token = await GenerateJwtToken(user);
                     var refreshToken = GenerateRefreshToken();
 
-                    await SaveRefreshTokenAsync(user, refreshToken); // Save in AspNetUserTokens
+                    await SaveRefreshTokenAsync(user, refreshToken);
 
                     return ApiResponse.Success(new
                     {
@@ -116,16 +116,5 @@ namespace FeedbackHub.Server.Endpoints.Account
         {
             await _userManager.SetAuthenticationTokenAsync(user, "JWT", "RefreshToken", refreshToken);
         }
-
-        private async Task<string> GetRefreshTokenAsync(ApplicationUser user)
-        {
-            return await _userManager.GetAuthenticationTokenAsync(user, "JWT", "RefreshToken");
-        }
-
-        private async Task RemoveRefreshTokenAsync(ApplicationUser user)
-        {
-            await _userManager.RemoveAuthenticationTokenAsync(user, "JWT", "RefreshToken");
-        }
-
     }
 }

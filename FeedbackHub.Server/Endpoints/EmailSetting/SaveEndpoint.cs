@@ -1,12 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.EmailSetting
 {
@@ -20,24 +17,14 @@ namespace FeedbackHub.Server.Endpoints.EmailSetting
         }
 
         [HttpPost("/email-setting")]
-        public override async Task<IActionResult> HandleAsync([FromBody] EmailSettingDto request, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync([FromBody] EmailSettingDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _emailSettingService.SaveAsync(request);
-
-                return ApiResponse.Success("Email Setting saved successfully");
-
-            }
-            catch (CustomException ex)
-            {
-              return  ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to save email setting", ex);
-            }
-            return ApiResponse.Error("Failed to save email setting");
+                return "Email Setting saved successfully"; 
+            }, "Failed to save email setting");
         }
+
     }
 }

@@ -1,14 +1,11 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Server.Extensions;
-using FeedbackHub.Server.Helpers;
 using FeedbackHub.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Feedback
 {
@@ -24,24 +21,14 @@ namespace FeedbackHub.Server.Endpoints.Feedback
         }
 
         [HttpPost("/feedback/new")]
-        public override async Task<IActionResult> HandleAsync([FromForm]SaveFeedbackDto request, CancellationToken cancellationToken = default)
+        public override async Task<IActionResult> HandleAsync([FromForm] SaveFeedbackDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return await ApiHandler.HandleAsync(async () =>
             {
                 await _feedbackService.SaveAsync(request.ToGenericDto(_userContext));
-
-                return ApiResponse.Success("Feedback submitted successfully");
-
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to save feedback", ex);
-            }
-            return ApiResponse.Error("Failed to save feedback");
+                return "Feedback submitted successfully"; 
+            }, "Failed to save feedback");
         }
+
     }
 }

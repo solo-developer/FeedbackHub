@@ -1,11 +1,8 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Account
 {
@@ -19,23 +16,14 @@ namespace FeedbackHub.Server.Endpoints.Account
         }
 
         [HttpPatch("/users/{userId}/reset-password")]
-        public override async Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _userService.ResetPasswordAsync(userId);
-
-                return ApiResponse.Success("User password reset successfully");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to reset user password", ex);
-            }
-            return ApiResponse.Error("Failed to reset user password");
+                return "User password reset successfully";
+            }, "Failed to reset user password");
         }
+
     }
 }

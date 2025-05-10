@@ -1,11 +1,8 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Account
 {
@@ -19,23 +16,14 @@ namespace FeedbackHub.Server.Endpoints.Account
         }
 
         [HttpPatch("/users/{userId}/restore")]
-        public override async Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
+        public override Task<IActionResult> HandleAsync(int userId, CancellationToken cancellationToken = default)
         {
-            try
+            return ApiHandler.HandleAsync(async () =>
             {
                 await _userService.UndoDeleteAsync(userId);
-
-                return ApiResponse.Success("User restored successfully");
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to restore user", ex);
-            }
-            return ApiResponse.Error("Failed to restore user");
+                return "User restored successfully";
+            }, "Failed to restore user");
         }
+
     }
 }

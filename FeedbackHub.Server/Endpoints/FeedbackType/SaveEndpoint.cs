@@ -2,7 +2,6 @@
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Repositories.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,12 +17,21 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
         }
 
         [HttpPost("/feedback-type")]
-        public override async Task<IActionResult> HandleAsync([FromBody]FeedbackTypeDto request, CancellationToken cancellationToken = default)
+        public override async Task<IActionResult> HandleAsync([FromBody] FeedbackTypeDto request, CancellationToken cancellationToken = default)
         {
-            var feedbackType = new Domain.Entities.FeedbackType() { Type = request.Type, Color = request.Color };
-            await _feedbackTypeRepo.InsertAsync(feedbackType);
+            return await ApiHandler.HandleAsync(async () =>
+            {
+                var feedbackType = new Domain.Entities.FeedbackType()
+                {
+                    Type = request.Type,
+                    Color = request.Color
+                };
 
-            return ApiResponse.Success("Feedback Type saved successfully.");
+                await _feedbackTypeRepo.InsertAsync(feedbackType);
+
+                return "Feedback Type saved successfully."; 
+            }, "Failed to save feedback type.");
         }
+
     }
 }

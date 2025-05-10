@@ -2,13 +2,9 @@
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.Enums;
-using FeedbackHub.Domain.Exceptions;
-using FeedbackHub.Domain.Services.Implementations;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace FeedbackHub.Server.Endpoints.Registration
 {
@@ -24,23 +20,13 @@ namespace FeedbackHub.Server.Endpoints.Registration
         [HttpPost("/registration-requests")]
         public override async Task<IActionResult> HandleAsync(RegistrationRequestFilterDto request, CancellationToken cancellationToken = default)
         {
-            try
+            return await ApiHandler.HandleAsync(async () =>
             {
                 request.State = (int)RegistrationRequestState.UnconvertedRequest;
                 var requests = await _registrationRequestService.GetAsync(request);
-
-                return ApiResponse.Success(requests);
-
-            }
-            catch (CustomException ex)
-            {
-               return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get registration requests", ex);
-            }
-            return ApiResponse.Error("Failed to get registration requests");
+                return requests; 
+            }, "Failed to get registration requests");
         }
+
     }
 }

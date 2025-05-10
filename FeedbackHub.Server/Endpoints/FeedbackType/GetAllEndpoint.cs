@@ -1,11 +1,7 @@
 ﻿using Ardalis.ApiEndpoints;
-using FeedbackHub.Domain;
-using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Services.Interface;
-using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace FeedbackHub.Server.Endpoints.FeedbackType
@@ -28,21 +24,12 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
         ]
         public override async Task<IActionResult> HandleAsync(CancellationToken cancellationToken = default)
         {
-            try
+            return await ApiHandler.HandleAsync(async () =>
             {
                 var feedbackTypes = await _feedbackTypeService.GetFeedbackTypesAsync();
-
-                return ApiResponse.Success(feedbackTypes);
-            }
-            catch (CustomException ex)
-            {
-                return ApiResponse.Info(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to get feedback types", ex);
-            }
-            return ApiResponse.Error("Failed to get feedback types");
+                return feedbackTypes;
+            }, "Failed to get feedback types");
         }
+
     }
 }

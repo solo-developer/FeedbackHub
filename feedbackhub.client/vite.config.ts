@@ -1,5 +1,4 @@
 import { fileURLToPath, URL } from 'node:url';
-
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
 import fs from 'fs';
@@ -15,28 +14,28 @@ const certificateArg = process.argv.map(arg => arg.match(/--name=(?<value>.+)/i)
 const certificateName = certificateArg?.groups?.value ?? "feedbackhub.client";
 
 if (!certificateName) {
-    console.error('Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly.')
+    console.error('Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly.');
     process.exit(-1);
 }
+
+// ✅ Ensure directory exists before exporting certs
+fs.mkdirSync(baseFolder, { recursive: true });
 
 const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
 const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
 if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
-    if (0 !== child_process.spawnSync('dotnet', [
-        'dev-certs',
-        'https',
-        '--export-path',
-        certFilePath,
-        '--format',
-        'Pem',
-        '--no-password',
-    ], { stdio: 'inherit', }).status) {
+    if (
+        child_process.spawnSync(
+            'dotnet',
+            ['dev-certs', 'https', '--export-path', certFilePath, '--format', 'Pem', '--no-password'],
+            { stdio: 'inherit' }
+        ).status !== 0
+    ) {
         throw new Error("Could not create certificate.");
     }
 }
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
     resolve: {
@@ -45,17 +44,16 @@ export default defineConfig({
         }
     },
     server: {
+        port: 5173,
         proxy: {
             '^/weatherforecast': {
                 target: 'https://localhost:7230/',
                 secure: false
             }
         },
-        port: 5173,
         https: {
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
         }
     }
-})
-
+});

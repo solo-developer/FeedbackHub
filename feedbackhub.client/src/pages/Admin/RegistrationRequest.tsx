@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PagePanel from '../../components/PagePanel';
 import GenericTable from '../../components/GenericTable';
 import { useToast } from '../../contexts/ToastContext';
@@ -20,7 +20,7 @@ const RegistrationRequestPage: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [applications, setApplications] = useState<ApplicationDto[]>([]);
     const [selectedRegistrationRequest, setSelectedRegistrationRequest] = useState<RegistrationRequestDto | null>(null);
-    const generateRandomPassword = (length = 10): string => {
+    const generateRandomPassword =useMemo((length = 10): string => {
         const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
         const numberChars = "0123456789";
@@ -44,7 +44,7 @@ const RegistrationRequestPage: React.FC = () => {
         password = password.split('').sort(() => Math.random() - 0.5).join('');
 
         return password;
-    };
+    },[selectedRegistrationRequest]);
 
     const [userConversionDto, setUserConversionData] = useState<UserConversionDto>({
         RegistrationRequestId: selectedRegistrationRequest?.Id ?? 0,
@@ -56,7 +56,7 @@ const RegistrationRequestPage: React.FC = () => {
         if (selectedRegistrationRequest) {
             setUserConversionData({
                 RegistrationRequestId: selectedRegistrationRequest.Id,
-                Password: generateRandomPassword(),
+                Password: generateRandomPassword,
                 ApplicationIds: []
             });
         }
@@ -297,7 +297,7 @@ const RegistrationRequestPage: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Password"
-                                value={generateRandomPassword()}
+                                value={generateRandomPassword}
                                 className="form-control"
                                 onChange={(e) =>
                                     setUserConversionData(prev => ({

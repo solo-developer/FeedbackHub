@@ -8,6 +8,7 @@ import LandingPage from './LandingPage';
 import AddFeedbackPage from './Feedback/AddFeedback';
 import FeedbacksPage from '../Shared/Feedback/Feedbacks';
 import ConsumerLayout from './ConsumerLayout';
+import NotificationSetting from './NotificationSetting';
 
 
 const ConsumerDashboardPage: React.FC = () => {
@@ -16,7 +17,8 @@ const ConsumerDashboardPage: React.FC = () => {
          <ConsumerLayout>
                    <Routes> 
                          <Route path="/feedback/new" element={<AddFeedbackPage />} />         
-                         <Route path="/feedbacks/:ticketstatus" element={<FeedbacksPage />} />                   
+                         <Route path="/feedbacks/:ticketstatus" element={<FeedbacksPage />} />           
+                         <Route path="/notification-settings" element={<NotificationSetting />} />                
                         <Route path="*" element={<LandingPage />} />
                     </Routes>
          </ConsumerLayout>

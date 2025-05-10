@@ -29,7 +29,10 @@ namespace FeedbackHub.Infrastructure.Context
             builder.ApplyConfiguration(new TemplateConfiguration());
             builder.ApplyConfiguration(new TicketSequenceConfiguration());
             builder.ApplyConfiguration(new UserDetailConfiguration());
+            builder.ApplyConfiguration(new UserFeedbackEmailSubscriptionConfiguration());
+            builder.ApplyConfiguration(new UserSubscribedFeedbackTypeNotificationConfiguration());
             builder.ApplyConfiguration(new UserSubscriptionConfiguration());
+            builder.ApplyConfiguration(new UserNotificationTriggerStateConfiguration());
             base.OnModelCreating(builder);           
         }
 
@@ -43,7 +46,10 @@ namespace FeedbackHub.Infrastructure.Context
         public DbSet<Template> Templates { get; set; }
         public DbSet<TicketSequence> TicketSequences { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
+        public DbSet<UserFeedbackEmailSubscription> UserFeedbackEmailSubscriptions { get; set; }
+        public DbSet<UserNotificationTriggerState> UserNotificationTriggerStates { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
+        public DbSet<UserSubscribedFeedbackTypeNotification> UserSubscribedFeedbackTypeNotifications { get; set; }
        
     }
 }

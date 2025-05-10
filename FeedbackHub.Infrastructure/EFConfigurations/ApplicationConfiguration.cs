@@ -26,7 +26,12 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.HasMany(a => a.Subscriptions)
                 .WithOne(s => s.Application)
                 .HasForeignKey(s => s.ApplicationId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(a => a.NotificationSubscriptions)
+             .WithOne(s => s.Application)
+             .HasForeignKey(s => s.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Select from 'react-select';
 import {
     NotificationTriggerStateLevel,
     UserFeedbackEmailSubscription,
@@ -11,7 +12,6 @@ import { getUserEmailSubscriptions } from '../../services/Consumer/SubscriptionS
 import { useAppSwitcher } from '../../contexts/AppSwitcherContext';
 import PagePanel from '../../components/PagePanel';
 import { EnumToDropdownOptions } from '../../utils/EnumHelper';
-import { TicketStatus } from '../../types/feedback/TicketStatus';
 
 const NotificationSetting: React.FC = () => {
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
@@ -74,6 +74,10 @@ const NotificationSetting: React.FC = () => {
         });
     };
 
+    // Create the selected options from enum values
+    const selectedOptions = statusOptions.filter(opt =>
+        subscription.TriggerStates.includes(opt.value)
+    );
     const handleSubmit = async () => {
         if (!subscription) return;
 
@@ -128,25 +132,21 @@ const NotificationSetting: React.FC = () => {
                                 <label htmlFor="triggerStates" className="form-label">
                                     Trigger notifications for these statuses:
                                 </label>
-                                <select
-                                    className="form-select"
-                                    id="triggerStates"
-                                    multiple
-                                    value={subscription.TriggerStates.map(s => s.toString())}
-                                    onChange={(e) => {
-                                        const selected = Array.from(e.target.selectedOptions, o => parseInt(o.value, 10));
+
+                                <Select
+                                    isMulti
+                                    options={statusOptions}
+                                    value={selectedOptions}
+                                    onChange={(selected) => {
+                                        const values = (selected as typeof statusOptions).map(opt => opt.value);
                                         setSubscription({
                                             ...subscription,
-                                            TriggerStates: selected as NotificationTriggerStateLevel[],
+                                            TriggerStates: values,
                                         });
                                     }}
-                                >
-                                    {statusOptions.map(option => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                />
                             </div>
                         )}
                     </div>
@@ -174,7 +174,7 @@ const NotificationSetting: React.FC = () => {
 
                         <div className="row">
                             {feedbackTypes.map(type => (
-                                <div className="col-md-6" key={type.Id}>
+                                <div className="col-md-12" key={type.Id}>
                                     <div className="form-check">
                                         <input
                                             className="form-check-input"
@@ -193,14 +193,14 @@ const NotificationSetting: React.FC = () => {
                     </div>
                 </div>
 
-
-                <div className="d-grid">
-                    <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? 'Saving...' : 'Save Preferences'}
-                    </button>
+                <div className="text-end">
+                   <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : 'Save Preferences'}
+                </button>
                 </div>
-            </div>
-        </PagePanel>
+          
+        </div>
+        </PagePanel >
 
     );
 };

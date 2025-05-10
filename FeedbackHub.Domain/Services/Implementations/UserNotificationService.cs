@@ -2,6 +2,7 @@
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
+using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
 {
@@ -25,6 +26,22 @@ namespace FeedbackHub.Domain.Services.Implementations
                 TriggerStates = userNotification.TriggerStates.Select(x => x.TriggerState).ToList(),
                 FeedbackTypeIds = userNotification.SubscribedFeedbackTypes.Select(x => x.FeedbackTypeId).ToList()
             };
+        }
+
+        public async Task SaveAsync(GenericDto<UserNotificationDto> dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var userNotification = await _repo.FindAsync(x => x.UserId == dto.LoggedInUserId && x.ApplicationId == dto.ApplicationId) ?? new UserFeedbackEmailSubscription();
+                userNotification.UserId = dto.LoggedInUserId;
+                userNotification.ApplicationId = dto.ApplicationId.Value;
+                userNotification.NotifyOnStatusChange= dto.Model.NotifyOnStatusChange;
+                userNotification.NotifyOnCommentMade = dto.Model.NotifyOnCommentMade;
+                userNotification.AddFeedbackTypeSubscriptions(dto.Model.FeedbackTypeIds);
+                userNotification.AddTriggerStates(dto.Model.TriggerStates);
+                await _repo.AddOrUpdateAsync(userNotification, userNotification.Id);
+                tx.Complete();
+            }
         }
     }
 }

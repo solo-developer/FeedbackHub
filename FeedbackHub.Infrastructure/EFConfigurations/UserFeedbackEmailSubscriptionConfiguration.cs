@@ -12,7 +12,6 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
 
             builder.Property(e => e.UserId).IsRequired();
             builder.Property(e => e.ApplicationId).IsRequired();
-            builder.Property(e => e.FeedbackTypeId).IsRequired();
 
             builder.HasMany(e => e.SubscribedFeedbackTypes)
                    .WithOne(e => e.FeedbackSubscription)
@@ -23,6 +22,11 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .WithOne(e => e.Subscription)
                 .HasForeignKey(e => e.SubscriptionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(us => us.User)
+.WithMany(a => a.EmailSubscriptions)
+.HasForeignKey(us => us.UserId)
+.OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(us => us.Application)
            .WithMany(a => a.NotificationSubscriptions)

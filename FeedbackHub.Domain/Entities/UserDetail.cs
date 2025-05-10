@@ -52,6 +52,7 @@ namespace FeedbackHub.Domain.Entities
         public virtual ApplicationUser ApplicationUser { get; private set; }
         public virtual RegistrationRequest RegistrationRequest { get; private set; }
         public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
+        public virtual List<UserFeedbackEmailSubscription> EmailSubscriptions { get; private set; } = new();
 
         public void MarkDeleted()
         {

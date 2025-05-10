@@ -4,11 +4,10 @@ import {
     NotificationTriggerStateLevel,
     UserFeedbackEmailSubscription,
 } from '../../types/notification/UserEmailSubscription';
-import axios from 'axios';
 import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import { getAllFeedbackTypesAsync } from '../../services/FeedbackTypeService';
 import { useToast } from '../../contexts/ToastContext';
-import { getUserEmailSubscriptions } from '../../services/Consumer/SubscriptionService';
+import { getUserEmailSubscriptions, saveNotificationSettings } from '../../services/Consumer/SubscriptionService';
 import { useAppSwitcher } from '../../contexts/AppSwitcherContext';
 import PagePanel from '../../components/PagePanel';
 import { EnumToDropdownOptions } from '../../utils/EnumHelper';
@@ -61,6 +60,35 @@ const NotificationSetting: React.FC = () => {
         }
     };
 
+    const saveSettings = async () => {
+        if (!subscription) return;
+
+        setIsSubmitting(true);
+        try {
+
+            const response = await saveNotificationSettings(subscription);
+
+            if (response.Success) {
+                showToast('Preferences saved successfully', response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        } catch (err) {
+            showToast('Failed to save notification preferences', 'error');
+        }
+        finally{
+            setIsSubmitting(false);
+        }
+    }
+
     const handleCheckboxChange = (id: number) => {
         if (!subscription) return;
         const currentIds = subscription.FeedbackTypeIds;
@@ -76,21 +104,10 @@ const NotificationSetting: React.FC = () => {
 
     // Create the selected options from enum values
     const selectedOptions = statusOptions.filter(opt =>
-        subscription.TriggerStates.includes(opt.value)
+        subscription?.TriggerStates.includes(opt.value)
     );
     const handleSubmit = async () => {
-        if (!subscription) return;
-
-        setIsSubmitting(true);
-        try {
-            await axios.put('/api/subscription-settings', subscription);
-            showToast('Preferences updated!', 'success');
-        } catch (error) {
-            console.error(error);
-            showToast('Error updating preferences.', 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
+       saveSettings();
     };
 
     if (!subscription || !selectedApp) return <div className="text-center mt-5">Loading...</div>;
@@ -194,12 +211,12 @@ const NotificationSetting: React.FC = () => {
                 </div>
 
                 <div className="text-end">
-                   <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
-                    {isSubmitting ? 'Saving...' : 'Save Preferences'}
-                </button>
+                    <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Save Preferences'}
+                    </button>
                 </div>
-          
-        </div>
+
+            </div>
         </PagePanel >
 
     );

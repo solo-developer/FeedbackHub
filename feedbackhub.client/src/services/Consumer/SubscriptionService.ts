@@ -33,3 +33,19 @@ export const getUserEmailSubscriptions = async (): Promise<ServiceResponseType<U
       return { Success: false, Message: 'Failed to load notification settings', ResponseType:'error' };
     }
   }; 
+
+
+  export const saveNotificationSettings = async (dto : UserFeedbackEmailSubscription): Promise<ServiceResponseType<any>> => {
+    try {
+      const response = await api.post('/consumer/notification-settings',dto);
+  
+      if (isSuccess(response)) {
+        return  {Success:true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+      } 
+      else {
+        return { Success: false,  ResponseType : parseResponseType(response), Message : parseMessage(response)} as ServiceResponseType<any>;
+      }
+    } catch (err) {
+      return { Success: false, Message: 'Failed to save notification settings', ResponseType:'error' };
+    }
+  }; 

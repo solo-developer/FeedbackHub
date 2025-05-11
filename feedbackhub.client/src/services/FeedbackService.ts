@@ -1,6 +1,8 @@
+import { FilterOption } from '../types/feedback/DateFilterRange';
 import { FeedbackAttachmentDto } from '../types/feedback/FeedbackAttachmentDto';
 import { FeedbackBasicDetailDto, FeedbackDto } from '../types/feedback/FeedbackBasicDetailDto';
 import { FeedbackCommentDto } from '../types/feedback/FeedbackCommentDto';
+import { FeedbackCountDto } from '../types/feedback/FeedbackCount';
 import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
 import { FeedbackUpdateDto } from '../types/feedback/FeedbackUpdateDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
@@ -147,3 +149,19 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
         return { Success: false, Message: 'Failed to upload attachments', ResponseType: 'error' };
     }
 };
+
+  export const getFeedbacksCountAsync = async (dateRange : FilterOption): Promise<ServiceResponseType<FeedbackCountDto[]>> => {
+    try {
+        const response = await api.get(`/feedbacks/count?DateRange=${dateRange}`);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<FeedbackCountDto[]>(response) } as ServiceResponseType<FeedbackCountDto[]>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<FeedbackCountDto[]>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get feedback counts', ResponseType: 'error' };
+    }
+  };
+

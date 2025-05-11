@@ -172,7 +172,7 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             var entity = await _repo.GetByIdAsync(dto.Model.Id) ?? throw new ItemNotFoundException("Feedback not found.");
 
-            var status= entity.Status;
+            var status = entity.Status;
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 entity.UpdateFeedback(dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
@@ -188,7 +188,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                 return;
             if (!userNotificationSubscription.FeedbackTypeIds.Contains(entity.FeedbackTypeId))
                 return;
-            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a=> (int)a).Contains((int)entity.Status))
+            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a => (int)a).Contains((int)entity.Status))
                 return;
 
             var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackStatusChanged, new FeedbackStatusUpdatedEmailNotificationDto
@@ -274,6 +274,21 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 tx.Complete();
             }
+        }
+
+        public async Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(FeedbackCountFilterDto request)
+        {
+            var fromDate = request.FromDate.ToDateTime(TimeOnly.MinValue);
+            var toDate = request.ToDate.ToDateTime(TimeOnly.MaxValue);
+
+            var queryable = _repo.GetQueryable().Where(a => a.CreatedDate.Date >= fromDate.Date && a.CreatedDate.Date <= toDate.Date);
+
+            return await queryable.GroupBy(a => a.Status)
+                .Select(a => new FeedbackCountResponseDto
+                {
+                    Status = a.Key,
+                    Count = a.Count()
+                }).ToListAsync();
         }
     }
 }

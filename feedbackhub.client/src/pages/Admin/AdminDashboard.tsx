@@ -1,6 +1,3 @@
-import React from 'react';
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
 import { Route, Routes } from 'react-router-dom';
 import DashboardPage from '../Consumer/Dashboard';
 import LoginPage from '../Login';
@@ -14,15 +11,15 @@ import Board from './Board';
 import NewAdminUserPage from './NewAdminUser';
 import AdminFeedbackListPage from './AdminFeedbackList';
 import AdminLayout from './AdminLayout';
+import LandingPage from './LandingPage';
 
 const AdminDashboard = () => {
- 
 
   return (
     <AdminLayout>
      <Routes>
               <Route path="board" element={<Board />} />
-              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="dashboard" element={<LandingPage />} />
               <Route path="feedbacks" element={<AdminFeedbackListPage />} />
               <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
               <Route path="registration-requests" element={<RegistrationRequestPage />} />
@@ -32,7 +29,7 @@ const AdminDashboard = () => {
               <Route path="/admin-users" element={<UsersPage userType="Admin"/>} />
               <Route path="/client-users" element={<UsersPage userType="Client"/>} />
               <Route path="/users/new" element={<NewAdminUserPage/>} />
-              <Route path="*" element={<LoginPage />} />
+              <Route path="*" element={<LandingPage />} />
             </Routes>
     </AdminLayout>
    

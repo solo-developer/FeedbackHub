@@ -327,7 +327,7 @@ const EditFeedbackPage: React.FC = () => {
                             {/* Ticket State (State) */}
                             <div className="row">
                                 <div className="col-md-4 mb-3 align-items-center">
-                                    <label className="form-label me-2">State</label>
+                                    <label className="form-label me-2">Type</label>
                                     <select className="form-select"
                                         name="FeedbackTypeId"
                                         value={formData.FeedbackTypeId}

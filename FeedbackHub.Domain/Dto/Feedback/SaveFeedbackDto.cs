@@ -24,4 +24,10 @@ namespace FeedbackHub.Domain.Dto
         public string Description { get; set; }
     }
 
+    public class FeedbackStatusUpdatedEmailNotificationDto
+    {
+        public TicketStatus OldStatus { get; set; }
+        public FeedbackUpdateDto UpdatedDetail { get; set; }
+    }
+
 }

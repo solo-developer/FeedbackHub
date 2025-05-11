@@ -67,7 +67,6 @@ const NotificationSetting: React.FC = () => {
         try {
 
             const response = await saveNotificationSettings(subscription);
-
             if (response.Success) {
                 showToast('Preferences saved successfully', response.ResponseType, {
                     autoClose: 3000,

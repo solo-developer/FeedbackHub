@@ -47,6 +47,9 @@ namespace FeedbackHub.Server.DataSeeder
 
             await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.AccountCreated, "Account Created", "AccountCreated.html");
 
+            await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.FeedbackCommentAdded, "Comment Added", "FeedbackCommentAdded.html");
+            await AddEmailTemplateIfNotExists(context, Domain.Enums.TemplateType.FeedbackStatusChanged, "Feedback Status Updated", "FeedbackStatusUpdated.html");
+
         }
         private async Task AddEmailTemplateIfNotExists(AppDbContext context, Domain.Enums.TemplateType templateType, string subject, string templateFileName)
         {

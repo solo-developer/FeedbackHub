@@ -1,9 +1,11 @@
 ﻿using FeedbackHub.Domain.Dto;
 using FeedbackHub.Domain.Dto.Feedback;
 using FeedbackHub.Domain.Entities;
+using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
+using FeedbackHub.Domain.Templating;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Transactions;
@@ -16,12 +18,19 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly ITicketSequenceRepository _ticketSequenceRepo;
         private readonly IAttachmentService _attachmentService;
         private readonly IBaseRepository<RegistrationRequest> _registrationRequestRepo;
-        public FeedbackService(IBaseRepository<Feedback> repo, ITicketSequenceRepository ticketSequenceRepo, IAttachmentService attachmentService, IBaseRepository<RegistrationRequest> registrationRequestRepo)
+        private readonly IEmailContentComposer _emailContentComposerService;
+        private readonly IEmailSenderService _emailSenderService;
+        private readonly IUserNotificationService _userNotificationService;
+
+        public FeedbackService(IBaseRepository<Feedback> repo, ITicketSequenceRepository ticketSequenceRepo, IAttachmentService attachmentService, IBaseRepository<RegistrationRequest> registrationRequestRepo, IEmailContentComposer emailContentComposerService, IEmailSenderService emailSenderService, IUserNotificationService userNotificationService)
         {
             _repo = repo;
             _ticketSequenceRepo = ticketSequenceRepo;
             _attachmentService = attachmentService;
             _registrationRequestRepo = registrationRequestRepo;
+            _emailContentComposerService = emailContentComposerService;
+            _emailSenderService = emailSenderService;
+            _userNotificationService = userNotificationService;
         }
 
         public async Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto : FeedbackFilterDto
@@ -96,14 +105,14 @@ namespace FeedbackHub.Domain.Services.Implementations
                 CreatedBy = a.User.FullName,
                 CreatedDate = a.CreatedDate,
                 FeedbackType = a.FeedbackType.Type,
-                Client= a.User.RegistrationRequest.Client.Name,
+                Client = a.User.RegistrationRequest.Client.Name,
                 Application = a.Application.Name,
                 Priority = a.Priority,
                 Status = a.Status
             };
         }
 
-        private  Expression<Func<Feedback, FeedbackDetailDto>> MapToFeedbackDetail()
+        private Expression<Func<Feedback, FeedbackDetailDto>> MapToFeedbackDetail()
         {
             return a => new FeedbackDetailDto
             {
@@ -118,7 +127,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Application = a.Application.Name,
                 Priority = a.Priority,
                 Status = a.Status,
-                Description= a.Description
+                Description = a.Description
             };
         }
 
@@ -154,41 +163,87 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task<FeedbackDetailDto> GetByIdAsync(int id)
         {
-            var feedback =await _repo.GetQueryable().Where(a => a.Id == id).Select(MapToFeedbackDetail()).FirstOrDefaultAsync();
+            var feedback = await _repo.GetQueryable().Where(a => a.Id == id).Select(MapToFeedbackDetail()).FirstOrDefaultAsync();
             if (feedback == null) throw new ItemNotFoundException("Feedback detail not found.");
             return feedback;
         }
 
         public async Task UpdateAsync(GenericDto<FeedbackUpdateDto> dto)
         {
+            var entity = await _repo.GetByIdAsync(dto.Model.Id) ?? throw new ItemNotFoundException("Feedback not found.");
+
+            var status= entity.Status;
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var entity = await _repo.GetByIdAsync(dto.Model.Id) ?? throw new ItemNotFoundException("Feedback not found.");
                 entity.UpdateFeedback(dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
-                
-                await _repo.UpdateAsync(entity,entity.Id);
+
+                await _repo.UpdateAsync(entity, entity.Id);
 
                 tx.Complete();
             }
+            if (dto.LoggedInUserId == entity.UserId || dto.Model.Status == status)
+                return;
+            var userNotificationSubscription = await _userNotificationService.GetSetting(entity.UserId, entity.ApplicationId);
+            if (!userNotificationSubscription.NotifyOnStatusChange)
+                return;
+            if (!userNotificationSubscription.FeedbackTypeIds.Contains(entity.FeedbackTypeId))
+                return;
+            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a=> (int)a).Contains((int)entity.Status))
+                return;
+
+            var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackStatusChanged, new FeedbackStatusUpdatedEmailNotificationDto
+            {
+                OldStatus = status,
+                UpdatedDetail = dto.Model
+            });
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { entity.User.ApplicationUser.Email! }
+            });
         }
 
         public async Task AddCommentAsync(GenericDto<AddFeedbackCommentDto> dto)
         {
+            var entity = await _repo.GetByIdAsync(dto.Model.FeedbackId) ?? throw new ItemNotFoundException("Feedback not found.");
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var entity = await _repo.GetByIdAsync(dto.Model.FeedbackId) ?? throw new ItemNotFoundException("Feedback not found.");
                 entity.AddComment(dto.Model.Comment, dto.LoggedInUserId);
                 await _repo.UpdateAsync(entity, entity.Id);
 
                 tx.Complete();
             }
+
+            if (dto.LoggedInUserId == entity.UserId)
+                return;
+
+            var userNotificationSubscription = await _userNotificationService.GetSetting(entity.UserId, entity.ApplicationId);
+            if (!userNotificationSubscription.NotifyOnCommentMade)
+                return;
+            if (!userNotificationSubscription.FeedbackTypeIds.Contains(entity.FeedbackTypeId))
+                return;
+
+            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a => (int)a).Contains((int)entity.Status))
+                return;
+
+            var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackCommentAdded, dto.Model);
+
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { entity.User.ApplicationUser.Email! }
+            });
         }
 
         public async Task<List<FeedbackCommentDto>> GetCommentsAsync(int feedbackId)
         {
             var feedback = await _repo.GetQueryableWithNoTracking().FirstOrDefaultAsync(a => a.Id == feedbackId) ?? throw new ItemNotFoundException("Feedback not found");
 
-            return feedback.Histories.OrderByDescending(a=>a.CreatedDate).Select(a => new FeedbackCommentDto
+            return feedback.Histories.OrderByDescending(a => a.CreatedDate).Select(a => new FeedbackCommentDto
             {
                 Comment = a.Comment,
                 EnteredDate = a.CreatedDate,
@@ -204,8 +259,8 @@ namespace FeedbackHub.Domain.Services.Implementations
             {
                 Id = a.Id,
                 FeedbackId = a.FeedbackId,
-                AttachmentIdentifier= a.AttachmentIdentifier,
-                DisplayName =a.DisplayName,
+                AttachmentIdentifier = a.AttachmentIdentifier,
+                DisplayName = a.DisplayName,
                 EnteredDate = a.CreatedDate,
                 EnteredBy = a.User.FullName
             }).ToList();
@@ -213,7 +268,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task AddAttachmentsAsync(GenericDto<SaveFeedbackAttachmentDto> dto)
         {
-            using(TransactionScope tx= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 await _attachmentService.SaveAsync(dto.Model.FeedbackId, dto.LoggedInUserId, dto.Model.Attachments);
 

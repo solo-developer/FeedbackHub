@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Comment on Your Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .content {
+            padding: 20px 0;
+        }
+
+            .content p {
+                line-height: 1.6;
+                margin: 10px 0;
+            }
+
+        .comment-box {
+            background-color: #f1f3f5;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-top: 15px;
+            font-style: italic;
+            color: #444;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <div class="header">
+            <h2>New Comment on Your Feedback</h2>
+        </div>
+
+        <div class="content">
+            <p>Hi <strong>{{UserName}}</strong>,</p>
+
+            <p>A new comment has been added to the feedback you raised.</p>
+
+            <p>
+                <strong>Ticket ID:</strong> #{{TicketId}}<br>
+                <strong>Title:</strong> {{TicketTitle}}
+            </p>
+
+            <p><strong>Comment:</strong></p>
+            <div class="comment-box">
+                {{CommentContent}}
+            </div>
+
+            <a class="button" href="{{TicketUrl}}" target="_blank">View Feedback</a>
+
+            <p>If you have any questions or need further assistance, feel free to reply to this email or contact our support team.</p>
+
+            <p>Thanks,<br>FeedbackHub Team</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

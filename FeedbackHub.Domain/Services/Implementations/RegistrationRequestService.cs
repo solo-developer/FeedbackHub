@@ -8,7 +8,6 @@ using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Domain.Templating;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -16,18 +15,14 @@ namespace FeedbackHub.Domain.Services.Implementations
     public class RegistrationRequestService : IRegistrationRequestService
     {
         private readonly IBaseRepository<RegistrationRequest> _registrationRequestRepo;
-        private readonly IRoleRepository _roleRepo;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IEmailSenderService _emailSenderService;
         private readonly IEmailContentComposer _emailContentComposer;
 
-        public RegistrationRequestService(IBaseRepository<RegistrationRequest> registrationRequestRepo, IRoleRepository roleRepo, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IEmailSenderService emailSenderService, IEmailContentComposer emailContentComposer)
+        public RegistrationRequestService(IBaseRepository<RegistrationRequest> registrationRequestRepo, UserManager<ApplicationUser> userManager, IEmailSenderService emailSenderService, IEmailContentComposer emailContentComposer)
         {
             _registrationRequestRepo = registrationRequestRepo;
-            _roleRepo = roleRepo;
             _userManager = userManager;
-            _roleManager = roleManager;
             _emailSenderService = emailSenderService;
             _emailContentComposer = emailContentComposer;
         }

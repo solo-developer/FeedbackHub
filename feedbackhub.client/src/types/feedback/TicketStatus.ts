@@ -6,3 +6,11 @@ export enum TicketStatus {
     OnHold=5
   }
   
+  
+export const TicketStatusLabels: Record<TicketStatus, string> = {
+  [TicketStatus.Open]: 'Open',
+  [TicketStatus.Closed]: 'Closed',
+  [TicketStatus.Declined]: 'Declined',
+  [TicketStatus.Resolved]: 'Resolved',
+  [TicketStatus.OnHold]: 'On Hold',
+};

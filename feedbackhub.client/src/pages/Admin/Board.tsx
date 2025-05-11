@@ -46,11 +46,21 @@ const mockData: FeedbackEntry[] = [
 const Board: React.FC = () => {
   const [groupingType, setGroupingType] = useState<GroupType>('Client');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [expandedApplications, setExpandedApplications] = useState<Set<string>>(new Set());
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleRow = (key: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set(prev);
       newSet.has(key) ? newSet.delete(key) : newSet.add(key);
+      return newSet;
+    });
+  };
+
+  const toggleApplicationRow = (app: string) => {
+    setExpandedApplications((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(app) ? newSet.delete(app) : newSet.add(app);
       return newSet;
     });
   };
@@ -91,50 +101,48 @@ const Board: React.FC = () => {
     }, []);
   };
 
-  const renderColumns = (entries: FeedbackEntry[]) => {
-    const allFeedbacks = entries.flatMap((e) => e.feedbacks);
-    const statuses = Object.values(TicketStatus).filter(
-      (v) => typeof v === 'number'
-    ) as TicketStatus[];
+  const renderFeedbacks = (feedbacks: Feedback[]) => {
+    const feedbacksByStatus: { [key: number]: Feedback[] } = {
+      [TicketStatus.Open]: [],
+      [TicketStatus.Closed]: [],
+      [TicketStatus.Declined]: [],
+      [TicketStatus.Resolved]: [],
+      [TicketStatus.OnHold]: [],
+    };
+
+    feedbacks.forEach((feedback) => {
+      feedbacksByStatus[feedback.status].push(feedback);
+    });
 
     return (
-      <div className="row mt-3">
-        {statuses.map((status) => {
-          const feedbacks = allFeedbacks.filter((f) => f.status === status);
-          return (
-            <div className="col" key={status}>
-              <div className="card h-100">
-                <div className="card-header bg-light fw-bold text-center">
-                  {TicketStatusLabels[status]}
-                </div>
-                <div className="card-body" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                  {feedbacks.length > 0 ? (
-                    feedbacks.map((fb) => (
-                      <div className="card mb-2 shadow-sm" key={fb.id}>
-                        <div className="card-body p-2">
-                          <h6 className="mb-1">{fb.title}</h6>
-                          <small className="text-muted">{fb.description}</small>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted small">No feedbacks</p>
-                  )}
+      <div className="d-flex justify-content-between mt-3">
+        {Object.keys(feedbacksByStatus).map((status) => (
+          <div className="col-2" key={status} style={{ borderRight: '2px solid #ddd', paddingRight: '20px' }}>
+            <h6 className="text-center">{TicketStatusLabels[Number(status)]}</h6>
+            {feedbacksByStatus[Number(status)].map((feedback) => (
+              <div className="card mb-2" key={feedback.id}>
+                <div className="card-body">
+                  <h6 className="card-title">{feedback.title}</h6>
+                  <p className="card-text">{feedback.description}</p>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        ))}
       </div>
     );
   };
 
   const grouped = groupFeedbacks();
 
+  const toggleFullScreen = () => {
+    setIsFullscreen((prev) => !prev);
+  };
+
   return (
-    <div className="container-fluid">
+    <div className={`container-fluid ${isFullscreen ? 'fullscreen' : ''}`}>
       {/* Dropdown */}
-      <div className="d-flex justify-content-end mb-4">
+      <div className="d-flex justify-content-between mb-4">
         <div className="w-25">
           <select
             className="form-select"
@@ -146,6 +154,11 @@ const Board: React.FC = () => {
             <option value="ClientAndApplication">Group by Client & Application</option>
           </select>
         </div>
+
+        {/* Fullscreen Button */}
+        <button className="btn btn-outline-primary btn-sm" onClick={toggleFullScreen}>
+          {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+        </button>
       </div>
 
       {/* Group by Client */}
@@ -153,16 +166,18 @@ const Board: React.FC = () => {
         grouped.map((group) => (
           <div className="card border-primary shadow-sm mb-3" key={group.client}>
             <div className="card-body">
-              <div className="d-flex align-items-center mb-2">
-                <button
-                  className="btn btn-sm btn-outline-secondary me-2"
-                  onClick={() => toggleRow(group.client)}
-                >
-                  {expandedRows.has(group.client) ? '➖' : '➕'}
-                </button>
-                <strong>Client:</strong> {group.client}
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <button
+                    className="btn btn-sm btn-outline-secondary me-2"
+                    onClick={() => toggleRow(group.client)}
+                  >
+                    {expandedRows.has(group.client) ? '➖' : '➕'}
+                  </button>
+                  <strong>Client:</strong> {group.client}
+                </div>
               </div>
-              {expandedRows.has(group.client) && renderColumns(group.entries)}
+              {expandedRows.has(group.client) && renderFeedbacks(group.entries.flatMap((entry) => entry.feedbacks))}
             </div>
           </div>
         ))}
@@ -172,16 +187,18 @@ const Board: React.FC = () => {
         grouped.map((group) => (
           <div className="card border-success shadow-sm mb-3" key={group.application}>
             <div className="card-body">
-              <div className="d-flex align-items-center mb-2">
-                <button
-                  className="btn btn-sm btn-outline-secondary me-2"
-                  onClick={() => toggleRow(group.application)}
-                >
-                  {expandedRows.has(group.application) ? '➖' : '➕'}
-                </button>
-                <strong>Application:</strong> {group.application}
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <button
+                    className="btn btn-sm btn-outline-secondary me-2"
+                    onClick={() => toggleRow(group.application)}
+                  >
+                    {expandedRows.has(group.application) ? '➖' : '➕'}
+                  </button>
+                  <strong>Application:</strong> {group.application}
+                </div>
               </div>
-              {expandedRows.has(group.application) && renderColumns(group.entries)}
+              {expandedRows.has(group.application) && renderFeedbacks(group.entries.flatMap((entry) => entry.feedbacks))}
             </div>
           </div>
         ))}
@@ -191,23 +208,31 @@ const Board: React.FC = () => {
         grouped.map((group) => (
           <div className="card border-warning shadow-sm mb-4" key={group.client}>
             <div className="card-body">
-              <div className="d-flex align-items-center mb-2">
-                <button
-                  className="btn btn-sm btn-outline-secondary me-2"
-                  onClick={() => toggleRow(group.client)}
-                >
-                  {expandedRows.has(group.client) ? '➖' : '➕'}
-                </button>
-                <strong>Client:</strong> {group.client}
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <button
+                    className="btn btn-sm btn-outline-secondary me-2"
+                    onClick={() => toggleRow(group.client)}
+                  >
+                    {expandedRows.has(group.client) ? '➖' : '➕'}
+                  </button>
+                  <strong>Client:</strong> {group.client}
+                </div>
               </div>
 
               {expandedRows.has(group.client) &&
-                group.applications.map((app, idx) => (
-                  <div className="card border-info shadow-sm mt-3" key={idx}>
-                    <div className="card-body">
-                      <h6>Application: {app.application}</h6>
-                      {renderColumns(app.entries)}
+                group.applications.map((app) => (
+                  <div key={app.application} style={{ paddingLeft: '20px', backgroundColor: '#f8f9fa' }}>
+                    <div className="d-flex justify-content-start align-items-center mt-2">
+                      <button
+                        className="btn btn-sm btn-outline-secondary me-2"
+                        onClick={() => toggleApplicationRow(app.application)}
+                      >
+                        {expandedApplications.has(app.application) ? '➖' : '➕'}
+                      </button>
+                      <strong>Application:</strong> {app.application}
                     </div>
+                    {expandedApplications.has(app.application) && renderFeedbacks(app.entries.flatMap((entry) => entry.feedbacks))}
                   </div>
                 ))}
             </div>

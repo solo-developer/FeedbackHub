@@ -63,7 +63,7 @@ const LandingPage: React.FC = () => {
       {loading && <p className="text-center text-muted">Loading ticket stats...</p>}
       {error && <p className="text-center text-danger">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && !error && (<>
         <div className="row g-4">
           {/* Tickets Raised */}
           <div className="col-md-3">
@@ -105,6 +105,18 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className='row g-4 mt-2'>
+          <div className="col-md-3">
+            <div className="card border-warning shadow-sm">
+              <div className="card-body text-warning">
+                <h5 className="card-title">Tickets Put On Hold</h5>
+                <p className="display-6 fw-semibold">{getCount(TicketStatus.OnHold)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
       )}
     </div>
   );

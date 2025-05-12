@@ -25,9 +25,6 @@ const Board: React.FC<BoardProps> = ({ type }) => {
     else
     fetchBacklogs();
 
-     return () => {
-    console.log("Unmounted");
-  };
   }, [type]);
 
   const fetchActiveFeedbacks = async () => {

@@ -9,6 +9,7 @@ import { ChangePasswordDto } from '../types/account/ChangePasswordDto';
 import { useToast } from '../contexts/ToastContext';
 import { changePasswordAsync } from '../services/UserService';
 import { useNavigate } from 'react-router-dom';
+import PagePanel from '../components/PagePanel';
 
 
 const ChangePasswordPage: React.FC = () => {
@@ -73,8 +74,10 @@ const ChangePasswordPage: React.FC = () => {
     };
 
     const content = (
-        <div className="container mt-5" style={{ maxWidth: '500px' }}>
-            <h4 className="mb-4">Change Password</h4>
+        <PagePanel title='Change Password'>
+
+              <div className="container mt-3" style={{ maxWidth: '500px' }}>
+           
             {message && <div className="alert alert-info">{message}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
@@ -115,6 +118,8 @@ const ChangePasswordPage: React.FC = () => {
                 </button>
             </form>
         </div>
+        </PagePanel>
+      
     );
 
     return role === ADMIN_ROLE ? (

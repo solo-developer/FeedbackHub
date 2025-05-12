@@ -14,6 +14,7 @@ namespace FeedbackHub.Domain.Services.Interface
 
         Task AddCommentAsync(GenericDto<AddFeedbackCommentDto> dto);
         Task<List<BoardFeedbackDto>> GetBoardFeedbacksAsync(GenericDto<BoardFeedbackFilterDto> dto);
+        Task<List<BoardFeedbackDto>> GetBoardBacklogsAsync(GenericDto<BoardFeedbackFilterDto> dto);
 
         Task<List<FeedbackCommentDto>> GetCommentsAsync(int feedbackId);
         Task<List<FeedbackAttachmentDto>> GetAttachmentsAsync(int feedbackId);

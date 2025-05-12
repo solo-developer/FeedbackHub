@@ -8,7 +8,8 @@ import {
   faUserShield,
   faEnvelope,
   faComments,
-  faClipboardList
+  faClipboardList,
+  faTasks
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -32,6 +33,13 @@ const Sidebar = () => {
             <NavLink to="/admin/board" className={({ isActive }) => `nav-link px-0 align-middle ${isActive ? activeClass : ' text-white'}`}>
               <FontAwesomeIcon icon={faClipboardList} className="me-2" />
               <span className="d-none d-sm-inline">Board</span>
+            </NavLink>
+          </li>
+
+           <li className="nav-item">
+            <NavLink to="/admin/backlog" className={({ isActive }) => `nav-link px-0 align-middle ${isActive ? activeClass : ' text-white'}`}>
+              <FontAwesomeIcon icon={faTasks} className="me-2" />
+              <span className="d-none d-sm-inline">Backlog</span>
             </NavLink>
           </li>
 

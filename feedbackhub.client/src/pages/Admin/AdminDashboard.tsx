@@ -17,22 +17,23 @@ const AdminDashboard = () => {
 
   return (
     <AdminLayout>
-     <Routes>
-              <Route path="board" element={<Board />} />
-              <Route path="dashboard" element={<LandingPage />} />
-              <Route path="feedbacks" element={<AdminFeedbackListPage />} />
-              <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
-              <Route path="registration-requests" element={<RegistrationRequestPage />} />
-              <Route path="clients" element={<ClientOrganizationIndexPage />} />
-              <Route path="email-configuration" element={<EmailConfiguration />} />
-              <Route path="applications" element={<ApplicationIndexPage />} />
-              <Route path="/admin-users" element={<UsersPage userType="Admin"/>} />
-              <Route path="/client-users" element={<UsersPage userType="Client"/>} />
-              <Route path="/users/new" element={<NewAdminUserPage/>} />
-              <Route path="*" element={<LandingPage />} />
-            </Routes>
+      <Routes>
+        <Route path="board" element={<Board type='board'  key="board"/>} />
+        <Route path="backlog" element={<Board type='backlog'  key="backlog" />} />
+        <Route path="dashboard" element={<LandingPage />} />
+        <Route path="feedbacks" element={<AdminFeedbackListPage />} />
+        <Route path="feedback-type" element={<FeedbackTypeIndexPage />} />
+        <Route path="registration-requests" element={<RegistrationRequestPage />} />
+        <Route path="clients" element={<ClientOrganizationIndexPage />} />
+        <Route path="email-configuration" element={<EmailConfiguration />} />
+        <Route path="applications" element={<ApplicationIndexPage />} />
+        <Route path="/admin-users" element={<UsersPage userType="Admin" />} />
+        <Route path="/client-users" element={<UsersPage userType="Client" />} />
+        <Route path="/users/new" element={<NewAdminUserPage />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
     </AdminLayout>
-   
+
   );
 };
 

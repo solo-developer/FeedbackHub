@@ -293,7 +293,21 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task<List<BoardFeedbackDto>> GetBoardFeedbacksAsync(GenericDto<BoardFeedbackFilterDto> dto)
         {
-            var feedbacksQueryable = _repo.GetQueryable().Where(a=>a.Status != TicketStatus.OnHold);
+            var feedbacksQueryable = _repo.GetQueryable().Where(a => a.Status != TicketStatus.OnHold);
+            (feedbacksQueryable, List<BoardFeedbackDto> feedbacks) = await GetFilteredBoardFeedbacks(dto, feedbacksQueryable);
+
+            return feedbacks;
+        }
+        public async Task<List<BoardFeedbackDto>> GetBoardBacklogsAsync(GenericDto<BoardFeedbackFilterDto> dto)
+        {
+            var feedbacksQueryable = _repo.GetQueryable().Where(a => a.Status == TicketStatus.OnHold);
+            (feedbacksQueryable, List<BoardFeedbackDto> feedbacks) = await GetFilteredBoardFeedbacks(dto, feedbacksQueryable);
+
+            return feedbacks;
+        }
+
+        private async Task<(IQueryable<Feedback> feedbacksQueryable, List<BoardFeedbackDto> feedbacks)> GetFilteredBoardFeedbacks(GenericDto<BoardFeedbackFilterDto> dto, IQueryable<Feedback> feedbacksQueryable)
+        {
             if (dto.Model.FromDate.HasValue)
             {
                 var fromDate = dto.Model.FromDate.Value;
@@ -305,29 +319,28 @@ namespace FeedbackHub.Domain.Services.Implementations
                 feedbacksQueryable = feedbacksQueryable.Where(a => a.CreatedDate.Date <= toDate.Date);
             }
 
-            var feedbacks =await feedbacksQueryable.GroupBy(a => new { a.Application.ShortName, a.User.RegistrationRequest.Client.Code }).Select(a => new BoardFeedbackDto
+            var feedbacks = await feedbacksQueryable.GroupBy(a => new { a.Application.ShortName, a.User.RegistrationRequest.Client.Code }).Select(a => new BoardFeedbackDto
             {
                 Client = a.Key.Code,
                 Application = a.Key.ShortName,
                 Feedbacks = a.Select(b => new BoardFeedbackDetailDto
                 {
-                    Id= b.Id,
-                    TicketId= b.TicketId,
-                    Title=b.Title,
-                    Status= b.Status,
-                    RaisedBy =b.User.FullName,
-                    RaisedDate= b.CreatedDate,
-                    FeedbackType= new FeedbackTypeDto
+                    Id = b.Id,
+                    TicketId = b.TicketId,
+                    Title = b.Title,
+                    Status = b.Status,
+                    RaisedBy = b.User.FullName,
+                    RaisedDate = b.CreatedDate,
+                    FeedbackType = new FeedbackTypeDto
                     {
                         Id = b.FeedbackTypeId,
                         Type = b.FeedbackType.Type,
-                        Color =b.FeedbackType.Color
+                        Color = b.FeedbackType.Color
                     }
                 })
 
             }).ToListAsync();
-
-            return feedbacks;
+            return (feedbacksQueryable, feedbacks);
         }
     }
 }

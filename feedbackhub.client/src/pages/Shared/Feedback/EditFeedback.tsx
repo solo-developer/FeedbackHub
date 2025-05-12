@@ -216,53 +216,53 @@ const EditFeedbackPage: React.FC = () => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     const handleUpload = async () => {
-        
-         const fullForm = {
-                    FeedbackId : feedbackId,
-                    Attachments: selectedFiles,
-                };
-        
-                const formToSend = buildFormData(fullForm as Record<string, any>);
-        
-                try {
-                    const response = await saveFeedbackAttachments(formToSend);
-        
-                    if (response.Success) {
-                        fetchAttachmentsAsync();
-                        showToast("Attachments submitted successfully", response.ResponseType, {
-                            autoClose: 3000,
-                            draggable: true
-                        });
-                    }
-                    else {
-                        showToast(response.Message, response.ResponseType, {
-                            autoClose: 3000,
-                            draggable: true
-                        });
-                    }
-        
-                } catch (err) {
-                    showToast('Failed to submit attachment', 'error');
-                }
+
+        const fullForm = {
+            FeedbackId: feedbackId,
+            Attachments: selectedFiles,
+        };
+
+        const formToSend = buildFormData(fullForm as Record<string, any>);
+
+        try {
+            const response = await saveFeedbackAttachments(formToSend);
+
+            if (response.Success) {
+                fetchAttachmentsAsync();
+                showToast("Attachments submitted successfully", response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        } catch (err) {
+            showToast('Failed to submit attachment', 'error');
+        }
 
     };
 
-     const [fileSelectionForDelete, setFileSelectionForDelete] = useState<string>('');
+    const [fileSelectionForDelete, setFileSelectionForDelete] = useState<string>('');
     const removeAttachmentBtnClicked = (identifier: string) => {
-            setFileSelectionForDelete(identifier);
+        setFileSelectionForDelete(identifier);
 
-            setShowRemoveFileConfirmation(true);
+        setShowRemoveFileConfirmation(true);
     };
 
-        const removeAttachment = async (identifier:string) => {
+    const removeAttachment = async (identifier: string) => {
         try {
             setShowRemoveFileConfirmation(false);
 
             const response = await deleteAttachmentAsync(identifier);
 
             if (response.Success) {
-               setFileSelectionForDelete('');
-               fetchAttachmentsAsync();
+                setFileSelectionForDelete('');
+                fetchAttachmentsAsync();
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -441,7 +441,7 @@ const EditFeedbackPage: React.FC = () => {
                                             <div className="input-group">
                                                 <input
                                                     type="file"
-                                                    multiple 
+                                                    multiple
                                                     className="form-control"
                                                     onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
                                                 />
@@ -473,7 +473,7 @@ const EditFeedbackPage: React.FC = () => {
                                                                 href='#'
                                                                 rel="noopener noreferrer"
                                                                 className="btn btn-sm btn-outline-primary"
-                                                                onClick={() => downloadAttachment(att.AttachmentIdentifier,att.DisplayName)}
+                                                                onClick={() => downloadAttachment(att.AttachmentIdentifier, att.DisplayName)}
                                                             >
                                                                 View
                                                             </a>
@@ -507,7 +507,7 @@ const EditFeedbackPage: React.FC = () => {
                 variant="primary"
             />
 
-             <ConfirmDialog
+            <ConfirmDialog
                 show={showRemoveFileConfirmation}
                 onHide={() => setShowRemoveFileConfirmation(false)}
                 onConfirm={() => removeAttachment(fileSelectionForDelete)}
@@ -519,7 +519,6 @@ const EditFeedbackPage: React.FC = () => {
             />
         </>
     );
-
 
     return (
         role == ADMIN_ROLE ? (<AdminLayout>

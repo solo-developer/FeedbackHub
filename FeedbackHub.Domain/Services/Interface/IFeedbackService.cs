@@ -13,6 +13,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<FeedbackDetailDto> GetByIdAsync(int id);
 
         Task AddCommentAsync(GenericDto<AddFeedbackCommentDto> dto);
+        Task<List<BoardFeedbackDto>> GetBoardFeedbacksAsync(GenericDto<BoardFeedbackFilterDto> dto);
 
         Task<List<FeedbackCommentDto>> GetCommentsAsync(int feedbackId);
         Task<List<FeedbackAttachmentDto>> GetAttachmentsAsync(int feedbackId);

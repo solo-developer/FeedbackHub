@@ -22,10 +22,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const refreshToken = localStorage.getItem('refresh_token');
     
     if (accessToken && refreshToken) {
-      // Here, you can decode the token if needed and get the role
       try {
-        const decodedToken: any = jwtDecode(accessToken); // Ensure jwtDecode is imported
-        setAuthState(true, decodedToken.Role);
+        const decodedToken: any = jwtDecode(accessToken); 
+        setAuthState(true, decodedToken.role);
       } catch (error) {
         console.error("Error decoding token:", error);
         setAuthState(false, null); // If the token is invalid, reset auth state

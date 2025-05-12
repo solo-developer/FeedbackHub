@@ -1,3 +1,4 @@
+import { BoardFeedbackDto } from '../types/feedback/BoardFeedbackDto';
 import { FilterOption } from '../types/feedback/DateFilterRange';
 import { FeedbackAttachmentDto } from '../types/feedback/FeedbackAttachmentDto';
 import { FeedbackBasicDetailDto, FeedbackDto } from '../types/feedback/FeedbackBasicDetailDto';
@@ -162,6 +163,21 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedback counts', ResponseType: 'error' };
+    }
+  };
+
+  export const getBoardFeedbacksAsync = async (): Promise<ServiceResponseType<BoardFeedbackDto[]>> => {
+    try {
+        const response = await api.get(`/feedback/board`);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<BoardFeedbackDto[]>(response) } as ServiceResponseType<BoardFeedbackDto[]>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<BoardFeedbackDto[]>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
     }
   };
 

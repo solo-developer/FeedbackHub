@@ -1,53 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { TicketStatus, TicketStatusLabels } from '../../types/feedback/TicketStatus';
+import { BoardFeedbackDetailDto, BoardFeedbackDto } from '../../types/feedback/BoardFeedbackDto';
+import { getBoardFeedbacksAsync } from '../../services/FeedbackService';
+import { useToast } from '../../contexts/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 type GroupType = 'Client' | 'Application' | 'ClientAndApplication';
-
-interface Feedback {
-  id: number;
-  status: TicketStatus;
-  title: string;
-  description: string;
-}
-
-interface FeedbackEntry {
-  client: string;
-  application: string;
-  feedbacks: Feedback[];
-}
-
-const mockData: FeedbackEntry[] = [
-  {
-    client: 'Client A',
-    application: 'App X',
-    feedbacks: [
-      { id: 1, status: TicketStatus.Open, title: 'Login fails', description: 'OAuth redirect issue' },
-      { id: 2, status: TicketStatus.Resolved, title: 'UI glitch', description: 'Alignment issue on dashboard' },
-    ],
-  },
-  {
-    client: 'Client B',
-    application: 'App Y',
-    feedbacks: [
-      { id: 3, status: TicketStatus.Closed, title: 'Data not saving', description: 'Missing DB transaction' },
-      { id: 4, status: TicketStatus.Declined, title: 'Feature request', description: 'Export to PDF' },
-    ],
-  },
-  {
-    client: 'Client A',
-    application: 'App Y',
-    feedbacks: [
-      { id: 5, status: TicketStatus.OnHold, title: 'Cache issue', description: 'Outdated state display' },
-    ],
-  },
-];
 
 const Board: React.FC = () => {
   const [groupingType, setGroupingType] = useState<GroupType>('Client');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [expandedApplications, setExpandedApplications] = useState<Set<string>>(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+  const [feedbacks, setFeedbacks] = useState<BoardFeedbackDto[]>([]);
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await getBoardFeedbacksAsync();
+      if (response.Success) {
+        setFeedbacks(response.Data);
+      } else {
+        showToast(response.Message, response.ResponseType, {
+          autoClose: 3000,
+          draggable: true,
+        });
+      }
+    } catch {
+      showToast('Failed to load feedbacks', 'error');
+    }
+  };
 
   const toggleRow = (key: string) => {
     setExpandedRows((prev) => {
@@ -65,65 +53,89 @@ const Board: React.FC = () => {
     });
   };
 
+  const handleOpenInNewWindow = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+
   const groupFeedbacks = () => {
     if (groupingType === 'Client') {
-      return mockData.reduce((acc: any[], curr) => {
-        const clientEntry = acc.find((item) => item.client === curr.client);
-        if (!clientEntry) acc.push({ client: curr.client, entries: [curr] });
-        else clientEntry.entries.push(curr);
-        return acc;
-      }, []);
+      const clientMap: { [client: string]: BoardFeedbackDto[] } = {};
+      feedbacks.forEach((fb) => {
+        if (!clientMap[fb.Client]) clientMap[fb.Client] = [];
+        clientMap[fb.Client].push(fb);
+      });
+
+      return Object.entries(clientMap).map(([Client, entries]) => ({ Client, entries }));
     }
 
     if (groupingType === 'Application') {
-      return mockData.reduce((acc: any[], curr) => {
-        const appEntry = acc.find((item) => item.application === curr.application);
-        if (!appEntry) acc.push({ application: curr.application, entries: [curr] });
-        else appEntry.entries.push(curr);
-        return acc;
-      }, []);
+      const appMap: { [app: string]: BoardFeedbackDto[] } = {};
+      feedbacks.forEach((fb) => {
+        if (!appMap[fb.Application]) appMap[fb.Application] = [];
+        appMap[fb.Application].push(fb);
+      });
+
+      return Object.entries(appMap).map(([Application, entries]) => ({ Application, entries }));
     }
 
-    // ClientAndApplication
-    return mockData.reduce((acc: any[], curr) => {
-      const clientEntry = acc.find((item) => item.client === curr.client);
-      if (!clientEntry) {
-        acc.push({ client: curr.client, applications: [{ application: curr.application, entries: [curr] }] });
-      } else {
-        const appEntry = clientEntry.applications.find((app) => app.application === curr.application);
-        if (!appEntry) {
-          clientEntry.applications.push({ application: curr.application, entries: [curr] });
-        } else {
-          appEntry.entries.push(curr);
-        }
-      }
-      return acc;
-    }, []);
+    // Client & Application
+    const clientMap = new Map<string, Map<string, BoardFeedbackDto[]>>();
+
+    feedbacks.forEach((fb) => {
+      if (!clientMap.has(fb.Client)) clientMap.set(fb.Client, new Map());
+      const appMap = clientMap.get(fb.Client)!;
+      if (!appMap.has(fb.Application)) appMap.set(fb.Application, []);
+      appMap.get(fb.Application)!.push(fb);
+    });
+
+    const combined: {
+      Client: string;
+      applications: { Application: string; entries: BoardFeedbackDto[] }[];
+    }[] = [];
+
+    clientMap.forEach((appMap, client) => {
+      const applications = Array.from(appMap.entries()).map(([Application, entries]) => ({
+        Application,
+        entries,
+      }));
+      combined.push({ Client: client, applications });
+    });
+
+    return combined;
   };
 
-  const renderFeedbacks = (feedbacks: Feedback[]) => {
-    const feedbacksByStatus: { [key: number]: Feedback[] } = {
+  const renderFeedbacks = (feedbacks: BoardFeedbackDetailDto[]) => {
+    const feedbacksByStatus: { [key: number]: BoardFeedbackDetailDto[] } = {
       [TicketStatus.Open]: [],
       [TicketStatus.Closed]: [],
       [TicketStatus.Declined]: [],
       [TicketStatus.Resolved]: [],
-      [TicketStatus.OnHold]: [],
+      // [TicketStatus.OnHold]: [],
     };
 
     feedbacks.forEach((feedback) => {
-      feedbacksByStatus[feedback.status].push(feedback);
+      feedbacksByStatus[feedback.Status].push(feedback);
     });
 
     return (
-      <div className="d-flex justify-content-between mt-3">
+      <div className="d-flex justify-content-start mt-3">
         {Object.keys(feedbacksByStatus).map((status) => (
-          <div className="col-2" key={status} style={{ borderRight: '2px solid #ddd', paddingRight: '20px' }}>
+          <div className="col-3" key={status} style={{ borderRight: '2px solid #ddd', paddingRight: '20px' }}>
             <h6 className="text-center">{TicketStatusLabels[Number(status)]}</h6>
             {feedbacksByStatus[Number(status)].map((feedback) => (
-              <div className="card mb-2" key={feedback.id}>
+              <div className="card mb-2" key={feedback.Id}
+                style={{
+                  cursor: 'pointer',
+                  borderLeft: `5px solid ${feedback.FeedbackType.Color}`,
+                  borderRadius: '4px'
+                }}
+                onClick={() => handleOpenInNewWindow(`/feedback/${feedback.Id}`)}
+
+              >
                 <div className="card-body">
-                  <h6 className="card-title">{feedback.title}</h6>
-                  <p className="card-text">{feedback.description}</p>
+                  <h6 className="card-title">{feedback.Title}</h6>
+                  <p className="card-text">{feedback.RaisedBy}</p>
                 </div>
               </div>
             ))}
@@ -141,7 +153,7 @@ const Board: React.FC = () => {
 
   return (
     <div className={`container-fluid ${isFullscreen ? 'fullscreen' : ''}`}>
-      {/* Dropdown */}
+      {/* Controls */}
       <div className="d-flex justify-content-between mb-4">
         <div className="w-25">
           <select
@@ -154,8 +166,6 @@ const Board: React.FC = () => {
             <option value="ClientAndApplication">Group by Client & Application</option>
           </select>
         </div>
-
-        {/* Fullscreen Button */}
         <button className="btn btn-outline-primary btn-sm" onClick={toggleFullScreen}>
           {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
         </button>
@@ -164,20 +174,19 @@ const Board: React.FC = () => {
       {/* Group by Client */}
       {groupingType === 'Client' &&
         grouped.map((group) => (
-          <div className="card border-primary shadow-sm mb-3" key={group.client}>
+          <div className="card border-primary shadow-sm mb-3" key={group.Client}>
             <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <button
-                    className="btn btn-sm btn-outline-secondary me-2"
-                    onClick={() => toggleRow(group.client)}
-                  >
-                    {expandedRows.has(group.client) ? '➖' : '➕'}
-                  </button>
-                  <strong>Client:</strong> {group.client}
-                </div>
+              <div className="d-flex justify-content-start align-items-center">
+                <button
+                  className="btn btn-sm btn-outline-secondary me-2"
+                  onClick={() => toggleRow(group.Client)}
+                >
+                  {expandedRows.has(group.Client) ? '➖' : '➕'}
+                </button>
+                <strong>Client:</strong> {group.Client}
               </div>
-              {expandedRows.has(group.client) && renderFeedbacks(group.entries.flatMap((entry) => entry.feedbacks))}
+              {expandedRows.has(group.Client) &&
+                renderFeedbacks(group.entries.flatMap((entry) => entry.Feedbacks))}
             </div>
           </div>
         ))}
@@ -185,20 +194,19 @@ const Board: React.FC = () => {
       {/* Group by Application */}
       {groupingType === 'Application' &&
         grouped.map((group) => (
-          <div className="card border-success shadow-sm mb-3" key={group.application}>
+          <div className="card border-success shadow-sm mb-3" key={group.Application}>
             <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <button
-                    className="btn btn-sm btn-outline-secondary me-2"
-                    onClick={() => toggleRow(group.application)}
-                  >
-                    {expandedRows.has(group.application) ? '➖' : '➕'}
-                  </button>
-                  <strong>Application:</strong> {group.application}
-                </div>
+              <div className="d-flex justify-content-start align-items-center">
+                <button
+                  className="btn btn-sm btn-outline-secondary me-2"
+                  onClick={() => toggleRow(group.Application)}
+                >
+                  {expandedRows.has(group.Application) ? '➖' : '➕'}
+                </button>
+                <strong>Application:</strong> {group.Application}
               </div>
-              {expandedRows.has(group.application) && renderFeedbacks(group.entries.flatMap((entry) => entry.feedbacks))}
+              {expandedRows.has(group.Application) &&
+                renderFeedbacks(group.entries.flatMap((entry) => entry.Feedbacks))}
             </div>
           </div>
         ))}
@@ -206,33 +214,32 @@ const Board: React.FC = () => {
       {/* Group by Client & Application */}
       {groupingType === 'ClientAndApplication' &&
         grouped.map((group) => (
-          <div className="card border-warning shadow-sm mb-4" key={group.client}>
+          <div className="card border-warning shadow-sm mb-4" key={group.Client}>
             <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <button
-                    className="btn btn-sm btn-outline-secondary me-2"
-                    onClick={() => toggleRow(group.client)}
-                  >
-                    {expandedRows.has(group.client) ? '➖' : '➕'}
-                  </button>
-                  <strong>Client:</strong> {group.client}
-                </div>
+              <div className="d-flex justify-content-start align-items-center">
+                <button
+                  className="btn btn-sm btn-outline-secondary me-2"
+                  onClick={() => toggleRow(group.Client)}
+                >
+                  {expandedRows.has(group.Client) ? '➖' : '➕'}
+                </button>
+                <strong>Client:</strong> {group.Client}
               </div>
 
-              {expandedRows.has(group.client) &&
+              {expandedRows.has(group.Client) &&
                 group.applications.map((app) => (
-                  <div key={app.application} style={{ paddingLeft: '20px', backgroundColor: '#f8f9fa' }}>
+                  <div key={app.Application} style={{ paddingLeft: '20px', backgroundColor: '#f8f9fa' }}>
                     <div className="d-flex justify-content-start align-items-center mt-2">
                       <button
                         className="btn btn-sm btn-outline-secondary me-2"
-                        onClick={() => toggleApplicationRow(app.application)}
+                        onClick={() => toggleApplicationRow(app.Application)}
                       >
-                        {expandedApplications.has(app.application) ? '➖' : '➕'}
+                        {expandedApplications.has(app.Application) ? '➖' : '➕'}
                       </button>
-                      <strong>Application:</strong> {app.application}
+                      <strong>Application:</strong> {app.Application}
                     </div>
-                    {expandedApplications.has(app.application) && renderFeedbacks(app.entries.flatMap((entry) => entry.feedbacks))}
+                    {expandedApplications.has(app.Application) &&
+                      renderFeedbacks(app.entries.flatMap((entry) => entry.Feedbacks))}
                   </div>
                 ))}
             </div>

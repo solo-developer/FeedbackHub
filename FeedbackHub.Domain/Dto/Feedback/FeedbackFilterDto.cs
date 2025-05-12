@@ -21,4 +21,10 @@ namespace FeedbackHub.Domain.Dto
         public int? UserId { get; set;}
     }
 
+    public class BoardFeedbackFilterDto
+    {
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+    }
+
 }

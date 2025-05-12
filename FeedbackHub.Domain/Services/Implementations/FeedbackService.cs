@@ -290,5 +290,44 @@ namespace FeedbackHub.Domain.Services.Implementations
                     Count = a.Count()
                 }).ToListAsync();
         }
+
+        public async Task<List<BoardFeedbackDto>> GetBoardFeedbacksAsync(GenericDto<BoardFeedbackFilterDto> dto)
+        {
+            var feedbacksQueryable = _repo.GetQueryable().Where(a=>a.Status != TicketStatus.OnHold);
+            if (dto.Model.FromDate.HasValue)
+            {
+                var fromDate = dto.Model.FromDate.Value;
+                feedbacksQueryable = feedbacksQueryable.Where(a => a.CreatedDate.Date >= fromDate.Date);
+            }
+            if (dto.Model.ToDate.HasValue)
+            {
+                var toDate = dto.Model.ToDate.Value;
+                feedbacksQueryable = feedbacksQueryable.Where(a => a.CreatedDate.Date <= toDate.Date);
+            }
+
+            var feedbacks =await feedbacksQueryable.GroupBy(a => new { a.Application.ShortName, a.User.RegistrationRequest.Client.Code }).Select(a => new BoardFeedbackDto
+            {
+                Client = a.Key.Code,
+                Application = a.Key.ShortName,
+                Feedbacks = a.Select(b => new BoardFeedbackDetailDto
+                {
+                    Id= b.Id,
+                    TicketId= b.TicketId,
+                    Title=b.Title,
+                    Status= b.Status,
+                    RaisedBy =b.User.FullName,
+                    RaisedDate= b.CreatedDate,
+                    FeedbackType= new FeedbackTypeDto
+                    {
+                        Id = b.FeedbackTypeId,
+                        Type = b.FeedbackType.Type,
+                        Color =b.FeedbackType.Color
+                    }
+                })
+
+            }).ToListAsync();
+
+            return feedbacks;
+        }
     }
 }

@@ -23,4 +23,23 @@ namespace FeedbackHub.Domain.Dto.Feedback
 
         public required string Description { get; set; }
     }
+
+    public class BoardFeedbackDetailDto
+    {
+        public required int Id { get; set; }
+        public required int TicketId { get; set; }
+        public required string Title { get; set; }
+        public required string RaisedBy { get; set; }
+        public required TicketStatus Status { get; set; }
+        public required DateTime RaisedDate { get; set; }
+        public required FeedbackTypeDto FeedbackType { get; set; }
+    }
+
+    public class BoardFeedbackDto
+    {
+        public required string Client { get; set; }
+        public required string Application { get; set; }
+
+        public IEnumerable<BoardFeedbackDetailDto> Feedbacks { get; set; } = new List<BoardFeedbackDetailDto>();
+    }
 }

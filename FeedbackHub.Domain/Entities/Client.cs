@@ -16,6 +16,8 @@ namespace FeedbackHub.Domain.Entities
         public bool IsEnabled { get; private set; } = true;
 
         public virtual List<RegistrationRequest> RegistrationRequests { get; set; } = new();
+        public virtual List<ClientApplicationSubscription> AppSubscriptions { get; set; } = new();
+        public virtual List<AdminUserApplicationAccess> AdminUsersWithAccess { get; set; } = new();
 
         public void Enable()
         {

@@ -18,7 +18,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .HasMaxLength(50);
 
             builder.Property(a => a.Logo)
-                .HasColumnType("varbinary(max)"); 
+                .HasColumnType("varbinary(max)");
 
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
@@ -29,6 +29,16 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(a => a.NotificationSubscriptions)
+             .WithOne(s => s.Application)
+             .HasForeignKey(s => s.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(a => a.ClientSubscriptions)
+             .WithOne(s => s.Application)
+             .HasForeignKey(s => s.ApplicationId)
+             .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.HasMany(a => a.AdminUsersWithAccess)
              .WithOne(s => s.Application)
              .HasForeignKey(s => s.ApplicationId)
              .OnDelete(DeleteBehavior.Cascade);

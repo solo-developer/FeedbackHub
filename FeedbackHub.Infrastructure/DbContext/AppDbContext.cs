@@ -18,8 +18,10 @@ namespace FeedbackHub.Infrastructure.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.ApplyConfiguration(new AdminUserApplicationAccessConfiguration());
             builder.ApplyConfiguration(new ApplicationConfiguration());
             builder.ApplyConfiguration(new AttachmentConfiguration());
+            builder.ApplyConfiguration(new ClientApplicationSubscriptionConfiguration());
             builder.ApplyConfiguration(new ClientConfiguration());
             builder.ApplyConfiguration(new FeedbackConfiguration());
             builder.ApplyConfiguration(new FeedbackHistoryConfiguration());
@@ -36,9 +38,11 @@ namespace FeedbackHub.Infrastructure.Context
             base.OnModelCreating(builder);           
         }
 
+        public DbSet<AdminUserApplicationAccess> AdminUserApplicationAccesses { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<Client> Clients { get; set; }
+        public DbSet<ClientApplicationSubscription> ClientApplicationSubscriptions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<FeedbackType> FeedbackTypes { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }

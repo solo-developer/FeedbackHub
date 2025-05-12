@@ -1,6 +1,5 @@
 ﻿using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
-using System.Runtime.CompilerServices;
 
 namespace FeedbackHub.Domain.Entities
 {
@@ -53,6 +52,7 @@ namespace FeedbackHub.Domain.Entities
         public virtual RegistrationRequest RegistrationRequest { get; private set; }
         public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
         public virtual List<UserFeedbackEmailSubscription> EmailSubscriptions { get; private set; } = new();
+        public virtual List<AdminUserApplicationAccess> AllowedApplications { get; private set; } = new();
 
         public void MarkDeleted()
         {

@@ -40,6 +40,11 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .WithOne(us => us.User)
                 .HasForeignKey(us => us.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(ud => ud.AllowedApplications)
+                .WithOne(us => us.AdminUser)
+                .HasForeignKey(us => us.AdminUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

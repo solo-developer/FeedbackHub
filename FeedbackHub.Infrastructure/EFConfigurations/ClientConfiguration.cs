@@ -1,11 +1,6 @@
 ﻿using FeedbackHub.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FeedbackHub.Infrastructure.EFConfigurations
 {
@@ -27,6 +22,16 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .HasDefaultValue(true); 
 
             builder.HasMany(c => c.RegistrationRequests)
+                .WithOne(r => r.Client) 
+                .HasForeignKey(r => r.ClientId)
+                .OnDelete(DeleteBehavior.Cascade); 
+            
+            builder.HasMany(c => c.AppSubscriptions)
+                .WithOne(r => r.Client) 
+                .HasForeignKey(r => r.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.HasMany(c => c.AdminUsersWithAccess)
                 .WithOne(r => r.Client) 
                 .HasForeignKey(r => r.ClientId)
                 .OnDelete(DeleteBehavior.Cascade); 

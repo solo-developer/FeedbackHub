@@ -29,6 +29,25 @@ namespace FeedbackHub.Domain.Services.Implementations
             _userManager = userManager;
         }
 
+        public async Task ChangePasswordAsync(GenericDto<ChangePasswordDto> dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                if (dto.Model.IsPasswordMatch == false) throw new InvalidValueException("New password and confirm password doesn't match.");
+                var userDetail = await _userRepo.FindAsync(a => a.Id == dto.LoggedInUserId);
+
+                var isPasswordCorrect = await _userManager.CheckPasswordAsync(userDetail.ApplicationUser, dto.Model.CurrentPassword);
+                if (!isPasswordCorrect) throw new InvalidValueException("Current password doesn't match.");
+
+                var updatePassword =await _userManager.ChangePasswordAsync(userDetail.ApplicationUser, dto.Model.CurrentPassword, dto.Model.NewPassword);
+                if (updatePassword.Succeeded ==false)
+                {
+                    throw new CustomException(updatePassword.Errors.FirstOrDefault().Description);
+                }
+                tx.Complete();
+            }
+        }
+
         public async Task CreateAdminUserAsync(CreateUserDto dto)
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -45,7 +64,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                     throw new Exception("There were some issues in assigning role to the user");
 
                 await _userRepo.InsertAsync(userDetail);
-                
+
                 tx.Complete();
             }
 
@@ -58,8 +77,6 @@ namespace FeedbackHub.Domain.Services.Implementations
                 IsHtml = true,
                 To = new List<string> { dto.Email.Value }
             });
-
-
         }
 
         public async Task DeleteAsync(int id)

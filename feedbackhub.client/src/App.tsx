@@ -16,6 +16,7 @@ import RegistrationRequestPage from './pages/Consumer/RegistrationRequest';
 import { AppSwitcherProvider } from './contexts/AppSwitcherContext';
 import { ADMIN_ROLE } from './utils/Constants';
 import EditFeedbackPage from './pages/Shared/Feedback/EditFeedback';
+import ChangePasswordPage from './pages/ChangePassword';
 
 const App = () => {
   return (
@@ -57,6 +58,7 @@ const AppRoutes = () => {
           <Route path="/admin/*" element={<AdminDashboardPage />} />
           <Route path="/consumer/*" element={ <AppSwitcherProvider><DashboardPage /></AppSwitcherProvider>} />
           <Route path="/feedback/:id" element={ <EditFeedbackPage></EditFeedbackPage>} />
+          <Route path="/profile/change-password" element={ <ChangePasswordPage></ChangePasswordPage>} />
         </Route>
         <Route path="/access-denied" element={<AccessDenied/>} />
         <Route

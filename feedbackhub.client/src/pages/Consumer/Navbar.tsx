@@ -25,22 +25,17 @@ const ConsumerNavbar = () => {
   return (
     <Navbar bg="primary" variant="dark" expand="lg" fixed="top">
       <Container fluid>
-        {/* Sidebar Toggle Button (optional) */}
         <Button variant="primary" className="d-lg-none">
           ☰
         </Button>
 
-        {/* Brand */}
         <Navbar.Brand className="ms-2" href="#">
-          Consumer Dashboard
+          Feedback Hub
         </Navbar.Brand>
 
-        {/* Responsive Navbar */}
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll">
-          <Nav className="ms-auto align-items-center">
-
-            {/* App Switcher Dropdown */}
+          <Nav className="ms-auto align-items-center">          
             {selectedApp && (
               <NavDropdown title={selectedApp.Name} id="appSwitcherDropdown" align="end" className="me-3">
                 {apps.map((app) => (
@@ -72,6 +67,8 @@ const ConsumerNavbar = () => {
               align="end"
             >
               <NavDropdown.Item href="#">Profile</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="/profile/change-password" className='text-warning'>Change Password</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="#" className="text-danger" onClick={logoutButtonClicked}>
                 Logout

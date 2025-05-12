@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from '../types/account/ChangePasswordDto';
 import { CreateAdminUserDto } from '../types/account/CreateAdminUserDto';
 import { ClientUserDetailDto, UserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
@@ -82,5 +83,21 @@ export const undoDeleteUserAsync = async (userId: number): Promise<ServiceRespon
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to create user', ResponseType: 'error' };
+    }
+  };
+
+  
+  export const changePasswordAsync = async (dto: ChangePasswordDto): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/account/change-password', dto);
+  
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to change password', ResponseType: 'error' };
     }
   };

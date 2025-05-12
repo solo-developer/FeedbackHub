@@ -29,6 +29,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0",
     "react-select": "^5.10.1",
+    "react-spinners": "^0.17.0",
     "react-toastify": "^11.0.5",
     "select2": "^4.1.0-rc.0"
   },

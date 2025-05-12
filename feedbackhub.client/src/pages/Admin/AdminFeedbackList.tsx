@@ -9,6 +9,7 @@ import PagePanel from '../../components/PagePanel';
 import GenericTable from '../../components/GenericTable';
 import { getAsync, getForAdminAsync } from '../../services/FeedbackService';
 import { useToast } from '../../contexts/ToastContext';
+import FullScreenLoader from '../../components/FullScreenLoader';
 
 
 const AdminFeedbackListPage: React.FC = () => {
@@ -56,6 +57,7 @@ const AdminFeedbackListPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
+     
       setIsLoading(true);
       const response = await getForAdminAsync(filterDto);
       if (response.Success) {
@@ -121,7 +123,7 @@ const AdminFeedbackListPage: React.FC = () => {
   }
   ], []);
 
-  return (
+  return  (
     <PagePanel title='Feedbacks'>
       <GenericTable
         columns={columns}

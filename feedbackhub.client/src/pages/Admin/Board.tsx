@@ -5,6 +5,8 @@ import { useToast } from '../../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { BoardFeedbackDto } from '../../types/feedback/BoardFeedbackDto';
 import BoardGroupSection from '../../components/BoardGroupSection';
+import { faL } from '@fortawesome/free-solid-svg-icons';
+import FullScreenLoader from '../../components/FullScreenLoader';
 
 type FeedbackType = 'board' | 'backlog';
 
@@ -16,6 +18,7 @@ const Board: React.FC<BoardProps> = ({ type }) => {
   const [groupingType, setGroupingType] = useState<'Client' | 'Application' | 'ClientAndApplication'>('Client');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [feedbacks, setFeedbacks] = useState<BoardFeedbackDto[]>([]);
+  const [isLoading, setIsLoading] =useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -29,6 +32,7 @@ const Board: React.FC<BoardProps> = ({ type }) => {
 
   const fetchActiveFeedbacks = async () => {
     try {
+      setIsLoading(true);
       const response = await getBoardFeedbacksAsync();
       if (response.Success) {
         setFeedbacks(response.Data);
@@ -41,9 +45,13 @@ const Board: React.FC<BoardProps> = ({ type }) => {
     } catch {
       showToast('Failed to load feedbacks', 'error');
     }
+    finally{
+      setIsLoading(false);
+    }
   };
 
   const fetchBacklogs = async () => {
+    setIsLoading(true);
     try {
       const response = await getBoardBacklogsAsync();
       if (response.Success) {
@@ -57,6 +65,9 @@ const Board: React.FC<BoardProps> = ({ type }) => {
     } catch {
       showToast('Failed to load feedbacks', 'error');
     }
+    finally{
+      setIsLoading(false);
+    }
   };
 
   const toggleRow = (key: string) => {
@@ -67,7 +78,7 @@ const Board: React.FC<BoardProps> = ({ type }) => {
     });
   };
 
-  return (
+  return isLoading? (<FullScreenLoader></FullScreenLoader>) :(
     <div className="container-fluid">
       {/* Controls */}
       <div className="d-flex justify-content-between mb-4">

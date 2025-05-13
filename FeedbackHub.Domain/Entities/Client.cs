@@ -16,6 +16,19 @@ namespace FeedbackHub.Domain.Entities
                 ClientId = this.Id
             }).ToList(); ;
         }
+
+        public void Update(string name, string code, List<int> applicationIds)
+        {
+            this.Name = name;
+            this.Code = code;
+
+            this.AppSubscriptions.Clear();
+            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription
+            {
+                ApplicationId = a,
+                ClientId = this.Id
+            }).ToList(); ;
+        }
         public string Name { get; private set; }
         public string Code { get; private set; }
         public bool IsEnabled { get; private set; } = true;

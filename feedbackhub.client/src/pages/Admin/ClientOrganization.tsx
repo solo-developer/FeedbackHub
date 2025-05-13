@@ -7,10 +7,10 @@ import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResp
 import { ClientDto } from '../../types/client/ClientDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
-import { deleteClientAsync, fetchClients } from '../../services/ClientService';
+import { deleteClientAsync, editClientAsync, fetchClients, saveClientAsync } from '../../services/ClientService';
 import Select from 'react-select';
 import { fetchApplications } from '../../services/ApplicationService';
-import { ApplicationDto } from '../../types/application/ApplicationDto'; 
+import { ApplicationDto } from '../../types/application/ApplicationDto';
 import { SaveClientDto } from '../../types/client/SaveClientDto';
 
 
@@ -26,7 +26,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const [selectedId, setSelectedId] = useState(0);
 
     const [formState, setFormState] = useState<SaveClientDto>({
-        Id : 0,
+        Id: 0,
         Name: '',
         Code: '',
         ApplicationIds: []
@@ -77,7 +77,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
 
     const resetForm = () => {
         setFormState({
-            Id : 0,
+            Id: 0,
             Name: '',
             Code: '',
             ApplicationIds: []
@@ -87,28 +87,77 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const save = async () => {
         try {
             setIsLoading(true);
-            const response = await api.post('/client', formState);
-
-            showToast(parseMessage(response), parseResponseType(response), {
-                autoClose: 3000,
-                draggable: true
-            });
-
-            if (isSuccess(response)) {
-                resetForm();
-                closeModal();
-                await fetchData();
+            if (formState.Id == 0) {
+                await saveClient(formState);
+            }
+            else {
+                await updateClient(formState);
             }
         } catch {
-            showToast('Failed to save client organization', 'error');
+            showToast('Failed to save/update client organization', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const saveClient = async (dto: SaveClientDto) => {
+        const response = await saveClientAsync(formState);
+
+        if (response.Success) {
+            showToast('Client saved successfully', response.ResponseType, {
+                autoClose: 3000,
+                draggable: true
+            });
+            await cleanUpsAfterSaveUpdate();
+        }
+        else {
+            showToast(response.Message, response.ResponseType, {
+                autoClose: 3000,
+                draggable: true
+            });
+        }
+    }
+
+    const updateClient = async (dto: SaveClientDto) => {
+        const response = await editClientAsync(formState);
+
+        if (response.Success) {
+            showToast('Client updated successfully', response.ResponseType, {
+                autoClose: 3000,
+                draggable: true
+            });
+            await cleanUpsAfterSaveUpdate();
+        }
+        else {
+            showToast(response.Message, response.ResponseType, {
+                autoClose: 3000,
+                draggable: true
+            });
+        }
+    }
+
+    const cleanUpsAfterSaveUpdate = async () => {
+        resetForm();
+        closeModal();
+        await fetchData();
+    }
+
     const disableClient = (id: number) => {
         setSelectedId(id);
         setShowDialog(true);
+    };
+
+    const editClientButtonClicked = (id: number) => {
+        let client = data.find(a => a.Id == id);
+        if (!client)
+            return;
+        setFormState({
+            Id: id,
+            Name: client.Name,
+            Code: client.Code,
+            ApplicationIds: client.SubscribedApplications.map(a => a.Id)
+        });
+        setShowModal(true);
     };
 
     const handleDeleteConfirm = async () => {
@@ -144,12 +193,12 @@ const ClientOrganizationIndexPage: React.FC = () => {
                 header: 'Code',
                 accessorKey: 'Code',
             },
-             {
+            {
                 id: 'Applications',
                 header: 'Applications',
                 cell: ({ row }: any) => (
-                   
-                  row.original.SubscribedApplications.length > 0 ?  row.original.SubscribedApplications.map(a=>a.ShortName).join(',') : 'N/A'
+
+                    row.original.SubscribedApplications.length > 0 ? row.original.SubscribedApplications.map(a => a.ShortName).join(',') : 'N/A'
                 )
             },
             {
@@ -157,6 +206,18 @@ const ClientOrganizationIndexPage: React.FC = () => {
                 header: 'Action',
                 cell: ({ row }: any) => (
                     <div>
+
+                        <span
+                            className='me-2'
+                            role="button"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Edit Client"
+                            onClick={() => editClientButtonClicked(row.original.Id)}
+                        >
+                            <i className="fas fa-edit text-primary"></i>
+                        </span>
+
                         <span
                             role="button"
                             data-bs-toggle="tooltip"
@@ -166,28 +227,19 @@ const ClientOrganizationIndexPage: React.FC = () => {
                         >
                             <i className="fas fa-ban text-danger"></i>
                         </span>
+
+
                     </div>
                 ),
             }
         ],
-        []
+        [data]
     );
-    const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
+    const selectedApplicationOptions = applications.filter(app =>
+        formState.ApplicationIds.includes(app.Id)
+    );
+
     const [inputValue, setInputValue] = useState('');
-
-    const handleChange = (selectedOptions: any[]) => {
-        const selectedIds = selectedOptions.map(opt => opt.Id);
-        setSelectedOptions(selectedOptions);
-        setFormState(prev => ({
-            ...prev!,
-            ApplicationIds: selectedIds
-        }));
-
-    };
-
-    const handleInputChange = (newInputValue: string) => {
-        setInputValue(newInputValue);
-    };
     const headerContent = (
         <div>
             <button onClick={openModal} className="btn btn-primary btn-sm">
@@ -241,16 +293,23 @@ const ClientOrganizationIndexPage: React.FC = () => {
 
                     <div className="form-group mb-2">
                         <label>Applications</label>
-                       {applications.length > 0 && <Select
-                                    isMulti
-                                    options={applications}
-                                    getOptionLabel={(e) => e.Name}
-                                    getOptionValue={(e) => e.Id.toString()}
-                                    value={selectedOptions}
-                                    onChange={handleChange}
-                                    inputValue={inputValue}
-                                    onInputChange={handleInputChange}
-                                />} 
+                        {applications.length > 0 && <Select
+                            isMulti
+                            options={applications}
+                            getOptionLabel={(e) => e.Name}
+                            getOptionValue={(e) => e.Id.toString()}
+                            value={selectedApplicationOptions}
+                            onChange={(selectedOptions: any[]) => {
+                                const selectedIds = selectedOptions.map(opt => opt.Id);
+                                setFormState(prev => ({
+                                    ...prev,
+                                    ApplicationIds: selectedIds
+                                }));
+                            }}
+                            inputValue={inputValue}
+                            onInputChange={setInputValue}
+                        />
+                        }
                     </div>
                 </form>
             </Modal>

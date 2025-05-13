@@ -7,5 +7,8 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<List<ClientDto>> GetAllClientsAsync();
         Task SaveAsync(ClientSaveDto dto);
         Task UpdateAsync(ClientSaveDto dto);
+
+        Task<List<ApplicationDto>> GetSubscribedApplicationsByClientIdAsync(int clientId);
+
     }
 }

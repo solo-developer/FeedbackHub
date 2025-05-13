@@ -47,3 +47,18 @@ export const deleteApplicationAsync = async (id: number): Promise<ServiceRespons
         return { Success: false, Message: 'Failed to delete application', ResponseType: 'error' };
     }
 }; 
+
+export const getApplicationsByClientIdAsync = async (id:number): Promise<ServiceResponseType<ApplicationDto[]>> => {
+    try {
+      const response = await api.get(`/client/${id}/applications`);
+  
+      if (isSuccess(response)) {
+        return  {Success:true, Data: parseData<ApplicationDto[]>(response) } as ServiceResponseType<ApplicationDto[]>;
+      } 
+      else {
+        return { Success: false,  ResponseType : parseResponseType(response), Message : parseMessage(response)} as ServiceResponseType<ApplicationDto[]>;
+      }
+    } catch (err) {
+      return { Success: false, Message: 'Failed to load applications', ResponseType:'error' };
+    }
+  };

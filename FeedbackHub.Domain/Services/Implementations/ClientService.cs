@@ -34,6 +34,19 @@ namespace FeedbackHub.Domain.Services.Implementations
             }).ToList();
         }
 
+        public async Task<List<ApplicationDto>> GetSubscribedApplicationsByClientIdAsync(int clientId)
+        {
+            var client = await _clientRepo.GetByIdAsync(clientId) ?? throw new ItemNotFoundException("Client not found");
+
+            return client.AppSubscriptions.Select(a => new ApplicationDto
+            {
+                Id = a.ApplicationId,
+                Name = a.Application.Name,
+                ShortName = a.Application.ShortName,
+                Logo = a.Application.Logo
+            }).ToList();
+        }
+
         public async Task SaveAsync(ClientSaveDto request)
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))

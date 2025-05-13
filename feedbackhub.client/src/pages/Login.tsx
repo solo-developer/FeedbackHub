@@ -89,9 +89,9 @@ const LoginPage = () => {
                       </div>
 
                       <button
-                          type="submit"
+                          type="submit" disabled={isLoading}
                           className="form-control login-btn btn-primary">
-                          Login
+                          {isLoading? 'Logging In...' : 'Login'}
                       </button>
                   </form>
               </div>

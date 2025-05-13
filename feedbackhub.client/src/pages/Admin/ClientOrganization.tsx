@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import api  from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
-import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResponseParser';
-import { ClientDto } from '../../types/client/ClientDto';
+import { ClientDto, SaveClientDto } from '../../types/client/ClientDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
-import { deleteClientAsync, fetchClients } from '../../services/ClientService';
+import { deleteClientAsync, fetchClients, saveClientAsync } from '../../services/ClientService';
+import { ApplicationDto } from '../../types/application/ApplicationDto';
+import Select from 'react-select';
+import { fetchApplications } from '../../services/ApplicationService';
 
 const ClientOrganizationIndexPage: React.FC = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState<ClientDto[]>([]);
+    const [applications, setApplications] = useState<ApplicationDto[]>([]);
     const { showToast } = useToast();
     const [showModal, setShowModal] = useState(false);
 
@@ -24,19 +26,29 @@ const ClientOrganizationIndexPage: React.FC = () => {
 
     const [showDialog, setShowDialog] = useState(false);
     const [selectedId, setSelectedId] = useState(0);
-    const handleDeleteConfirm =async () => {
+
+    const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
+    const [inputValue, setInputValue] = useState('');
+
+    const handleChange = (selectedOptions: any[]) => {
+        const selectedIds = selectedOptions.map(opt => opt.Id);
+        setSelectedOptions(selectedOptions);       
+
+    };
+
+    const handleDeleteConfirm = async () => {
         setShowDialog(false);
         try {
             const response = await deleteClientAsync(selectedId);
-            
-            if(response.Success){
+
+            if (response.Success) {
                 showToast('Client disabled successfully', 'success', {
                     autoClose: 3000,
                     draggable: true
                 });
                 await fetchData();
             }
-            else{
+            else {
                 showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
@@ -51,7 +63,30 @@ const ClientOrganizationIndexPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+        fetchApplicationData();
     }, []);
+
+    const fetchApplicationData = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetchApplications();
+
+            if (response.Success) {
+                setApplications(response.Data);
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        } catch (err) {
+            showToast('Failed to load applications', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -78,6 +113,8 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const resetForm = () => {
         setName('');
         setCode('');
+        setSelectedOptions([]);
+        
     };
 
     const disableClient = (id: number) => {
@@ -88,20 +125,25 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const save = async () => {
         try {
             setIsLoading(true);
-            const response = await api.post('/client', {
-                'Name': name,
-                'Code': code
-            });
 
-            showToast(parseMessage(response), parseResponseType(response), {
-                autoClose: 3000,
-                draggable: true
-            });
+            let clientDto: SaveClientDto = {
+                Id: 0,
+                Name: name,
+                Code: code,
+                ApplicationIds: selectedOptions.map(a=> parseInt(a))
+            }
+            const response = await saveClientAsync(clientDto);
 
-            if (isSuccess(response)) {
+            if (response.Success) {
                 resetForm();
                 closeModal();
                 await fetchData();
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
             }
 
         } catch (err) {
@@ -124,17 +166,17 @@ const ClientOrganizationIndexPage: React.FC = () => {
             {
                 id: 'Action',
                 header: 'Action',
-                cell: ({ row } : any) => (
+                cell: ({ row }: any) => (
                     <div>
                         <span
-                                role="button"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                title="Disable Client"
-                                onClick={() => disableClient(row.original.Id)}
-                            >
-                                <i className="fas fa-ban text-danger"></i>
-                            </span>                      
+                            role="button"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Disable Client"
+                            onClick={() => disableClient(row.original.Id)}
+                        >
+                            <i className="fas fa-ban text-danger"></i>
+                        </span>
                     </div>
                 ),
             }
@@ -184,6 +226,22 @@ const ClientOrganizationIndexPage: React.FC = () => {
                             className="form-control"
                         />
                     </div>
+                    <div className="form-group mb-2">
+                        <label>Applications</label>
+                        {
+                            applications.length > 0 && <Select
+                                isMulti
+                                options={applications}
+                                getOptionLabel={(e) => e.Name}
+                                getOptionValue={(e) => e.Id.toString()}
+                                value={selectedOptions}
+                                onChange={handleChange}
+                                inputValue={inputValue}
+                            />
+                        }
+
+
+                    </div>
                 </form>
             </Modal>
 
@@ -196,7 +254,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
                 confirmText="Disable"
                 cancelText="Cancel"
                 variant="danger"
-             />
+            />
         </>
     );
 };

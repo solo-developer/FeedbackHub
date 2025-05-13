@@ -7,7 +7,7 @@ import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResp
 import { ClientDto } from '../../types/client/ClientDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
-import { fetchClients } from '../../services/ClientService';
+import { deleteClientAsync, fetchClients } from '../../services/ClientService';
 
 const ClientOrganizationIndexPage: React.FC = () => {
 
@@ -27,15 +27,20 @@ const ClientOrganizationIndexPage: React.FC = () => {
     const handleDeleteConfirm =async () => {
         setShowDialog(false);
         try {
-            const response = await api.del(`/client/${selectedId}`);
-
-            showToast(parseMessage(response), parseResponseType(response), {
-                autoClose: 3000,
-                draggable: true
-            });
-
-            if (isSuccess(response)) {               
+            const response = await deleteClientAsync(selectedId);
+            
+            if(response.Success){
+                showToast('Client disabled successfully', 'success', {
+                    autoClose: 3000,
+                    draggable: true
+                });
                 await fetchData();
+            }
+            else{
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
             }
 
         } catch (err) {
@@ -119,7 +124,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
             {
                 id: 'Action',
                 header: 'Action',
-                cell: ({ row }) => (
+                cell: ({ row } : any) => (
                     <div>
                         <span
                                 role="button"
@@ -158,7 +163,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add Client Organization" footer={modalFooter}>
                 <form onSubmit={save}>
-                    <div className="form-group">
+                    <div className="form-group mb-2">
                         <label className="text-start w-100">Client Name</label>
                         <input
                             type="text"

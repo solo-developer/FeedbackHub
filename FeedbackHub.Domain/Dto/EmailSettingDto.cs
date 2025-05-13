@@ -6,12 +6,13 @@ namespace FeedbackHub.Domain.Dto
     public class EmailSettingDto
     {
         public EmailSettingDto() { }
-        public EmailSettingDto(string host, int port, string encryptionMethod, string username, string password)
+        public EmailSettingDto(string host, int port, string encryptionMethod, string username, string password,string senderEmail)
         {
             this.Host = host;
             this.Port = port;
             this.Username = username;
             this.Password = password;
+            this.SenderEmail = senderEmail;
             if (!Enum.IsDefined(typeof(EmailEncryptionMethod), encryptionMethod)) throw new InvalidValueException("Value of encryption method is invalid.");
             this.EncryptionMethod =(EmailEncryptionMethod) Enum.Parse(typeof(EmailEncryptionMethod), encryptionMethod);
         }
@@ -19,6 +20,7 @@ namespace FeedbackHub.Domain.Dto
         public  int Port { get; set; }
         public EmailEncryptionMethod EncryptionMethod { get; set; } = EmailEncryptionMethod.None;
 
+        public string? SenderEmail { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
     }

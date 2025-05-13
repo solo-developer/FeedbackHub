@@ -51,7 +51,6 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const ResetPasswordClicked = async (userId:number) => {
         try {
             const response = await resetPasswordAsync(userId);
-         
             if (response.Success) {
                 showToast("Password reset successfully. Password is sent in email", response.ResponseType, {
                     autoClose: 3000,
@@ -223,7 +222,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
             
             
         ].filter(Boolean),
-        [userType]
+        [userType,data]
     );
 
     const headerContent = (

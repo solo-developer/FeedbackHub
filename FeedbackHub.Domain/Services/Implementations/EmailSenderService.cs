@@ -25,7 +25,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                 var settingService = scope.ServiceProvider.GetRequiredService<IEmailSettingService>();
                 var mailSetting = await settingService.GetEmailSettingAsync();
 
-                var senderEmail = mailSetting.Username;
+                var senderEmail = mailSetting.SenderEmail;
                 if (string.IsNullOrEmpty(senderEmail))
                     throw new ItemNotFoundException("Email setting is not saved.");
 

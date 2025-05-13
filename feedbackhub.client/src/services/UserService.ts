@@ -60,7 +60,7 @@ export const undoDeleteUserAsync = async (userId: number): Promise<ServiceRespon
         const response = await api.patch(`/users/${userId}/reset-password`);
   
         if (isSuccess(response)) {
-            return { Success: true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+            return { Success: true, ResponseType: parseResponseType(response), Data: parseData<any>(response) } as ServiceResponseType<any>;
         }
         else {
             return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;

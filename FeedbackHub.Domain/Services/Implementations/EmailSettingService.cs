@@ -28,8 +28,9 @@ namespace FeedbackHub.Domain.Services.Implementations
             var emailEncryptionMethod = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY))?.Value;
             var username = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_USERNAME_SETTINGS_KEY))?.Value;
             var password = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY))?.Value;
+            var senderEmail = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_SENDER_SETTINGS_KEY))?.Value;
 
-            return new EmailSettingDto(emailHost, emailPort == default ? 0 : int.Parse(emailPort), string.IsNullOrEmpty(emailEncryptionMethod) ? EmailEncryptionMethod.None.ToString() : emailEncryptionMethod, username, string.IsNullOrEmpty(password) ? string.Empty : _aESEncryptionHelper.Decrypt(password));
+            return new EmailSettingDto(emailHost, emailPort == default ? 0 : int.Parse(emailPort), string.IsNullOrEmpty(emailEncryptionMethod) ? EmailEncryptionMethod.None.ToString() : emailEncryptionMethod, username, string.IsNullOrEmpty(password) ? string.Empty : _aESEncryptionHelper.Decrypt(password), senderEmail);
         }
 
         public async Task SaveAsync(EmailSettingDto emailSettingDto)
@@ -58,6 +59,10 @@ namespace FeedbackHub.Domain.Services.Implementations
                 var passwordSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY)) ?? new Setting();
                 CopyValues(ref passwordSetting, Constants.EMAIL_PASSWORD_SETTINGS_KEY, _aESEncryptionHelper.Encrypt(emailSettingDto.Password), Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(passwordSetting, passwordSetting.Id);
+
+                var senderEmailSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_SENDER_SETTINGS_KEY)) ?? new Setting();
+                CopyValues(ref senderEmailSetting, Constants.EMAIL_SENDER_SETTINGS_KEY, emailSettingDto.SenderEmail, Constants.EMAIL_SETTING_GROUP);
+                await _settingRepo.AddOrUpdateAsync(senderEmailSetting, senderEmailSetting.Id);
 
                 tx.Complete();
             }

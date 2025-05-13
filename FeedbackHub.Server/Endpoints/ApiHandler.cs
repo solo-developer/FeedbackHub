@@ -14,6 +14,8 @@ namespace FeedbackHub.Server.Endpoints
             try
             {
                 var result = await action();
+                if (result is string)
+                    return ApiResponse.Success(result.ToString());
                 return ApiResponse.Success(result);
             }
             catch (CustomException ex)

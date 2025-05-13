@@ -166,6 +166,23 @@ namespace FeedbackHub.Domain.Services.Implementations
             return user;
         }
 
+        public async Task<UserProfileDto> GetUserProfileAsync(int userId)
+        {
+            var user = await _userRepo.GetByIdAsync(userId) ?? throw new ItemNotFoundException("User not found.");
+
+            var userProfile = new UserProfileDto
+            {
+                Id = user.Id,
+                Username = user.ApplicationUser.UserName,
+                Email = user.ApplicationUser.Email,
+                Fullname = user.FullName,
+                Role = (await _userManager.GetRolesAsync(user.ApplicationUser)).FirstOrDefault(),
+                Client = user.RegistrationRequest == null ? string.Empty : user.RegistrationRequest.Client.Name
+            };
+
+            return userProfile;
+        }
+
         public async Task ResetPasswordAsync(int id)
         {
             var newPassword = PasswordGenerator.GeneratePassword();

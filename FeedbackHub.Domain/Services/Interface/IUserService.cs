@@ -18,5 +18,7 @@ namespace FeedbackHub.Domain.Services.Interface
 
         Task CreateAdminUserAsync(CreateUserDto dto);
         Task ChangePasswordAsync(GenericDto<ChangePasswordDto> dto);
+
+        Task<UserProfileDto> GetUserProfileAsync(int userId);
     }
 }

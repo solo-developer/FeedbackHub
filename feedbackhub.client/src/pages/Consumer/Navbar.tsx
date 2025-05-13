@@ -4,13 +4,16 @@ import { useToast } from '../../contexts/ToastContext';
 import { handleLogout } from '../../services/AuthService';
 import { useAppSwitcher } from '../../contexts/AppSwitcherContext';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 
 const ConsumerNavbar = () => {
   const { selectedApp, setSelectedApp, apps } = useAppSwitcher();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { user } = useUser();
+
   const handleAppSwitch = (app: typeof selectedApp) => {
-    if (app?.Id !== selectedApp?.Id  && app) {
+    if (app?.Id !== selectedApp?.Id && app) {
       setSelectedApp(app);
       showToast(`Switched to ${app?.Name}`, 'success', {
         autoClose: 2000,
@@ -30,12 +33,12 @@ const ConsumerNavbar = () => {
         </Button>
 
         <Navbar.Brand className="ms-2" href="#">
-          Feedback Hub
+          Feedback Hub ({user?.Client})
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll">
-          <Nav className="ms-auto align-items-center">          
+          <Nav className="ms-auto align-items-center">
             {selectedApp && (
               <NavDropdown title={selectedApp.Name} id="appSwitcherDropdown" align="end" className="me-3">
                 {apps.map((app) => (
@@ -55,17 +58,22 @@ const ConsumerNavbar = () => {
               title={
                 <span className="d-flex align-items-center">
                   <img
-                    src="https://via.placeholder.com/30"
+                    src={
+                      user?.Avatar && user.Avatar.length > 0
+                        ? URL.createObjectURL(new Blob([new Uint8Array(user.Avatar)], { type: 'image/png' }))
+                        : '/assets/images/default-user.png' 
+                    }
                     alt="Profile"
                     className="rounded-circle me-2"
                     style={{ width: '30px', height: '30px' }}
                   />
-                  John Doe
+                  {user?.Fullname}
                 </span>
               }
               id="profileDropdown"
               align="end"
             >
+
               <NavDropdown.Item href="#">Profile</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="/profile/change-password" className='text-warning'>Change Password</NavDropdown.Item>

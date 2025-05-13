@@ -1,6 +1,6 @@
 import { ChangePasswordDto } from '../types/account/ChangePasswordDto';
 import { CreateAdminUserDto } from '../types/account/CreateAdminUserDto';
-import { ClientUserDetailDto, UserDetailDto } from '../types/account/UserDetailDto';
+import { ClientUserDetailDto, UserProfileDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
@@ -101,3 +101,18 @@ export const undoDeleteUserAsync = async (userId: number): Promise<ServiceRespon
         return { Success: false, Message: 'Failed to change password', ResponseType: 'error' };
     }
   };
+
+export const getLoggedInUserInfoAsync = async (): Promise<ServiceResponseType<UserProfileDto>> => {
+  try {
+      const response = await api.get('/account/logged-in-user-info');
+
+      if (isSuccess(response)) {
+          return { Success: true, Data: parseData<UserProfileDto>(response) } as ServiceResponseType<UserProfileDto>;
+      }
+      else {
+          return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<UserProfileDto>;
+      }
+  } catch (err) {
+      return { Success: false, Message: 'Failed to get user profile', ResponseType: 'error' };
+  }
+};

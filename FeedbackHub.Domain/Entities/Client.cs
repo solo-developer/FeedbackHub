@@ -6,10 +6,15 @@ namespace FeedbackHub.Domain.Entities
     {
         public Client() { }
 
-        public Client(string name, string code)
+        public Client(string name, string code, List<int> applicationIds)
         {
             this.Name = name;
             this.Code = code;
+            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription
+            {
+                ApplicationId = a,
+                ClientId = this.Id
+            }).ToList(); ;
         }
         public string Name { get; private set; }
         public string Code { get; private set; }

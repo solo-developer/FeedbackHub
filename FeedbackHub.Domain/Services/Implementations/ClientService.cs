@@ -21,7 +21,14 @@ namespace FeedbackHub.Domain.Services.Implementations
             {
                 Id = a.Id,
                 Name = a.Name,
-                Code = a.Code
+                Code = a.Code,
+                SubscribedApplications= a.AppSubscriptions.Select(b=> new ApplicationDto
+                {
+                    Id= b.ApplicationId,
+                    Name= b.Application.Name,
+                    ShortName =b.Application.ShortName,
+                    Logo= b.Application.Logo
+                }).ToList()
             }).ToList();
         }
     }

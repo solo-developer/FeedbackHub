@@ -276,12 +276,21 @@ namespace FeedbackHub.Domain.Services.Implementations
             }
         }
 
-        public async Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(FeedbackCountFilterDto request)
+        public async Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(GenericDto<FeedbackCountFilterDto> model)
         {
-            var fromDate = request.FromDate.ToDateTime(TimeOnly.MinValue);
-            var toDate = request.ToDate.ToDateTime(TimeOnly.MaxValue);
+            var dto = model.Model;
+            var fromDate = dto.FromDate.ToDateTime(TimeOnly.MinValue);
+            var toDate = dto.ToDate.ToDateTime(TimeOnly.MaxValue);
 
             var queryable = _repo.GetQueryable().Where(a => a.CreatedDate.Date >= fromDate.Date && a.CreatedDate.Date <= toDate.Date);
+            if (model.ApplicationId > 0)
+            {
+                queryable = queryable.Where(a => a.ApplicationId == model.ApplicationId);
+            }
+            if (model.ClientId > 0)
+            {
+                queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == model.ClientId);
+            }
 
             return await queryable.GroupBy(a => a.Status)
                 .Select(a => new FeedbackCountResponseDto

@@ -6,9 +6,7 @@ import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync, resetPasswordAsync
 import { ClientUserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import ConfirmDialog from "../components/ConfirmDialog";
-import { parseMessage, parseResponseType } from '../utils/HttpResponseParser';
 import { useNavigate } from 'react-router-dom';
-import { debug } from 'console';
 
 interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';

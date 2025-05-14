@@ -232,7 +232,7 @@ const GenericTable = forwardRef(<T extends object>(
       {renderFilters && <div className="mb-3">{renderFilters()}</div>}
 
       {paginationType === 'client' && enablePagination && (
-        <div className="mb-2">
+        <div className="mb-2 d-flex justify-content-end">
           <input
             type="text"
             className="form-control form-control-sm w-25"

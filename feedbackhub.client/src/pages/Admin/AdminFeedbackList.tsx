@@ -13,13 +13,13 @@ import FullScreenLoader from '../../components/FullScreenLoader';
 
 
 const AdminFeedbackListPage: React.FC = () => {
-  
+
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [data, setData] = useState<FeedbackBasicDetailDto[]>([]);
   const pageSize = 10;
 
@@ -37,9 +37,9 @@ const AdminFeedbackListPage: React.FC = () => {
   useEffect(() => {
     setFilter(prev => ({
       ...prev,
-      Skip: (currentPage - 1) * pageSize,
+      Skip: (currentPage - 1) * prev.Take,
     }));
-  }, [ currentPage]);
+  }, [currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -57,12 +57,12 @@ const AdminFeedbackListPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
-     
+
       setIsLoading(true);
       const response = await getForAdminAsync(filterDto);
       if (response.Success) {
         setData(response.Data.Data);
-        setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
+        setTotalCount(response.Data.TotalCount);
       } else {
         showToast(response.Message, response.ResponseType);
       }
@@ -108,22 +108,22 @@ const AdminFeedbackListPage: React.FC = () => {
       id: 'Action',
       header: 'Action',
       cell: ({ row }) => (
-          <div>
-               <span
-                      role="button"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
-                      title="View Feedback"
-                      onClick={() => navigate(`/feedback/${row.original.Id}`)}
-                  >
-                     <i className="fas fa-edit text-primary"></i>
-                  </span>
-          </div>
+        <div>
+          <span
+            role="button"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="View Feedback"
+            onClick={() => navigate(`/feedback/${row.original.Id}`)}
+          >
+            <i className="fas fa-edit text-primary"></i>
+          </span>
+        </div>
       ),
-  }
+    }
   ], []);
 
-  return  (
+  return (
     <PagePanel title='Feedbacks'>
       <GenericTable
         columns={columns}
@@ -131,11 +131,23 @@ const AdminFeedbackListPage: React.FC = () => {
         isLoading={isLoading}
         enablePagination
         paginationType="server"
-        pageSize={pageSize}
+        pageSize={filterDto.Take}
         serverPaginationProps={{
-          currentPage: currentPage - 1,
-          totalPages,
-          onPageChange: (newPage) => setCurrentPage(newPage),
+          currentPage: currentPage,
+          totalCount: totalCount,
+          onPageChange: (newPage) => {
+            setCurrentPage(newPage);
+            
+          },
+          onPageSizeChange: (newSize) => {
+            setFilter(prev => ({
+              ...prev,
+              Take: newSize,
+              Skip: 0,
+
+            }));
+            setCurrentPage(1);
+          },
         }}
       />
     </PagePanel>

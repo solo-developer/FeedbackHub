@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useState,
-  useRef,
   forwardRef,
   useImperativeHandle,
 } from 'react';
@@ -12,14 +11,16 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getPaginationRowModel,
+  getFilteredRowModel,
   SortingState,
 } from '@tanstack/react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface ServerPaginationProps {
-  totalPages: number;
-  currentPage: number;
+  totalCount: number;
+  currentPage: number; // 1-based
   onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
 }
 
 interface GenericTableProps<T> {
@@ -27,7 +28,6 @@ interface GenericTableProps<T> {
   data: T[];
   isLoading?: boolean;
 
-  // Pagination
   enablePagination?: boolean;
   paginationType?: 'client' | 'server';
   pageSize?: number;
@@ -65,6 +65,23 @@ const GenericTable = forwardRef(<T extends object>(
 ) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [currentPageSize, setCurrentPageSize] = useState(pageSize);
+  const [currentPageIndex, setCurrentPageIndex] = useState(
+    paginationType === 'server' && serverPaginationProps
+      ? serverPaginationProps.currentPage - 1
+      : 0
+  );
+
+  const totalCount =
+    paginationType === 'server'
+      ? serverPaginationProps?.totalCount ?? 0
+      : data.length;
+
+  const totalPages =
+    paginationType === 'server'
+      ? Math.ceil(totalCount / currentPageSize)
+      : undefined;
 
   const updatedColumns: ColumnDef<T, any>[] = [
     {
@@ -131,35 +148,100 @@ const GenericTable = forwardRef(<T extends object>(
     columns: updatedColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: enablePagination && paginationType === 'server',
-    pageCount:
-      paginationType === 'server' && serverPaginationProps
-        ? serverPaginationProps.totalPages
-        : undefined,
-    state: { sorting },
+    manualPagination: paginationType === 'server',
+    pageCount: totalPages,
+    state: {
+      sorting,
+      globalFilter,
+      ...(paginationType === 'server' && {
+        pagination: {
+          pageIndex: currentPageIndex,
+          pageSize: currentPageSize,
+        },
+      }),
+    },
     onSortingChange: updater => {
       const updated = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(updated.length > 0 ? [updated[0]] : []);
     },
+    onGlobalFilterChange: setGlobalFilter,
   });
 
-  // Notify parent when sort changes
   useEffect(() => {
     if (onSortChange && sorting.length > 0) {
-      const sortedColumn = sorting[0];
-      onSortChange(sortedColumn);
+      onSortChange(sorting[0]);
     }
   }, [sorting, onSortChange]);
 
-  // Expose selected IDs to parent
   useImperativeHandle(ref, () => ({
     getSelectedIds: () => Array.from(selectedIds),
   }));
 
+  const pagination = table.getState().pagination;
+  const filteredTotal =
+    paginationType === 'server'
+      ? totalCount
+      : table.getFilteredRowModel().rows.length;
+
+  const pageStart =
+    filteredTotal === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1;
+  const pageEnd = Math.min(
+    (pagination.pageIndex + 1) * pagination.pageSize,
+    filteredTotal
+  );
+
+  const handlePageSizeChange = (size: number) => {
+    if (paginationType === 'server' && serverPaginationProps) {
+      setCurrentPageSize(size);
+      setCurrentPageIndex(0);
+      serverPaginationProps.onPageSizeChange?.(size);
+      serverPaginationProps.onPageChange(1);
+    } else {
+      table.setPageSize(size);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (paginationType === 'server' && serverPaginationProps) {
+      if (currentPageIndex > 0) {
+        const newPage = currentPageIndex; // 0-based to 1-based
+        setCurrentPageIndex(newPage - 1);
+        serverPaginationProps.onPageChange(newPage);
+      }
+    } else {
+      table.previousPage();
+    }
+  };
+
+  const handleNextPage = () => {
+    if (paginationType === 'server' && serverPaginationProps) {
+      const newPage = currentPageIndex + 2;
+      if (newPage <= totalPages) {
+        setCurrentPageIndex(newPage - 1);
+        serverPaginationProps.onPageChange(newPage);
+      }
+    } else {
+      table.nextPage();
+    }
+  };
+
   return (
     <div className="container-fluid mt-3 w-100">
       {renderFilters && <div className="mb-3">{renderFilters()}</div>}
+
+      {paginationType === 'client' && enablePagination && (
+        <div className="mb-2">
+          <input
+            type="text"
+            className="form-control form-control-sm w-25"
+            placeholder="Search..."
+            value={globalFilter ?? ''}
+            onChange={e => setGlobalFilter(e.target.value)}
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="text-center">
@@ -218,28 +300,60 @@ const GenericTable = forwardRef(<T extends object>(
           </table>
 
           {enablePagination && (
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </button>
-              <span>
-                Page{' '}
-                <strong>{table.getState().pagination.pageIndex + 1}</strong> of{' '}
-                {paginationType === 'server' && serverPaginationProps
-                  ? serverPaginationProps.totalPages
-                  : table.getPageCount()}
-              </span>
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </button>
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2">
+                <span className="small">Rows per page:</span>
+                {[1,5, 10, 20, 50].map(size => (
+                  <button
+                    key={size}
+                    className={`btn btn-sm ${
+                      pagination.pageSize === size ? 'btn-primary' : 'btn-outline-primary'
+                    }`}
+                    onClick={() => handlePageSizeChange(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-muted small text-center flex-grow-1">
+                Showing {pageStart}–{pageEnd} of {filteredTotal}
+              </div>
+
+              <div className="d-flex align-items-center gap-2">
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={handlePreviousPage}
+                  disabled={
+                    paginationType === 'server'
+                      ? currentPageIndex === 0
+                      : !table.getCanPreviousPage()
+                  }
+                >
+                  Previous
+                </button>
+                <span className="small">
+                  Page{' '}
+                  {paginationType === 'server'
+                    ? currentPageIndex + 1
+                    : pagination.pageIndex + 1}{' '}
+                  of{' '}
+                  {paginationType === 'server'
+                    ? totalPages
+                    : table.getPageCount()}
+                </span>
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={handleNextPage}
+                  disabled={
+                    paginationType === 'server'
+                      ? currentPageIndex + 1 >= (totalPages ?? 1)
+                      : !table.getCanNextPage()
+                  }
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </>

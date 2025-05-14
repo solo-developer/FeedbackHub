@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import PagePanel from '../components/PagePanel';
 import GenericTable from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
-import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync ,resetPasswordAsync} from '../services/UserService';
+import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync, resetPasswordAsync } from '../services/UserService';
 import { ClientUserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import ConfirmDialog from "../components/ConfirmDialog";
 import { parseMessage, parseResponseType } from '../utils/HttpResponseParser';
 import { useNavigate } from 'react-router-dom';
+import { debug } from 'console';
 
 interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';
@@ -19,7 +20,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const pageSize = 10;
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
     const tableRef = useRef<{ getSelectedIds: () => (string | number)[] }>(null);
     const [data, setData] = useState<ClientUserDetailDto[]>([]);
     const [filterDto, setFilter] = useState<UserFilterDto>({
@@ -28,7 +29,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         UserType: userType
     });
     const { showToast } = useToast();
-    const navigate= useNavigate();
+    const navigate = useNavigate();
     useEffect(() => {
         setFilter(prev => ({
             ...prev,
@@ -48,7 +49,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     //     const selectedIds = tableRef.current?.getSelectedIds() || [];
     //     console.log('Selected row IDs:', selectedIds);
     //   };
-    const ResetPasswordClicked = async (userId:number) => {
+    const ResetPasswordClicked = async (userId: number) => {
         try {
             const response = await resetPasswordAsync(userId);
             if (response.Success) {
@@ -57,7 +58,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                     draggable: true
                 });
             }
-            else{
+            else {
                 showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
@@ -69,12 +70,12 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         }
     }
 
-    const UndoDeleteClicked = async (userId : number) => {
+    const UndoDeleteClicked = async (userId: number) => {
         setSelectedUserId(userId);
         setShowUndoDeleteDialog(true);
     }
 
-    const DeleteClicked = async (userId : number) => {
+    const DeleteClicked = async (userId: number) => {
         setSelectedUserId(userId);
         setShowDeleteDialog(true);
     }
@@ -83,11 +84,11 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         setShowDeleteDialog(false);
         try {
             const response = await deleteUserAsync(selectedUserId);
-         
+
             if (response.Success) {
                 await fetchData();
             }
-            else{
+            else {
                 showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
@@ -103,11 +104,11 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         setShowUndoDeleteDialog(false);
         try {
             const response = await undoDeleteUserAsync(selectedUserId);
-         
+
             if (response.Success) {
                 await fetchData();
             }
-            else{
+            else {
                 showToast(response.Message, response.ResponseType, {
                     autoClose: 3000,
                     draggable: true
@@ -126,7 +127,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
 
             if (response.Success) {
                 setData(response.Data.Data);
-                setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
+                setTotalCount(response.Data.TotalCount);
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -140,7 +141,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         } finally {
             setIsLoading(false);
         }
-    };    
+    };
     const columns = React.useMemo(
         () => [
             {
@@ -154,12 +155,12 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 header: 'Email',
                 accessorFn: (row) => row.Email || ''
             },
-          userType!='Admin' &&  {
+            userType != 'Admin' && {
                 id: 'Client',
                 header: 'Client',
                 accessorFn: (row) => row.Client || ''
             },
-          userType!='Admin' &&  {
+            userType != 'Admin' && {
                 id: 'Applications',
                 header: 'Applications',
                 cell: ({ row }) => {
@@ -204,7 +205,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                                     <i className="fas fa-trash-alt text-danger"></i>
                                 </span>
                             )}
-            
+
                             {/* Always show Reset Password */}
                             <span
                                 role="button"
@@ -219,37 +220,51 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                     );
                 }
             }
-            
-            
+
+
         ].filter(Boolean),
-        [userType,data]
+        [userType, data]
     );
 
     const headerContent = (
         <div>
-            <button onClick={()=>{navigate('/admin/users/new')}} className="btn btn-primary btn-sm"><i className='fas fa-plus'></i>&nbsp; Add</button>
+            <button onClick={() => { navigate('/admin/users/new') }} className="btn btn-primary btn-sm"><i className='fas fa-plus'></i>&nbsp; Add</button>
         </div>
     );
 
     return (
         <>
-            <PagePanel title={`${userType} Users`} headerContent={userType=='Admin' && headerContent}>
+            <PagePanel title={`${userType} Users`} headerContent={userType == 'Admin' && headerContent}>
 
                 <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination
                     paginationType="server"
                     pageSize={pageSize}
-                    getRowId={(row)=> row.Id.toString()}
+                    getRowId={(row) => row.Id.toString()}
                     ref={tableRef}
                     serverPaginationProps={{
-                        currentPage: currentPage - 1,
-                        totalPages,
+                        currentPage: currentPage,
+                        totalCount: totalCount,
                         onPageChange: (newPage) => {
                             setCurrentPage(newPage);
+                             setFilter(prev => ({
+                                ...prev,
+                                Take: prev.Take ,
+                                Skip : ((newPage-1) * prev.Take)
+                            }));
+                        },
+                        onPageSizeChange: (newSize) => {
+                            setFilter(prev => ({
+                                ...prev,
+                                 Take: newSize ,
+                                Skip : 0,
+                                
+                            }));
+                            setCurrentPage(1);
                         },
                     }}
                     onSortChange={(sortedColumns) => {
                         console.log('Sorted columns:', sortedColumns);
-                      }}
+                    }}
                 />
             </PagePanel>
             <ConfirmDialog

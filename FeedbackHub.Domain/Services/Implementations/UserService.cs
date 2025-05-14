@@ -113,7 +113,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var totalCount = await queryable.CountAsync();
 
-            var users = await queryable.Select(a => new UserDetailDto
+            var users = await queryable.OrderBy(a=>a.ApplicationUser.Email).Skip(dto.Skip).Take(dto.Take).Select(a => new UserDetailDto
             {
                 Id = a.Id,
                 Fullname = a.FullName,

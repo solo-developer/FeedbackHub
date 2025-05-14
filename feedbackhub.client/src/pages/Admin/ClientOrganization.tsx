@@ -260,7 +260,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Client Organization Setup' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} />
+                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}/>
             </PagePanel>
 
             <Modal show={showModal} onClose={closeModal} title="Add Client Organization" footer={modalFooter}>

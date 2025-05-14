@@ -165,7 +165,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Feedback Type Setup' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} />
+                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}/>
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add Feedback Type" footer={modalFooter}>
                 <form onSubmit={saveFeedbackType}>

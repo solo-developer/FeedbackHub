@@ -317,7 +317,7 @@ const GenericTable = forwardRef(<T extends object>(
               </div>
 
               <div className="text-muted small text-center flex-grow-1">
-                Showing {pageStart}–{pageEnd} of {filteredTotal}
+                Showing {pageStart}–{pageEnd} of {filteredTotal} entries
               </div>
 
               <div className="d-flex align-items-center gap-2">

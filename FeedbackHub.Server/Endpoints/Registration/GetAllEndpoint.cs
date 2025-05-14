@@ -18,7 +18,7 @@ namespace FeedbackHub.Server.Endpoints.Registration
         }
 
         [HttpPost("/registration-requests")]
-        public override async Task<IActionResult> HandleAsync(RegistrationRequestFilterDto request, CancellationToken cancellationToken = default)
+        public override async Task<IActionResult> HandleAsync([FromBody]RegistrationRequestFilterDto request, CancellationToken cancellationToken = default)
         {
             return await ApiHandler.HandleAsync(async () =>
             {

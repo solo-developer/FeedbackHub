@@ -15,7 +15,7 @@ const RegistrationRequestPage: React.FC = () => {
     const pageSize = 10;
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
 
     const [showModal, setShowModal] = useState(false);
     const [applications, setApplications] = useState<ApplicationDto[]>([]);
@@ -67,7 +67,7 @@ const RegistrationRequestPage: React.FC = () => {
 
     const [data, setData] = useState<RegistrationRequestDto[]>([]);
     const [filterDto, setFilter] = useState<RegistrationRequestFilterDto>({
-        Take: 10,
+        Take: pageSize,
         Skip: 0
     });
     const { showToast } = useToast();
@@ -84,7 +84,14 @@ const RegistrationRequestPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, filterDto, selectedRegistrationRequest]);
+    }, [filterDto, selectedRegistrationRequest]);
+
+    useEffect(() => {
+        setFilter(prev => ({
+            ...prev,
+            Skip: (currentPage - 1) * prev.Take,
+        }));
+    }, [currentPage]);
 
     const convertToUserClicked = async (registrationRequest: RegistrationRequestDto) => {
         setSelectedRegistrationRequest(registrationRequest);
@@ -114,8 +121,8 @@ const RegistrationRequestPage: React.FC = () => {
 
     const getClientSubscribedApplications = async () => {
         try {
-            if(!selectedRegistrationRequest || selectedRegistrationRequest.Client.Id == 0){
-               return;
+            if (!selectedRegistrationRequest || selectedRegistrationRequest.Client.Id == 0) {
+                return;
             }
             const response = await getApplicationsByClientIdAsync(selectedRegistrationRequest.Client.Id);
 
@@ -141,7 +148,7 @@ const RegistrationRequestPage: React.FC = () => {
 
             if (response.Success) {
                 setData(response.Data.Data);
-                setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
+                setTotalCount(response.Data.TotalCount );
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -253,10 +260,18 @@ const RegistrationRequestPage: React.FC = () => {
                     paginationType="server"
                     pageSize={pageSize}
                     serverPaginationProps={{
-                        currentPage: currentPage - 1,
-                        totalPages,
+                        currentPage: currentPage,
+                        totalCount: totalCount,
                         onPageChange: (newPage) => {
                             setCurrentPage(newPage);
+                        },
+                        onPageSizeChange: (newSize) => {
+                            setFilter(prev => ({
+                                ...prev,
+                                Take: newSize,
+                                Skip: 0,
+                            }));
+                            setCurrentPage(1);
                         },
                     }}
                 />

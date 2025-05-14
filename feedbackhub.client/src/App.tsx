@@ -67,7 +67,9 @@ const AppRoutes = () => {
               </AppSwitcherProvider>
             </UserProvider>} />
           <Route path="/feedback/:id" element={<EditFeedbackPage></EditFeedbackPage>} />
-          <Route path="/profile/change-password" element={<ChangePasswordPage></ChangePasswordPage>} />
+          <Route path="/profile/change-password" element={<UserProvider>
+            <ChangePasswordPage></ChangePasswordPage>
+          </UserProvider>} />
         </Route>
         <Route path="/access-denied" element={<AccessDenied />} />
         <Route

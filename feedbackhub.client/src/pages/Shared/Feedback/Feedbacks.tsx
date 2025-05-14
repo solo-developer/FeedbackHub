@@ -18,7 +18,7 @@ const FeedbacksPage: React.FC = () => {
 
 
   const statusEnum = TicketStatus[ticketstatus as keyof typeof TicketStatus];
-  
+
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { selectedApp } = useAppSwitcher();
@@ -26,7 +26,7 @@ const FeedbacksPage: React.FC = () => {
   const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [data, setData] = useState<FeedbackBasicDetailDto[]>([]);
   const pageSize = 10;
 
@@ -39,15 +39,15 @@ const FeedbacksPage: React.FC = () => {
 
   useEffect(() => {
     const statusEnum = TicketStatus[ticketstatus as keyof typeof TicketStatus];
-  
-    setCurrentPage(1); 
+
+    setCurrentPage(1);
     setFilter(prev => ({
       ...prev,
       Skip: 0,
       Status: statusEnum
     }));
   }, [ticketstatus]);
-  
+
 
   useEffect(() => {
     fetchFeedbackTypes();
@@ -59,7 +59,15 @@ const FeedbacksPage: React.FC = () => {
       Skip: (currentPage - 1) * pageSize,
       Status: statusEnum,
     }));
-  }, [statusEnum, currentPage, selectedApp]);
+  }, [statusEnum, selectedApp]);
+
+  useEffect(() => {
+    setFilter(prev => ({
+      ...prev,
+      Skip: (currentPage - 1) * prev.Take,
+    }));
+  }, [currentPage]);
+
 
   useEffect(() => {
     fetchData();
@@ -81,7 +89,7 @@ const FeedbacksPage: React.FC = () => {
       const response = await getAsync(filterDto);
       if (response.Success) {
         setData(response.Data.Data);
-        setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
+        setTotalCount(response.Data.TotalCount);
       } else {
         showToast(response.Message, response.ResponseType);
       }
@@ -122,19 +130,19 @@ const FeedbacksPage: React.FC = () => {
       id: 'Action',
       header: 'Action',
       cell: ({ row }) => (
-          <div>
-               <span
-                      role="button"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
-                      title="View Feedback"
-                      onClick={() => navigate(`/feedback/${row.original.Id}`)}
-                  >
-                     <i className="fas fa-edit text-primary"></i>
-                  </span>
-          </div>
+        <div>
+          <span
+            role="button"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="View Feedback"
+            onClick={() => navigate(`/feedback/${row.original.Id}`)}
+          >
+            <i className="fas fa-edit text-primary"></i>
+          </span>
+        </div>
       ),
-  }
+    }
   ], []);
 
   return (
@@ -147,9 +155,21 @@ const FeedbacksPage: React.FC = () => {
         paginationType="server"
         pageSize={pageSize}
         serverPaginationProps={{
-          currentPage: currentPage - 1,
-          totalPages,
-          onPageChange: (newPage) => setCurrentPage(newPage),
+          currentPage: currentPage,
+          totalCount: totalCount,
+          onPageChange: (newPage) => {
+            setCurrentPage(newPage);
+
+          },
+          onPageSizeChange: (newSize) => {
+            setFilter(prev => ({
+              ...prev,
+              Take: newSize,
+              Skip: 0,
+
+            }));
+            setCurrentPage(1);
+          },
         }}
       />
     </PagePanel>

@@ -10,6 +10,7 @@ using FeedbackHub.Domain.Templating;
 using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -164,6 +165,15 @@ namespace FeedbackHub.Domain.Services.Implementations
             }).FirstOrDefaultAsync();
 
             return user;
+        }
+
+        public async Task<List<GenericDropdownDto<int, string>>> GetUserDropdownOptions(bool includeDeleted = false)
+        {
+            return await _userRepo.GetQueryableWithNoTracking().Where(a => includeDeleted || a.IsDeleted == false).Select(a => new GenericDropdownDto<int, string>
+            {
+                Label = a.FullName,
+                Value = a.Id
+            }).ToListAsync();
         }
 
         public async Task<UserProfileDto> GetUserProfileAsync(int userId)

@@ -68,6 +68,11 @@ namespace FeedbackHub.Domain.Services.Implementations
                 {
                     queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == adminFilter.Model.ClientId);
                 }
+
+                if (adminFilter.Model.FeedbackTypeId > 0)
+                {
+                    queryable = queryable.Where(a => a.FeedbackTypeId == adminFilter.Model.FeedbackTypeId);
+                }
             }
 
             if (request.Model.Status.HasValue)
@@ -81,6 +86,11 @@ namespace FeedbackHub.Domain.Services.Implementations
             if (request.Model.ToDate.HasValue)
             {
                 queryable = queryable.Where(a => a.CreatedDate.Date <= request.Model.ToDate.Value.Date);
+            }
+            if (!string.IsNullOrEmpty(request.Model.Search))
+            {
+                var normalisedSearch = request.Model.Search.ToLower().Trim();
+                queryable = queryable.Where(a => a.TicketId.ToString() == normalisedSearch || a.Title.ToLower().Contains(normalisedSearch));
             }
 
             var totalCount = await queryable.CountAsync();

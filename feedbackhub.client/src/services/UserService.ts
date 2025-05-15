@@ -1,7 +1,9 @@
+import { faL } from '@fortawesome/free-solid-svg-icons';
 import { ChangePasswordDto } from '../types/account/ChangePasswordDto';
 import { CreateAdminUserDto } from '../types/account/CreateAdminUserDto';
 import { ClientUserDetailDto, UserProfileDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
+import { GenericDropdownDto } from '../types/GenericDropdownDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
 import api from '../utils/HttpMiddleware';
@@ -116,3 +118,19 @@ export const getLoggedInUserInfoAsync = async (): Promise<ServiceResponseType<Us
       return { Success: false, Message: 'Failed to get user profile', ResponseType: 'error' };
   }
 };
+
+export const getUserOptions = async (includeDeleted:boolean =false): Promise<ServiceResponseType<GenericDropdownDto<number,string>[]>> => {
+  try {
+      const response = await api.get(`/user-options?includeDeleted=${includeDeleted}`);
+
+      if (isSuccess(response)) {
+          return { Success: true, Data: parseData<GenericDropdownDto<number,string>[]>(response) } as ServiceResponseType<GenericDropdownDto<number,string>[]>;
+      }
+      else {
+          return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<GenericDropdownDto<number,string>[]>;
+      }
+  } catch (err) {
+      return { Success: false, Message: 'Failed to get user options', ResponseType: 'error' };
+  }
+};
+

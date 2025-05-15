@@ -4,12 +4,13 @@ export interface FeedbackFilterDto{
     FromDate? : Date;
     ToDate? : Date;
     Skip: Number;
-    Take: Number;
-    Status? : TicketStatus
+    Take: number;
+    Status? : TicketStatus;
 }
 
 export interface AdminFeedbackFilterDto extends FeedbackFilterDto{
     UserId? : Number;
     ClientId? : Number;
     ApplicationId? : Number;
+    FeedbackTypeId? : Number;
 }

@@ -9,6 +9,7 @@ export interface FeedbackFilterDto{
 }
 
 export interface AdminFeedbackFilterDto extends FeedbackFilterDto{
+    Search: string;
     UserId? : Number;
     ClientId? : Number;
     ApplicationId? : Number;

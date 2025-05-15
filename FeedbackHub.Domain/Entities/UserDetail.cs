@@ -1,4 +1,5 @@
-﻿using FeedbackHub.Domain.ValueObjects;
+﻿using FeedbackHub.Domain.Dto.User;
+using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 
 namespace FeedbackHub.Domain.Entities
@@ -9,7 +10,7 @@ namespace FeedbackHub.Domain.Entities
         {
             return new UserDetail
             {
-                RegistrationRequestId= registrationRequestId,
+                RegistrationRequestId = registrationRequestId,
                 FullName = fullName,
                 ApplicationUser = new ApplicationUser
                 {
@@ -23,20 +24,30 @@ namespace FeedbackHub.Domain.Entities
             };
         }
 
-        public static UserDetail CreateAdminUser( string fullName, Email email)
+        public static UserDetail CreateAdminUser(string fullName, Email email, List<AdminUserApplicationAccessDto> accesses)
         {
-            return new UserDetail
+            var userDetail = new UserDetail
             {
                 FullName = fullName,
                 ApplicationUser = new ApplicationUser
                 {
                     UserName = email.Value,
                     Email = email.Value
-                },            
+                }
             };
+            foreach (var access in accesses)
+            {
+                if (access.ApplicationIds.Any())
+                {
+                    userDetail.AllowedApplications.AddRange(access.ApplicationIds.Select(a => new AdminUserApplicationAccess
+                    {
+                        ClientId = access.ClientId,
+                        ApplicationId = a
+                    }));
+                }
+            }
+            return userDetail;
         }
-
-
 
         public UserDetail()
         {

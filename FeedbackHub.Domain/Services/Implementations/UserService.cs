@@ -53,7 +53,7 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email);
+                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email,dto.Accesses);
 
                 var appUser = userDetail.ApplicationUser;
                 var result = await _userManager.CreateAsync(appUser, dto.Password);

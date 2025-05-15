@@ -27,7 +27,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
 
             builder.Property(e => e.AdminUserId).IsRequired();
             builder.Property(e => e.ClientId).IsRequired();
-            builder.Property(e => e.ApplicationId).IsRequired(false);
+            builder.Property(e => e.ApplicationId).IsRequired();
         }
     }
 }

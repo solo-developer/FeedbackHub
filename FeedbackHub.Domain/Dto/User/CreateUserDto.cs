@@ -9,5 +9,7 @@ namespace FeedbackHub.Domain.Dto.User
         public required Email Email { get; set; }
 
         public required string Password { get; set; }
+
+        public List<AdminUserApplicationAccessDto> Accesses { get; set; } = new();
     }
 }

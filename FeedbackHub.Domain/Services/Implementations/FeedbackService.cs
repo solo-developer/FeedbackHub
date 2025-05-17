@@ -68,11 +68,12 @@ namespace FeedbackHub.Domain.Services.Implementations
                 {
                     queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == adminFilter.Model.ClientId);
                 }
+            }
 
-                if (adminFilter.Model.FeedbackTypeId > 0)
-                {
-                    queryable = queryable.Where(a => a.FeedbackTypeId == adminFilter.Model.FeedbackTypeId);
-                }
+
+            if (request.Model.FeedbackTypeId > 0)
+            {
+                queryable = queryable.Where(a => a.FeedbackTypeId == request.Model.FeedbackTypeId);
             }
 
             if (request.Model.Status.HasValue)

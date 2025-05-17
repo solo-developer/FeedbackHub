@@ -11,6 +11,8 @@ namespace FeedbackHub.Domain.Dto
 
         public string? Search { get; set; }
         public TicketStatus? Status { get; set; }
+
+        public int? FeedbackTypeId { get; set; }
     }
 
     public class AdminFeedbackFilterDto : FeedbackFilterDto
@@ -20,8 +22,6 @@ namespace FeedbackHub.Domain.Dto
         public int? ApplicationId { get; set; }
 
         public int? UserId { get; set;}
-
-        public int? FeedbackTypeId { get; set;}
     }
 
     public class BoardFeedbackFilterDto

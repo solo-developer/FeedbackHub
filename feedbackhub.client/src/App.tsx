@@ -55,7 +55,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<HomeScreenPage />} />
         <Route path="/register" element={<RegistrationRequestPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin-dashboard" element={<UserProvider> <AdminDashboardPage /></UserProvider>} />
           <Route path="/admin/*" element={
             <UserProvider>
               <AdminDashboardPage />

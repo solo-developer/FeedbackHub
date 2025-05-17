@@ -1,24 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import PagePanel from '../../components/PagePanel';
 import { useNavigate } from 'react-router-dom';
 import { CreateAdminUserDto, AdminUserApplicationAccessDto } from '../../types/account/CreateAdminUserDto';
+import { ClientDto } from '../../types/client/ClientDto';
+import { fetchClients } from '../../services/ClientService';
+import { createAdminUserAsync } from '../../services/UserService';
 
-const mockClients = [
-  { Id: 1, Name: 'Client A' },
-  { Id: 2, Name: 'Client B' },
-];
-
-const mockApplications = [
-  { Id: 101, Name: 'App A1', ClientId: 1 },
-  { Id: 102, Name: 'App A2', ClientId: 1 },
-  { Id: 201, Name: 'App B1', ClientId: 2 },
-  { Id: 202, Name: 'App B2', ClientId: 2 },
-];
+// const mockClients = [
+//   {
+//     Id: 1,
+//     Name: 'Client A',
+//     Applications: [
+//       { Id: 101, Name: 'App A1' },
+//       { Id: 102, Name: 'App A2' }
+//     ]
+//   },
+//   {
+//     Id: 2,
+//     Name: 'Client B',
+//     Applications: [
+//       { Id: 201, Name: 'App B1' },
+//       { Id: 202, Name: 'App B2' }
+//     ]
+//   }
+// ];
 
 const NewAdminUserPage: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getClients();
+  }, []);
+
+  const getClients = async () => {
+    try {
+      const response = await fetchClients();
+      if (response.Success) {
+        setClients(response.Data);
+      } else {
+        showToast(response.Message, response.ResponseType, {
+          autoClose: 3000,
+          draggable: true
+        });
+      }
+    } catch {
+      showToast('Failed to load client organizations', 'error');
+    }
+  };
+
 
   const [formData, setFormData] = useState<CreateAdminUserDto>({
     FullName: '',
@@ -30,6 +61,8 @@ const NewAdminUserPage: React.FC = () => {
 
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
+  const [clients, setClients] = useState<ClientDto[]>([]);
+
   const [selectedApplications, setSelectedApplications] = useState<{ [clientId: number]: number[] }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,10 +110,12 @@ const NewAdminUserPage: React.FC = () => {
   };
 
   const handleSelectAllApplications = (clientId: number) => {
-    const appsForClient = mockApplications.filter(app => app.ClientId === clientId).map(app => app.Id);
+    const client = clients.find(c => c.Id === clientId);
+    if (!client) return;
+    const appIds = client.SubscribedApplications.map(app => app.Id);
     setSelectedApplications(prev => ({
       ...prev,
-      [clientId]: appsForClient
+      [clientId]: appIds
     }));
   };
 
@@ -118,11 +153,19 @@ const NewAdminUserPage: React.FC = () => {
     };
 
     try {
-      // Replace with actual API call
-      console.log('POST Payload:', finalPayload);
-      showToast("User created successfully", 'success');
-      navigate("/admin/admin-users");
-    } catch {
+      const response = await createAdminUserAsync(finalPayload);
+
+      if (response.Success) {
+        showToast("User Created successfully. An email will be sent to registered email for login credentials", 'success');
+        navigate("/admin/admin-users");
+      } else {
+        showToast(response.Message, response.ResponseType, {
+          autoClose: 3000,
+          draggable: true
+        });
+      }
+    }
+    catch {
       showToast("Failed to create user", 'error');
     }
   };
@@ -159,7 +202,7 @@ const NewAdminUserPage: React.FC = () => {
           <div className="card border mb-4">
             <div className="card-header bg-light"><strong>Application Access</strong></div>
             <div className="card-body">
-              {mockClients.map(client => (
+              {clients.map(client => (
                 <div key={client.Id} className="mb-3 border-bottom pb-2">
                   <div className="form-check form-switch mb-2">
                     <input
@@ -181,7 +224,7 @@ const NewAdminUserPage: React.FC = () => {
                         <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => handleDeselectAllApplications(client.Id)}>Deselect All</button>
                       </div>
                       <div className="row">
-                        {mockApplications.filter(app => app.ClientId === client.Id).map(app => (
+                        {client.SubscribedApplications.map(app => (
                           <div className="col-md-4" key={app.Id}>
                             <div className="form-check">
                               <input

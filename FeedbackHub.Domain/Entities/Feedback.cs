@@ -44,6 +44,8 @@ namespace FeedbackHub.Domain.Entities
         public virtual FeedbackType FeedbackType { get; set; }
         public virtual List<Attachment> Attachments { get; set; } = new();
         public virtual List<FeedbackHistory> Histories { get; set; } = new();
+        public virtual List<FeedbackRevision> Revisions { get; set; } = new();
+
         public virtual Application Application { get; set; }
 
         public void MarkDeleted()

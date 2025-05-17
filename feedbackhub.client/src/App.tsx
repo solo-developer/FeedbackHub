@@ -66,7 +66,7 @@ const AppRoutes = () => {
                 <DashboardPage />
               </AppSwitcherProvider>
             </UserProvider>} />
-          <Route path="/feedback/:id" element={<EditFeedbackPage></EditFeedbackPage>} />
+          <Route path="/feedback/:id" element={ <UserProvider><EditFeedbackPage></EditFeedbackPage></UserProvider>} />
           <Route path="/profile/change-password" element={<UserProvider>
             <ChangePasswordPage></ChangePasswordPage>
           </UserProvider>} />

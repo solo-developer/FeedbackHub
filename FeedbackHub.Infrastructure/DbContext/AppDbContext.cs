@@ -24,7 +24,9 @@ namespace FeedbackHub.Infrastructure.Context
             builder.ApplyConfiguration(new ClientApplicationSubscriptionConfiguration());
             builder.ApplyConfiguration(new ClientConfiguration());
             builder.ApplyConfiguration(new FeedbackConfiguration());
+            builder.ApplyConfiguration(new FeedbackChangedFieldConfiguration());
             builder.ApplyConfiguration(new FeedbackHistoryConfiguration());
+            builder.ApplyConfiguration(new FeedbackRevisionConfiguration());
             builder.ApplyConfiguration(new FeedbackTypeConfiguration());
             builder.ApplyConfiguration(new RegistrationRequestConfiguration());
             builder.ApplyConfiguration(new SettingConfiguration());
@@ -44,6 +46,8 @@ namespace FeedbackHub.Infrastructure.Context
         public DbSet<Client> Clients { get; set; }
         public DbSet<ClientApplicationSubscription> ClientApplicationSubscriptions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<FeedbackChangedField> FeedbackChangedFields { get; set; }
+        public DbSet<FeedbackRevision> FeedbackRevisions { get; set; }
         public DbSet<FeedbackType> FeedbackTypes { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
         public DbSet<Setting> Settings { get; set; }

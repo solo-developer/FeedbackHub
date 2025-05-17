@@ -186,7 +186,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var status = entity.Status;
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                entity.UpdateFeedback(dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
+                entity.UpdateFeedback(dto.LoggedInUserId, dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
 
                 await _repo.UpdateAsync(entity, entity.Id);
 

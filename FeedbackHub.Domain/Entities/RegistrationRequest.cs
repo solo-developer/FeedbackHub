@@ -8,7 +8,7 @@ namespace FeedbackHub.Domain.Entities
     public class RegistrationRequest : BaseEntity
     {
         private readonly IBaseRepository<RegistrationRequest> _repo;
-        public RegistrationRequest() { }
+        protected RegistrationRequest() { }
 
         public RegistrationRequest(IBaseRepository<RegistrationRequest> repo, Email email, int clientId, string fullname)
         {

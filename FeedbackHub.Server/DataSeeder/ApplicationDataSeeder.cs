@@ -67,12 +67,7 @@ namespace FeedbackHub.Server.DataSeeder
 
             var templateContent = await File.ReadAllTextAsync(filePath);
 
-            context.Templates.Add(new Template
-            {
-                Subject = subject,
-                EmailTemplate = templateContent,
-                TemplateType = templateType
-            });
+            context.Templates.Add(new Template(subject,templateContent,templateType));
 
             await context.SaveChangesAsync();
         }
@@ -90,12 +85,7 @@ namespace FeedbackHub.Server.DataSeeder
                 await userManager.CreateAsync(adminUser, _defaultUserCredentials.Password);
                 await userManager.AddToRoleAsync(adminUser, Constants.ADMIN_ROLE);
 
-                context.UserDetails.Add(new UserDetail
-                {
-                    AppUserId= adminUser.Id,
-                    FullName="Contact User",
-
-                });
+                context.UserDetails.Add(UserDetail.AssociateAspUserWithUserDetail(adminUser.Id,"Contact User"));
 
                 await context.SaveChangesAsync();
                 

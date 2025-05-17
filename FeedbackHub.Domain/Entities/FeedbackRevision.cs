@@ -2,7 +2,7 @@
 {
     public class FeedbackRevision :BaseEntity
     {
-        public FeedbackRevision() { }
+        protected FeedbackRevision() { }
 
         public FeedbackRevision(int feedbackId, int userId)
         {

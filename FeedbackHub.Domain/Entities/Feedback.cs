@@ -4,7 +4,7 @@ namespace FeedbackHub.Domain.Entities
 {
     public class Feedback : BaseEntity
     {
-        public Feedback() { }
+        protected Feedback() { }
 
         public Feedback(int userId, int feedbackTypeId, int applicationId, int priority, string title, string description)
         {

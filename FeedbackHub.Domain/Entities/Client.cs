@@ -1,20 +1,14 @@
-﻿using System.ComponentModel.Design;
-
-namespace FeedbackHub.Domain.Entities
+﻿namespace FeedbackHub.Domain.Entities
 {
     public class Client : BaseEntity
     {
-        public Client() { }
+        protected Client() { }
 
         public Client(string name, string code, List<int> applicationIds)
         {
             this.Name = name;
             this.Code = code;
-            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription
-            {
-                ApplicationId = a,
-                ClientId = this.Id
-            }).ToList(); ;
+            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription(this.Id,a)).ToList(); ;
         }
 
         public void Update(string name, string code, List<int> applicationIds)
@@ -23,11 +17,7 @@ namespace FeedbackHub.Domain.Entities
             this.Code = code;
 
             this.AppSubscriptions.Clear();
-            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription
-            {
-                ApplicationId = a,
-                ClientId = this.Id
-            }).ToList(); ;
+            this.AppSubscriptions = applicationIds.Select(a => new ClientApplicationSubscription(this.Id,a)).ToList(); ;
         }
         public string Name { get; private set; }
         public string Code { get; private set; }

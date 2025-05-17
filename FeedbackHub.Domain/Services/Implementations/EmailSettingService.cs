@@ -39,28 +39,37 @@ namespace FeedbackHub.Domain.Services.Implementations
             {
                 var emailSettings = await _settingRepo.GetQueryable().Where(a => a.Group.Equals(Constants.EMAIL_SETTING_GROUP)).ToListAsync();
 
-                var emailHostSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_HOST_SETTINGS_KEY)) ?? new Setting();
+                var emailHostSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_HOST_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_HOST_SETTINGS_KEY,string.Empty,Constants.EMAIL_SETTING_GROUP);
+
                 CopyValues(ref emailHostSetting, Constants.EMAIL_HOST_SETTINGS_KEY, emailSettingDto.Host, Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(emailHostSetting, emailHostSetting.Id);
 
 
-                var emailPortSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PORT_SETTINGS_KEY)) ?? new Setting();
+                var emailPortSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PORT_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_PORT_SETTINGS_KEY, string.Empty, Constants.EMAIL_SETTING_GROUP);
+
                 CopyValues(ref emailPortSetting, Constants.EMAIL_PORT_SETTINGS_KEY, emailSettingDto.Port.ToString(), Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(emailPortSetting, emailPortSetting.Id);
 
-                var emailEncryptionMethodSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY)) ?? new Setting();
+                var emailEncryptionMethodSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY, string.Empty, Constants.EMAIL_SETTING_GROUP);
+
+
                 CopyValues(ref emailEncryptionMethodSetting, Constants.EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY, emailSettingDto.EncryptionMethod.ToString(), Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(emailEncryptionMethodSetting, emailEncryptionMethodSetting.Id);
 
-                var usernameSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_USERNAME_SETTINGS_KEY)) ?? new Setting();
+                var usernameSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_USERNAME_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_USERNAME_SETTINGS_KEY, string.Empty, Constants.EMAIL_SETTING_GROUP); ;
+
                 CopyValues(ref usernameSetting, Constants.EMAIL_USERNAME_SETTINGS_KEY, emailSettingDto.Username, Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(usernameSetting, usernameSetting.Id);
 
-                var passwordSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY)) ?? new Setting();
+                var passwordSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_PASSWORD_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_PASSWORD_SETTINGS_KEY, string.Empty, Constants.EMAIL_SETTING_GROUP); ;
+
+
                 CopyValues(ref passwordSetting, Constants.EMAIL_PASSWORD_SETTINGS_KEY, _aESEncryptionHelper.Encrypt(emailSettingDto.Password), Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(passwordSetting, passwordSetting.Id);
 
-                var senderEmailSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_SENDER_SETTINGS_KEY)) ?? new Setting();
+                var senderEmailSetting = emailSettings.FirstOrDefault(a => a.Key.Equals(Constants.EMAIL_SENDER_SETTINGS_KEY)) ?? new Setting(Constants.EMAIL_SENDER_SETTINGS_KEY, string.Empty, Constants.EMAIL_SETTING_GROUP);
+
+
                 CopyValues(ref senderEmailSetting, Constants.EMAIL_SENDER_SETTINGS_KEY, emailSettingDto.SenderEmail, Constants.EMAIL_SETTING_GROUP);
                 await _settingRepo.AddOrUpdateAsync(senderEmailSetting, senderEmailSetting.Id);
 

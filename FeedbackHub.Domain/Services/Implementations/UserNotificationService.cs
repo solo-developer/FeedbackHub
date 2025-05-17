@@ -32,11 +32,14 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var userNotification = await _repo.FindAsync(x => x.UserId == dto.LoggedInUserId && x.ApplicationId == dto.ApplicationId) ?? new UserFeedbackEmailSubscription();
-                userNotification.UserId = dto.LoggedInUserId;
-                userNotification.ApplicationId = dto.ApplicationId.Value;
-                userNotification.NotifyOnStatusChange= dto.Model.NotifyOnStatusChange;
-                userNotification.NotifyOnCommentMade = dto.Model.NotifyOnCommentMade;
+                var userNotification = await _repo.FindAsync(x => x.UserId == dto.LoggedInUserId && x.ApplicationId == dto.ApplicationId)
+                    ?? new UserFeedbackEmailSubscription(
+                        dto.LoggedInUserId,
+                        dto.ApplicationId ?? throw new InvalidOperationException("ApplicationId cannot be null."),
+                        dto.Model.NotifyOnCommentMade,
+                        dto.Model.NotifyOnStatusChange
+                    );
+              
                 userNotification.AddFeedbackTypeSubscriptions(dto.Model.FeedbackTypeIds);
                 userNotification.AddTriggerStates(dto.Model.TriggerStates);
                 await _repo.AddOrUpdateAsync(userNotification, userNotification.Id);

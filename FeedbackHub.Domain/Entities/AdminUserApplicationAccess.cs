@@ -2,6 +2,13 @@
 {
     public class AdminUserApplicationAccess : BaseEntity
     {
+        protected AdminUserApplicationAccess() { }
+        public AdminUserApplicationAccess(int adminUserId, int clientId, int applicationId)
+        {
+            this.AdminUserId = adminUserId;
+            this.ClientId = clientId;
+            this.ApplicationId = applicationId;
+        }
         public int AdminUserId { get; set; }
         public int ClientId { get; set; }
         public int ApplicationId { get; set; }

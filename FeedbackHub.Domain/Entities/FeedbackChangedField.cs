@@ -5,7 +5,7 @@ namespace FeedbackHub.Domain.Entities
 {
     public class FeedbackChangedField : BaseEntity
     {
-        public FeedbackChangedField() { }
+        protected FeedbackChangedField() { }
 
         public FeedbackChangedField(string fieldName, string oldValue, string newValue)
         {

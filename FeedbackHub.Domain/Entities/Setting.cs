@@ -2,7 +2,7 @@
 {
     public class Setting : BaseEntity
     {
-        public Setting()
+        protected Setting()
         {
 
         }

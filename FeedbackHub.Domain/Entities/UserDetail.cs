@@ -1,14 +1,29 @@
 ﻿using FeedbackHub.Domain.Dto.User;
 using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
+using System.Runtime.CompilerServices;
 
 namespace FeedbackHub.Domain.Entities
 {
     public class UserDetail : BaseEntity
     {
+        protected UserDetail()
+        {
+
+        }
+
+        public static UserDetail AssociateAspUserWithUserDetail(int aspUserId, string fullName)
+        {
+            var userDetail = new UserDetail
+            {
+                AppUserId = aspUserId,
+                FullName = fullName
+            };
+            return userDetail;
+        }
         public static UserDetail CreateClientUser(int registrationRequestId, string fullName, string email, List<int> applicationIds)
         {
-            return new UserDetail
+            var userDetail = new UserDetail
             {
                 RegistrationRequestId = registrationRequestId,
                 FullName = fullName,
@@ -17,11 +32,15 @@ namespace FeedbackHub.Domain.Entities
                     UserName = email,
                     Email = email
                 },
-                Subscriptions = applicationIds.Select(id => new UserSubscription
-                {
-                    ApplicationId = id
-                }).ToList()
+
             };
+
+            foreach (var subscription in applicationIds)
+            {
+                userDetail.Subscribe(subscription);
+            }
+            return userDetail;
+
         }
 
         public static UserDetail CreateAdminUser(string fullName, Email email, List<AdminUserApplicationAccessDto> accesses)
@@ -39,22 +58,16 @@ namespace FeedbackHub.Domain.Entities
             {
                 if (access.ApplicationIds.Any())
                 {
-                    userDetail.AllowedApplications.AddRange(access.ApplicationIds.Select(a => new AdminUserApplicationAccess
-                    {
-                        ClientId = access.ClientId,
-                        ApplicationId = a
-                    }));
+                    userDetail.AllowedApplications.AddRange(
+                        access.ApplicationIds.Select(a =>
+                        new AdminUserApplicationAccess(userDetail.Id, access.ClientId, a)));
                 }
             }
             return userDetail;
         }
 
-        public UserDetail()
-        {
-
-        }
-        public string FullName { get; set; }
-        public int AppUserId { get; set; }
+        public string FullName { get;private set; }
+        public int AppUserId { get;private set; }
         public bool IsDeleted { get; private set; }
 
         public int? RegistrationRequestId { get; private set; }

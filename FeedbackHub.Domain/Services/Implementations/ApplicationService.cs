@@ -28,14 +28,9 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task SaveAsync(ApplicationDto dto)
         {
-            using(TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var application = new Application()
-                {
-                    Name=dto.Name,
-                    ShortName = dto.ShortName,
-                    Logo = dto.Logo
-                };
+                var application = new Application(dto.Name, dto.ShortName, dto.Logo);
 
                 await _applicationRepo.InsertAsync(application);
                 tx.Complete();

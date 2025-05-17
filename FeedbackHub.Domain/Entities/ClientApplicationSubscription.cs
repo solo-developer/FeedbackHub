@@ -2,8 +2,14 @@
 {
     public class ClientApplicationSubscription : BaseEntity
     {
-        public int ClientId { get; set; }
-        public int ApplicationId { get; set; }
+        protected ClientApplicationSubscription() { }
+        public ClientApplicationSubscription(int clientId, int applicationId)
+        {
+            this.ClientId = clientId;
+            this.ApplicationId = applicationId;
+        }
+        public int ClientId { get;private set; }
+        public int ApplicationId { get;private set; }
 
         public virtual Client Client { get; set; }
 

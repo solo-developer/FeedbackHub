@@ -2,8 +2,17 @@
 {
     public class FeedbackType : BaseEntity
     {
-        public required string @Type { get; set; }
-        public string Color { get; set; }
+        protected FeedbackType()
+        {
+            
+        }
+        public FeedbackType(string type, string color)
+        {
+            this.Type = type;
+            this.Color = color;
+        }
+        public string @Type { get;private set; }
+        public string Color { get;private set; }
 
         public bool IsDeleted { get;private set; }
 

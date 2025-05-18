@@ -32,19 +32,3 @@ export const fetchClients = async (): Promise<ServiceResponseType<ClientDto[]>> 
       return { Success: false, Message: 'Failed to delete client', ResponseType:'error' };
     }
   };
-
-  
-  export const saveClientAsync = async (dto : ClientDto): Promise<ServiceResponseType<any>> => {
-    try {
-      const response = await api.post(`/client`, dto);
-  
-      if (isSuccess(response)) {
-        return  {Success:true, Data: parseData<any>(response) } as ServiceResponseType<any>;
-      } 
-      else {
-        return { Success: false,  ResponseType : parseResponseType(response), Message : parseMessage(response)} as ServiceResponseType<any>;
-      }
-    } catch (err) {
-      return { Success: false, Message: 'Failed to save client', ResponseType:'error' };
-    }
-  };

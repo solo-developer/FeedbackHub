@@ -2,7 +2,14 @@
 {
     public class Application : BaseEntity
     {
-        public Application() { }
+        protected Application() { }
+
+        public Application(string name,string shortName, byte[] logo)
+        {
+            this.Name = name;
+            this.ShortName = shortName;
+            this.Logo = logo;
+        }
 
         public string Name { get; set; }
         public string ShortName { get; set; }

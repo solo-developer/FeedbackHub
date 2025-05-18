@@ -4,7 +4,7 @@ namespace FeedbackHub.Domain.Entities
 {
     public class Feedback : BaseEntity
     {
-        public Feedback() { }
+        protected Feedback() { }
 
         public Feedback(int userId, int feedbackTypeId, int applicationId, int priority, string title, string description)
         {
@@ -18,8 +18,22 @@ namespace FeedbackHub.Domain.Entities
             this.ModifiedDate = DateTime.Now;
         }
 
-        public void UpdateFeedback(int feedbackTypeId,  int priority, string title, string description, TicketStatus status)
+        public void UpdateFeedback(int userId, int feedbackTypeId, int priority, string title, string description, TicketStatus status)
         {
+
+            var revision = new FeedbackRevision(this.Id, this.UserId);
+
+            TrackChangeIfDifferent(revision, TrackedField.FeedbackTypeId, this.FeedbackTypeId.ToString(), feedbackTypeId.ToString());
+            TrackChangeIfDifferent(revision, TrackedField.Priority, this.Priority.ToString(), priority.ToString());
+            TrackChangeIfDifferent(revision, TrackedField.Title, this.Title, title);
+            TrackChangeIfDifferent(revision, TrackedField.Description, this.Description, description);
+            TrackChangeIfDifferent(revision, TrackedField.Status, this.Status.ToString(), status.ToString());
+
+            if (revision.ChangedFields.Count > 0)
+            {
+                this.Revisions.Add(revision);
+            }
+
             this.Priority = priority;
             this.FeedbackTypeId = feedbackTypeId;
             this.Title = title;
@@ -44,6 +58,8 @@ namespace FeedbackHub.Domain.Entities
         public virtual FeedbackType FeedbackType { get; set; }
         public virtual List<Attachment> Attachments { get; set; } = new();
         public virtual List<FeedbackHistory> Histories { get; set; } = new();
+        public virtual List<FeedbackRevision> Revisions { get; set; } = new();
+
         public virtual Application Application { get; set; }
 
         public void MarkDeleted()
@@ -53,7 +69,19 @@ namespace FeedbackHub.Domain.Entities
 
         public void AddComment(string comment, int userId)
         {
-            this.Histories.Add(new FeedbackHistory(this.Id,userId,comment,DateTime.Now));
+            this.Histories.Add(new FeedbackHistory(this.Id, userId, comment, DateTime.Now));
+        }
+
+        private void TrackChangeIfDifferent(FeedbackRevision revision,TrackedField field,string oldValue,string newValue)
+        {
+            if (!oldValue.Equals(newValue))
+            {
+                revision.ChangedFields.Add(new FeedbackChangedField(
+                    field.ToString(),
+                    oldValue,
+                    newValue
+                ));
+            }
         }
     }
 }

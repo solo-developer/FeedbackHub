@@ -11,5 +11,6 @@
         public const string EMAIL_ENCRYPTION_METHOD_SETTINGS_KEY = "EmailEncryptionMethod";
         public const string EMAIL_USERNAME_SETTINGS_KEY = "EmailUsername";
         public const string EMAIL_PASSWORD_SETTINGS_KEY = "EmailPassword";
+        public const string EMAIL_SENDER_SETTINGS_KEY = "SenderEmail";
     }
 }

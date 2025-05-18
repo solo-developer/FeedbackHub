@@ -5,7 +5,7 @@ namespace FeedbackHub.Domain.Entities
     public class Attachment : BaseEntity
     {
         private IFormFile _file;
-        public Attachment() { }
+        protected Attachment() { }
 
         public Attachment(int feedbackId, int createdBy,IFormFile file)
         {

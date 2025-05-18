@@ -4,9 +4,15 @@ namespace FeedbackHub.Domain.Entities
 {
     public class UserFeedbackEmailSubscription : BaseEntity
     {
-        public UserFeedbackEmailSubscription()
+        protected UserFeedbackEmailSubscription()
         {
-
+        }
+        public UserFeedbackEmailSubscription(int userId, int applicationId,bool notifyOnCommentMade, bool notifyOnStatusChange)
+        {
+            this.UserId = userId;
+            this.ApplicationId = applicationId;
+            this.NotifyOnCommentMade= notifyOnCommentMade;
+            this.NotifyOnStatusChange = notifyOnStatusChange;
         }
 
         public int UserId { get; set; }

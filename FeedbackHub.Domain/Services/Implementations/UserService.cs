@@ -10,6 +10,7 @@ using FeedbackHub.Domain.Templating;
 using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using System.Transactions;
 
 namespace FeedbackHub.Domain.Services.Implementations
@@ -52,7 +53,7 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email);
+                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email,dto.Accesses);
 
                 var appUser = userDetail.ApplicationUser;
                 var result = await _userManager.CreateAsync(appUser, dto.Password);
@@ -113,7 +114,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var totalCount = await queryable.CountAsync();
 
-            var users = await queryable.Select(a => new UserDetailDto
+            var users = await queryable.OrderBy(a=>a.ApplicationUser.Email).Skip(dto.Skip).Take(dto.Take).Select(a => new UserDetailDto
             {
                 Id = a.Id,
                 Fullname = a.FullName,
@@ -164,6 +165,32 @@ namespace FeedbackHub.Domain.Services.Implementations
             }).FirstOrDefaultAsync();
 
             return user;
+        }
+
+        public async Task<List<GenericDropdownDto<int, string>>> GetUserDropdownOptions(bool includeDeleted = false)
+        {
+            return await _userRepo.GetQueryableWithNoTracking().Where(a => includeDeleted || a.IsDeleted == false).Select(a => new GenericDropdownDto<int, string>
+            {
+                Label = a.FullName,
+                Value = a.Id
+            }).ToListAsync();
+        }
+
+        public async Task<UserProfileDto> GetUserProfileAsync(int userId)
+        {
+            var user = await _userRepo.GetByIdAsync(userId) ?? throw new ItemNotFoundException("User not found.");
+
+            var userProfile = new UserProfileDto
+            {
+                Id = user.Id,
+                Username = user.ApplicationUser.UserName,
+                Email = user.ApplicationUser.Email,
+                Fullname = user.FullName,
+                Role = (await _userManager.GetRolesAsync(user.ApplicationUser)).FirstOrDefault(),
+                Client = user.RegistrationRequest == null ? string.Empty : user.RegistrationRequest.Client.Name
+            };
+
+            return userProfile;
         }
 
         public async Task ResetPasswordAsync(int id)

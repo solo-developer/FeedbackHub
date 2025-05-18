@@ -21,11 +21,7 @@ namespace FeedbackHub.Server.Endpoints.FeedbackType
         {
             return await ApiHandler.HandleAsync(async () =>
             {
-                var feedbackType = new Domain.Entities.FeedbackType()
-                {
-                    Type = request.Type,
-                    Color = request.Color
-                };
+                var feedbackType = new Domain.Entities.FeedbackType(request.Type,request.Color);
 
                 await _feedbackTypeRepo.InsertAsync(feedbackType);
 

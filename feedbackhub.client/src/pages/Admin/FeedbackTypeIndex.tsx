@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import api  from '../../utils/HttpMiddleware';
+import api from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
-import { isSuccess, parseMessage, parseData, parseResponseType } from '../../utils/HttpResponseParser';
+import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResponseParser';
 import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
@@ -24,7 +24,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
 
     const [showDialog, setShowDialog] = useState(false);
     const [selectedId, setSelectedId] = useState(0);
-    const handleDeleteConfirm =async () => {
+    const handleDeleteConfirm = async () => {
         setShowDialog(false);
         try {
             const response = await api.delete(`/feedback-type/${selectedId}`);
@@ -34,7 +34,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 draggable: true
             });
 
-            if (isSuccess(response)) {               
+            if (isSuccess(response)) {
                 await fetchData();
             }
 
@@ -50,7 +50,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response =await getAllFeedbackTypesAsync();
+            const response = await getAllFeedbackTypesAsync();
 
             if (response.Success) {
                 setData(response.Data);
@@ -114,21 +114,33 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 id: 'Color',
                 header: 'Color',
                 accessorKey: 'Color',
+                cell: ({ row }: any) => (
+                    <div
+                        style={{
+                            width: '50px',
+                            height: '20px',
+                            backgroundColor: row.original.Color,
+                            border: '1px solid #ccc',
+                            borderRadius: '4px'
+                        }}
+                        title={row.original.Color}
+                    />
+                ),
             },
             {
                 id: 'Action',
                 header: 'Action',
                 cell: ({ row }) => (
                     <div>
-                          <span
-                                role="button"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                title="Delete Feedback Type"
-                                onClick={() => deleteFeedbackType(row.original.Id)}
-                            >
-                                <i className="fas fa-trash text-danger"></i>
-                            </span>                         
+                        <span
+                            role="button"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Delete Feedback Type"
+                            onClick={() => deleteFeedbackType(row.original.Id)}
+                        >
+                            <i className="fas fa-trash text-danger"></i>
+                        </span>
                     </div>
                 ),
             }
@@ -153,7 +165,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Feedback Type Setup' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} />
+                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}/>
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add Feedback Type" footer={modalFooter}>
                 <form onSubmit={saveFeedbackType}>
@@ -190,7 +202,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 confirmText="Delete"
                 cancelText="Cancel"
                 variant="danger"
-             />
+            />
         </>
     );
 };

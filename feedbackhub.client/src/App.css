@@ -1,4 +1,11 @@
-﻿#root {
+﻿/* App.css */
+:root {
+  --primary-color: #3f51b5;
+  --secondary-color: #f8f9fa;
+  --button-hover-color: #303f9f;
+}
+
+#root {
     /* max-width: 1280px; */
     /* margin: 0 auto; */
     padding: 2rem;
@@ -29,4 +36,26 @@ th, td {
   overflow: auto;
   width: 100%;
   height: 100%;
+}
+
+
+.admin-navbar {
+  height: 4rem;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.admin-navbar .navbar-brand,
+.admin-navbar .navbar-toggler,
+.admin-navbar .nav-link,
+.admin-navbar .dropdown-toggle {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.admin-navbar img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
 }

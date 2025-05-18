@@ -4,7 +4,7 @@ namespace FeedbackHub.Domain.Entities
 {
     public class UserSubscription : BaseEntity
     {
-        public UserSubscription() { }
+        protected UserSubscription() { }
 
         public UserSubscription(int userId, int applicationId)
         {

@@ -2,7 +2,7 @@
 {
     public class FeedbackHistory : BaseEntity
     {
-        public FeedbackHistory()
+        protected FeedbackHistory()
         {
             
         }

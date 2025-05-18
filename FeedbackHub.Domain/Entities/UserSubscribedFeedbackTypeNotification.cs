@@ -2,7 +2,7 @@
 {
     public class UserSubscribedFeedbackTypeNotification : BaseEntity
     {
-        public UserSubscribedFeedbackTypeNotification()
+        protected UserSubscribedFeedbackTypeNotification()
         {
             
         }

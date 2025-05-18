@@ -70,6 +70,12 @@ namespace FeedbackHub.Domain.Services.Implementations
                 }
             }
 
+
+            if (request.Model.FeedbackTypeId > 0)
+            {
+                queryable = queryable.Where(a => a.FeedbackTypeId == request.Model.FeedbackTypeId);
+            }
+
             if (request.Model.Status.HasValue)
             {
                 queryable = queryable.Where(a => a.Status == request.Model.Status);
@@ -81,6 +87,11 @@ namespace FeedbackHub.Domain.Services.Implementations
             if (request.Model.ToDate.HasValue)
             {
                 queryable = queryable.Where(a => a.CreatedDate.Date <= request.Model.ToDate.Value.Date);
+            }
+            if (!string.IsNullOrEmpty(request.Model.Search))
+            {
+                var normalisedSearch = request.Model.Search.ToLower().Trim();
+                queryable = queryable.Where(a => a.TicketId.ToString() == normalisedSearch || a.Title.ToLower().Contains(normalisedSearch));
             }
 
             var totalCount = await queryable.CountAsync();
@@ -175,7 +186,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             var status = entity.Status;
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                entity.UpdateFeedback(dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
+                entity.UpdateFeedback(dto.LoggedInUserId, dto.Model.FeedbackTypeId, dto.Model.Priority, dto.Model.Title, entity.Description, dto.Model.Status);
 
                 await _repo.UpdateAsync(entity, entity.Id);
 
@@ -276,12 +287,21 @@ namespace FeedbackHub.Domain.Services.Implementations
             }
         }
 
-        public async Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(FeedbackCountFilterDto request)
+        public async Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(GenericDto<FeedbackCountFilterDto> model)
         {
-            var fromDate = request.FromDate.ToDateTime(TimeOnly.MinValue);
-            var toDate = request.ToDate.ToDateTime(TimeOnly.MaxValue);
+            var dto = model.Model;
+            var fromDate = dto.FromDate.ToDateTime(TimeOnly.MinValue);
+            var toDate = dto.ToDate.ToDateTime(TimeOnly.MaxValue);
 
             var queryable = _repo.GetQueryable().Where(a => a.CreatedDate.Date >= fromDate.Date && a.CreatedDate.Date <= toDate.Date);
+            if (model.ApplicationId > 0)
+            {
+                queryable = queryable.Where(a => a.ApplicationId == model.ApplicationId);
+            }
+            if (model.ClientId > 0)
+            {
+                queryable = queryable.Where(a => a.User.RegistrationRequest.ClientId == model.ClientId);
+            }
 
             return await queryable.GroupBy(a => a.Status)
                 .Select(a => new FeedbackCountResponseDto

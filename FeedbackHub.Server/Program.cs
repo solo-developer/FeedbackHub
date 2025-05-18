@@ -178,17 +178,16 @@ namespace FeedbackHub.Server
         static void RegisterServices(IServiceCollection services)
         {
             services.Scan(scan => scan
-                     .FromAssembliesOf(typeof(IBaseRepository<>), typeof(BaseRepository<>))
-                     .AddClasses()
-                     .AsSelf()
-                      .AsImplementedInterfaces()
-                     .WithScopedLifetime());
+                .FromAssembliesOf(typeof(IBaseRepository<>), typeof(BaseRepository<>))
+                .AddClasses(classes => classes
+                    .Where(type => !typeof(BaseEntity).IsAssignableFrom(type))) // Skip domain entities
+                .AsSelf()
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
 
-            //services.AddScoped<ITokenValueProvider, GenericTokenProvider>();
-            //services.AddScoped<ITokenValueProvider, RegistrationRequestApprovedTokenProvider>();
             services.AddScoped<TokenProviderResolver>();
-            services.AddScoped<IApplicationInfoProvider,ApplicationInfoProvider>();
-            services.AddScoped<IUserContext,UserContext>();
+            services.AddScoped<IApplicationInfoProvider, ApplicationInfoProvider>();
+            services.AddScoped<IUserContext, UserContext>();
         }
     }
 }

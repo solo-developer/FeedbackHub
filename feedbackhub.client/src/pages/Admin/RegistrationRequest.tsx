@@ -7,7 +7,7 @@ import { convertToUser, getAllAsync } from '../../services/RegistrationService';
 import { RegistrationRequestFilterDto } from '../../types/account/RegistrationRequestFilterDto';
 import Modal from '../../components/Modal';
 import { ApplicationDto } from '../../types/application/ApplicationDto';
-import { fetchApplications } from '../../services/ApplicationService';
+import { fetchApplications, getApplicationsByClientIdAsync } from '../../services/ApplicationService';
 import Select from 'react-select';
 import { UserConversionDto } from '../../types/account/UserConversionDto';
 
@@ -15,12 +15,12 @@ const RegistrationRequestPage: React.FC = () => {
     const pageSize = 10;
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
 
     const [showModal, setShowModal] = useState(false);
     const [applications, setApplications] = useState<ApplicationDto[]>([]);
     const [selectedRegistrationRequest, setSelectedRegistrationRequest] = useState<RegistrationRequestDto | null>(null);
-    const generateRandomPassword =useMemo((length = 10): string => {
+    const generateRandomPassword = useMemo((length = 10): string => {
         const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
         const numberChars = "0123456789";
@@ -44,7 +44,7 @@ const RegistrationRequestPage: React.FC = () => {
         password = password.split('').sort(() => Math.random() - 0.5).join('');
 
         return password;
-    },[selectedRegistrationRequest]);
+    }, [selectedRegistrationRequest]);
 
     const [userConversionDto, setUserConversionData] = useState<UserConversionDto>({
         RegistrationRequestId: selectedRegistrationRequest?.Id ?? 0,
@@ -65,10 +65,9 @@ const RegistrationRequestPage: React.FC = () => {
 
     const closeModal = () => setShowModal(false);
 
-
     const [data, setData] = useState<RegistrationRequestDto[]>([]);
     const [filterDto, setFilter] = useState<RegistrationRequestFilterDto>({
-        Take: 10,
+        Take: pageSize,
         Skip: 0
     });
     const { showToast } = useToast();
@@ -78,10 +77,21 @@ const RegistrationRequestPage: React.FC = () => {
             openModal();
         }
     }, [selectedRegistrationRequest]);
+
+    useEffect(() => {
+        getClientSubscribedApplications();
+    }, [selectedRegistrationRequest])
+
     useEffect(() => {
         fetchData();
-        getApplications();
-    }, [currentPage, filterDto, selectedRegistrationRequest]);
+    }, [filterDto, selectedRegistrationRequest]);
+
+    useEffect(() => {
+        setFilter(prev => ({
+            ...prev,
+            Skip: (currentPage - 1) * prev.Take,
+        }));
+    }, [currentPage]);
 
     const convertToUserClicked = async (registrationRequest: RegistrationRequestDto) => {
         setSelectedRegistrationRequest(registrationRequest);
@@ -103,16 +113,18 @@ const RegistrationRequestPage: React.FC = () => {
                     draggable: true
                 });
             }
-
         }
         catch (ex) {
             showToast('Failed to conver to user', 'error');
         }
     };
 
-    const getApplications = async () => {
+    const getClientSubscribedApplications = async () => {
         try {
-            const response = await fetchApplications();
+            if (!selectedRegistrationRequest || selectedRegistrationRequest.Client.Id == 0) {
+                return;
+            }
+            const response = await getApplicationsByClientIdAsync(selectedRegistrationRequest.Client.Id);
 
             if (response.Success) {
                 setApplications(response.Data);
@@ -136,7 +148,7 @@ const RegistrationRequestPage: React.FC = () => {
 
             if (response.Success) {
                 setData(response.Data.Data);
-                setTotalPages(Math.ceil(response.Data.TotalCount / pageSize));
+                setTotalCount(response.Data.TotalCount );
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -221,15 +233,15 @@ const RegistrationRequestPage: React.FC = () => {
                     if (!row.original.IsUser) {
                         return (
                             <div>
-                                  <span
-                                role="button"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                title="Convert to User"
-                                onClick={() => convertToUserClicked(row.original)}
-                            >
-                                <i className="fas fa-exchange text-primary"></i>
-                            </span>   
+                                <span
+                                    role="button"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Convert to User"
+                                    onClick={() => convertToUserClicked(row.original)}
+                                >
+                                    <i className="fas fa-exchange text-primary"></i>
+                                </span>
                             </div>
                         );
                     }
@@ -248,10 +260,18 @@ const RegistrationRequestPage: React.FC = () => {
                     paginationType="server"
                     pageSize={pageSize}
                     serverPaginationProps={{
-                        currentPage: currentPage - 1,
-                        totalPages,
+                        currentPage: currentPage,
+                        totalCount: totalCount,
                         onPageChange: (newPage) => {
                             setCurrentPage(newPage);
+                        },
+                        onPageSizeChange: (newSize) => {
+                            setFilter(prev => ({
+                                ...prev,
+                                Take: newSize,
+                                Skip: 0,
+                            }));
+                            setCurrentPage(1);
                         },
                     }}
                 />

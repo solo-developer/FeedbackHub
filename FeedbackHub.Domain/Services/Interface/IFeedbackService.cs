@@ -20,6 +20,6 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<List<FeedbackAttachmentDto>> GetAttachmentsAsync(int feedbackId);
 
         Task AddAttachmentsAsync(GenericDto<SaveFeedbackAttachmentDto> dto);
-        Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(FeedbackCountFilterDto request);
+        Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(GenericDto<FeedbackCountFilterDto> request);
     }
 }

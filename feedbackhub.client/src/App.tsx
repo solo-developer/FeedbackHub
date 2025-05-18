@@ -17,6 +17,7 @@ import { AppSwitcherProvider } from './contexts/AppSwitcherContext';
 import { ADMIN_ROLE } from './utils/Constants';
 import EditFeedbackPage from './pages/Shared/Feedback/EditFeedback';
 import ChangePasswordPage from './pages/ChangePassword';
+import { UserProvider } from './contexts/UserContext';
 
 const App = () => {
   return (
@@ -37,7 +38,7 @@ const AppRoutes = () => {
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
-        setAuthState(true, decodedToken.role); 
+        setAuthState(true, decodedToken.role);
       } catch (error) {
         console.error("Token decoding error:", error);
         setAuthState(false, null);
@@ -45,22 +46,32 @@ const AppRoutes = () => {
     } else {
       setAuthState(false, null);
     }
-  }, [setAuthState]); 
+  }, [setAuthState]);
 
   return (
     <Router>
       <Routes>
-       
+
         <Route path="/login" element={<HomeScreenPage />} />
         <Route path="/register" element={<RegistrationRequestPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
-          <Route path="/admin/*" element={<AdminDashboardPage />} />
-          <Route path="/consumer/*" element={ <AppSwitcherProvider><DashboardPage /></AppSwitcherProvider>} />
-          <Route path="/feedback/:id" element={ <EditFeedbackPage></EditFeedbackPage>} />
-          <Route path="/profile/change-password" element={ <ChangePasswordPage></ChangePasswordPage>} />
+          <Route path="/admin-dashboard" element={<UserProvider> <AdminDashboardPage /></UserProvider>} />
+          <Route path="/admin/*" element={
+            <UserProvider>
+              <AdminDashboardPage />
+            </UserProvider>} />
+          <Route path="/consumer/*" element={
+            <UserProvider>
+              <AppSwitcherProvider>
+                <DashboardPage />
+              </AppSwitcherProvider>
+            </UserProvider>} />
+          <Route path="/feedback/:id" element={ <UserProvider><EditFeedbackPage></EditFeedbackPage></UserProvider>} />
+          <Route path="/profile/change-password" element={<UserProvider>
+            <ChangePasswordPage></ChangePasswordPage>
+          </UserProvider>} />
         </Route>
-        <Route path="/access-denied" element={<AccessDenied/>} />
+        <Route path="/access-denied" element={<AccessDenied />} />
         <Route
           path="/" element={
             <Navigate to={isAuthenticated ? (role === ADMIN_ROLE ? "/admin-dashboard" : "/consumer") : "/login"} />

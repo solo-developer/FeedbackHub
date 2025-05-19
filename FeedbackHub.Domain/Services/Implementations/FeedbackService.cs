@@ -192,15 +192,10 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 tx.Complete();
             }
-            if (dto.LoggedInUserId == entity.UserId || dto.Model.Status == status)
+            if (await IsValidForNotification(dto.LoggedInUserId, entity, status, dto.Model.Status) == false)
+            {
                 return;
-            var userNotificationSubscription = await _userNotificationService.GetSetting(entity.UserId, entity.ApplicationId);
-            if (!userNotificationSubscription.NotifyOnStatusChange)
-                return;
-            if (!userNotificationSubscription.FeedbackTypeIds.Contains(entity.FeedbackTypeId))
-                return;
-            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a => (int)a).Contains((int)entity.Status))
-                return;
+            }
 
             var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackStatusChanged, new FeedbackStatusUpdatedEmailNotificationDto
             {
@@ -226,6 +221,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 tx.Complete();
             }
+
 
             if (dto.LoggedInUserId == entity.UserId)
                 return;
@@ -367,10 +363,10 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             var feedback = await _repo.GetQueryable()
                 .Include(a => a.Revisions)
-                .ThenInclude(a=>a.ChangedFields)
+                .ThenInclude(a => a.ChangedFields)
                 .AsSplitQuery().FirstOrDefaultAsync(a => a.Id == feedbackId) ?? throw new ItemNotFoundException("Feedback not found");
 
-            return feedback.Revisions.OrderByDescending(a=>a.ChangedAt).Select(a=> new FeedbackRevisionDto
+            return feedback.Revisions.OrderByDescending(a => a.ChangedAt).Select(a => new FeedbackRevisionDto
             {
                 Id = a.Id,
                 FeedbackId = a.FeedbackId,
@@ -384,6 +380,64 @@ namespace FeedbackHub.Domain.Services.Implementations
                     DisplayName = b.GetDisplayName()
                 }).ToList()
             }).ToList();
+        }
+
+        public async Task UpdateStatusAsync(GenericDto<FeedbackStatusUpdateDto> dto)
+        {
+            var entity = await _repo.GetByIdAsync(dto.Model.FeedbackId) ?? throw new ItemNotFoundException("Feedback not found.");
+
+            var status = entity.Status;
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                entity.UpdateStatus(dto.LoggedInUserId, dto.Model.NewStatus);
+
+                await _repo.UpdateAsync(entity, entity.Id);
+
+                tx.Complete();
+            }
+
+            if (await IsValidForNotification(dto.LoggedInUserId,entity,status,dto.Model.NewStatus) == false)
+            {
+                return;
+            }
+          
+
+            var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackStatusChanged, new FeedbackStatusUpdatedEmailNotificationDto
+            {
+                OldStatus = status,
+                UpdatedDetail = new FeedbackUpdateDto
+                {
+                    Id = entity.Id,
+                    FeedbackTypeId = entity.FeedbackTypeId,
+                    Title = entity.Title,
+                    Status = dto.Model.NewStatus,
+                    Priority = entity.Priority,
+                    Description = entity.Description
+                }
+            });
+            _emailSenderService.SendEmailAsync(new EmailMessageDto
+            {
+                Body = body,
+                Subject = subject,
+                IsHtml = true,
+                To = new List<string> { entity.User.ApplicationUser.Email! }
+            });
+        }
+
+        private async Task<bool> IsValidForNotification(int userId, Feedback entity, TicketStatus oldStatus, TicketStatus newStatus)
+        {
+            if (userId == entity.UserId || newStatus == entity.Status)
+                return false;
+            var userNotificationSubscription = await _userNotificationService.GetSetting(entity.UserId, entity.ApplicationId);
+            if (!userNotificationSubscription.NotifyOnStatusChange)
+                return false;
+            if (!userNotificationSubscription.FeedbackTypeIds.Contains(entity.FeedbackTypeId))
+                return false;
+
+            if (!userNotificationSubscription.TriggerStates.Contains(NotificationTriggerStateLevel.AllChanges) && !userNotificationSubscription.TriggerStates.Select(a => (int)a).Contains((int)entity.Status))
+                return false;
+
+            return true;
         }
     }
 }

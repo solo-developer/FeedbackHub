@@ -23,5 +23,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<List<FeedbackCountResponseDto>> GetFeedbackCountAsync(GenericDto<FeedbackCountFilterDto> request);
 
         Task<List<FeedbackRevisionDto>> GetRevisionsAsync(int feedbackId);
+
+        Task UpdateStatusAsync(GenericDto<FeedbackStatusUpdateDto> dto);
     }
 }

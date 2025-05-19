@@ -42,6 +42,18 @@ namespace FeedbackHub.Domain.Entities
             this.ModifiedDate = DateTime.Now;
         }
 
+        public void UpdateStatus(int userId, TicketStatus status)
+        {
+            var revision = new FeedbackRevision(this.Id, this.UserId);
+            TrackChangeIfDifferent(revision, TrackedField.Status, this.Status.ToString(), status.ToString());
+            if (revision.ChangedFields.Count > 0)
+            {
+                this.Revisions.Add(revision);
+            }
+            this.Status = status;
+            this.ModifiedDate = DateTime.Now;
+        }
+
         public int UserId { get; private set; }
         public int FeedbackTypeId { get; private set; }
         public int ApplicationId { get; private set; }

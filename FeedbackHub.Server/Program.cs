@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace FeedbackHub.Server
 {
@@ -49,6 +50,8 @@ namespace FeedbackHub.Server
             builder.Services.AddControllers().AddJsonOptions(opt =>
             {
                 opt.JsonSerializerOptions.Converters.Add(new EmailJsonConverter());
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
             }); ;
             builder.Services.AddSwaggerGen();
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");

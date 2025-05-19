@@ -6,6 +6,7 @@ import { FeedbackCommentDto } from '../types/feedback/FeedbackCommentDto';
 import { FeedbackCountDto } from '../types/feedback/FeedbackCount';
 import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
 import { FeedbackRevisionDto } from '../types/feedback/FeedbackRevisionDto';
+import { FeedbackStatusUpdateDto } from '../types/feedback/FeedbackStatusUpdateDto';
 import { FeedbackUpdateDto } from '../types/feedback/FeedbackUpdateDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
@@ -210,5 +211,21 @@ export const getRevisionsByFeedbackIdAsync = async (feedbackId : number): Promis
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to get revisions', ResponseType: 'error' };
+    }
+};
+
+
+export const updateStatusAsync = async (dto: FeedbackStatusUpdateDto): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.patch('/feedback/status', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to update status', ResponseType: 'error' };
     }
 };

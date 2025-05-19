@@ -3,31 +3,27 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { getBoardBacklogsAsync, getBoardFeedbacksAsync } from '../../services/FeedbackService';
 import { useToast } from '../../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
-import { BoardFeedbackDto } from '../../types/feedback/BoardFeedbackDto';
+import { BoardFeedbackDto, BoardFeedbackDetailDto } from '../../types/feedback/BoardFeedbackDto';
 import BoardGroupSection from '../../components/BoardGroupSection';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 import FullScreenLoader from '../../components/FullScreenLoader';
 
 type FeedbackType = 'board' | 'backlog';
 
 interface BoardProps {
-  type: FeedbackType; 
+  type: FeedbackType;
 }
 
 const Board: React.FC<BoardProps> = ({ type }) => {
   const [groupingType, setGroupingType] = useState<'Client' | 'Application' | 'ClientAndApplication'>('Client');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [feedbacks, setFeedbacks] = useState<BoardFeedbackDto[]>([]);
-  const [isLoading, setIsLoading] =useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (type == 'board')
-      fetchActiveFeedbacks();
-    else
-    fetchBacklogs();
-
+    if (type === 'board') fetchActiveFeedbacks();
+    else fetchBacklogs();
   }, [type]);
 
   const fetchActiveFeedbacks = async () => {
@@ -44,8 +40,7 @@ const Board: React.FC<BoardProps> = ({ type }) => {
       }
     } catch {
       showToast('Failed to load feedbacks', 'error');
-    }
-    finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -64,8 +59,7 @@ const Board: React.FC<BoardProps> = ({ type }) => {
       }
     } catch {
       showToast('Failed to load feedbacks', 'error');
-    }
-    finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -78,7 +72,9 @@ const Board: React.FC<BoardProps> = ({ type }) => {
     });
   };
 
-  return isLoading? (<FullScreenLoader></FullScreenLoader>) :(
+  return isLoading ? (
+    <FullScreenLoader />
+  ) : (
     <div className="container-fluid">
       {/* Controls */}
       <div className="d-flex justify-content-between mb-4">
@@ -95,13 +91,13 @@ const Board: React.FC<BoardProps> = ({ type }) => {
         </div>
       </div>
 
-      {/* Grouped feedbacks */}
-      <BoardGroupSection
-        groupingType={groupingType}
-        feedbacks={feedbacks}
-        toggleRow={toggleRow}
-        expandedRows={expandedRows}
-      />
+        <BoardGroupSection
+          groupingType={groupingType}
+          feedbacks={feedbacks}
+          toggleRow={toggleRow}
+          expandedRows={expandedRows}
+        />
+     
     </div>
   );
 };

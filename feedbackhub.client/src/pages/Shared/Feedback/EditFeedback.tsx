@@ -21,6 +21,7 @@ import { FeedbackCommentDto } from '../../../types/feedback/FeedbackCommentDto';
 import { FeedbackAttachmentDto } from '../../../types/feedback/FeedbackAttachmentDto';
 import { buildFormData } from '../../../utils/FormDataHelper';
 import { deleteAttachmentAsync, downloadAttachment } from '../../../services/AttachmentService';
+import FeedbackRevisionHistory from './FeedbackRevisionHistory';
 
 const EditFeedbackPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -34,12 +35,18 @@ const EditFeedbackPage: React.FC = () => {
 
     const [feedbackDetail, setFeedbackDetail] = useState<FeedbackDto>();
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
-    const [activeTab, setActiveTab] = useState<'attachments' | 'history'>('history');
+    const [activeTab, setActiveTab] = useState<'attachments' | 'history' | 'revisions'>('history');
     const [historyComments, setHistoryComments] = useState<FeedbackCommentDto[]>([]);
     const [attachments, setAttachments] = useState<FeedbackAttachmentDto[]>([]);
     const [newComment, setNewComment] = useState<string>('');
     const [showAddCommentConfirmation, setShowAddCommentConfirmation] = useState(false);
     const [showRemoveFileConfirmation, setShowRemoveFileConfirmation] = useState(false);
+
+    const [revisionReloadKey, setRevisionReloadKey] = useState(0);
+
+    const refreshRevisions = () => {
+        setRevisionReloadKey(prev => prev + 1);
+    };
 
     const [formData, setFormData] = useState<FeedbackUpdateDto>({
         Id: feedbackId,
@@ -146,10 +153,11 @@ const EditFeedbackPage: React.FC = () => {
             const response = await updateFeedbackAsync(formData);
 
             if (response.Success) {
-                showToast('Feedback updated successfully', response.ResponseType, {
+                showToast('Feedback updated successfully', 'success', {
                     autoClose: 3000,
                     draggable: true
                 });
+                refreshRevisions();
             }
             else {
                 showToast(response.Message, response.ResponseType, {
@@ -248,6 +256,7 @@ const EditFeedbackPage: React.FC = () => {
     };
 
     const [fileSelectionForDelete, setFileSelectionForDelete] = useState<string>('');
+    const [showRevisions, setShowRevisions] = useState(false);
     const removeAttachmentBtnClicked = (identifier: string) => {
         setFileSelectionForDelete(identifier);
 
@@ -389,6 +398,17 @@ const EditFeedbackPage: React.FC = () => {
                                 </li>
                                 <li className="nav-item">
                                     <button
+                                        className={`nav-link ${activeTab === 'revisions' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setActiveTab('revisions')
+                                            setShowRevisions(true);
+                                        }}
+                                    >
+                                        Revisions
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button
                                         className={`nav-link ${activeTab === 'attachments' ? 'active' : ''}`}
                                         onClick={() => setActiveTab('attachments')}
                                     >
@@ -413,7 +433,8 @@ const EditFeedbackPage: React.FC = () => {
                                                 Add Comment
                                             </button>
                                             <br />
-                                            <h6>Previous Comments</h6>
+                                            {historyComments.length > 0 && 
+                                            <> <h6>Previous Comments</h6>
 
 
                                             <div className="comment-history">
@@ -428,10 +449,19 @@ const EditFeedbackPage: React.FC = () => {
                                                         <div>{cmt.Comment}</div>
                                                     </div>
                                                 ))}
-                                            </div>
+                                            </div> </>
+                                            }
+
                                         </div>
                                     </div>
                                 )}
+
+                                {activeTab === 'revisions' && (
+                                    <div>
+                                        {showRevisions && <FeedbackRevisionHistory key={revisionReloadKey} feedbackId={feedbackId} />}
+                                    </div>
+                                )}
+
 
                                 {activeTab === 'attachments' && (
                                     <div>

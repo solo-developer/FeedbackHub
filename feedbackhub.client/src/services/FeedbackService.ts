@@ -5,6 +5,7 @@ import { FeedbackBasicDetailDto, FeedbackDto } from '../types/feedback/FeedbackB
 import { FeedbackCommentDto } from '../types/feedback/FeedbackCommentDto';
 import { FeedbackCountDto } from '../types/feedback/FeedbackCount';
 import { AdminFeedbackFilterDto, FeedbackFilterDto } from '../types/feedback/FeedbackFilterDto';
+import { FeedbackRevisionDto } from '../types/feedback/FeedbackRevisionDto';
 import { FeedbackUpdateDto } from '../types/feedback/FeedbackUpdateDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
@@ -27,24 +28,9 @@ export const saveNewFeedbackAsync = async (dto: FormData): Promise<ServiceRespon
 };
 
 export const getAsync = async (dto: FeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
-  try {
-      const response = await api.post('/feedbacks', dto);
-
-      if (isSuccess(response)) {
-          return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
-      }
-      else {
-          return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
-      }
-  } catch (err) {
-      return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
-  }
-};
-
-export const getForAdminAsync = async (dto: AdminFeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
     try {
-        const response = await api.post('/admin/feedbacks', dto);
-  
+        const response = await api.post('/feedbacks', dto);
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
         }
@@ -54,13 +40,28 @@ export const getForAdminAsync = async (dto: AdminFeedbackFilterDto): Promise<Ser
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
     }
-  };
+};
 
-  
-export const getFeedbackByIdAsync = async (id:number): Promise<ServiceResponseType<FeedbackDto>> => {
+export const getForAdminAsync = async (dto: AdminFeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
+    try {
+        const response = await api.post('/admin/feedbacks', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
+    }
+};
+
+
+export const getFeedbackByIdAsync = async (id: number): Promise<ServiceResponseType<FeedbackDto>> => {
     try {
         const response = await api.get(`/feedback/${id}`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<FeedbackDto>(response) } as ServiceResponseType<FeedbackDto>;
         }
@@ -70,9 +71,9 @@ export const getFeedbackByIdAsync = async (id:number): Promise<ServiceResponseTy
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedback detail', ResponseType: 'error' };
     }
-  };
+};
 
-  
+
 export const updateFeedbackAsync = async (dto: FeedbackUpdateDto): Promise<ServiceResponseType<any>> => {
     try {
         const response = await api.post('/feedback/update', dto);
@@ -88,7 +89,7 @@ export const updateFeedbackAsync = async (dto: FeedbackUpdateDto): Promise<Servi
     }
 };
 
- 
+
 export const addFeedbackCommentAsync = async (dto: any): Promise<ServiceResponseType<any>> => {
     try {
         const response = await api.post('/feedback/comment', dto);
@@ -107,7 +108,7 @@ export const addFeedbackCommentAsync = async (dto: any): Promise<ServiceResponse
 export const getCommentsAsync = async (feedbackId: number): Promise<ServiceResponseType<FeedbackCommentDto[]>> => {
     try {
         const response = await api.get(`/feedbacks/${feedbackId}/comments`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<FeedbackCommentDto[]>(response) } as ServiceResponseType<FeedbackCommentDto[]>;
         }
@@ -117,13 +118,13 @@ export const getCommentsAsync = async (feedbackId: number): Promise<ServiceRespo
     } catch (err) {
         return { Success: false, Message: 'Failed to get comments', ResponseType: 'error' };
     }
-  };
+};
 
 
-  export const getAttachmentsAsync = async (feedbackId: number): Promise<ServiceResponseType<FeedbackAttachmentDto[]>> => {
+export const getAttachmentsAsync = async (feedbackId: number): Promise<ServiceResponseType<FeedbackAttachmentDto[]>> => {
     try {
         const response = await api.get(`/feedbacks/${feedbackId}/attachments`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<FeedbackAttachmentDto[]>(response) } as ServiceResponseType<FeedbackAttachmentDto[]>;
         }
@@ -133,9 +134,9 @@ export const getCommentsAsync = async (feedbackId: number): Promise<ServiceRespo
     } catch (err) {
         return { Success: false, Message: 'Failed to get attachments', ResponseType: 'error' };
     }
-  };
+};
 
-  
+
 export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceResponseType<any>> => {
     try {
         const response = await api.post('/feedback/attachments', dto);
@@ -151,10 +152,10 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
     }
 };
 
-  export const getFeedbacksCountAsync = async (dateRange : FilterOption): Promise<ServiceResponseType<FeedbackCountDto[]>> => {
+export const getFeedbacksCountAsync = async (dateRange: FilterOption): Promise<ServiceResponseType<FeedbackCountDto[]>> => {
     try {
         const response = await api.get(`/feedbacks/count?DateRange=${dateRange}`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<FeedbackCountDto[]>(response) } as ServiceResponseType<FeedbackCountDto[]>;
         }
@@ -164,12 +165,12 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedback counts', ResponseType: 'error' };
     }
-  };
+};
 
-  export const getBoardFeedbacksAsync = async (): Promise<ServiceResponseType<BoardFeedbackDto[]>> => {
+export const getBoardFeedbacksAsync = async (): Promise<ServiceResponseType<BoardFeedbackDto[]>> => {
     try {
         const response = await api.get(`/feedback/board`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<BoardFeedbackDto[]>(response) } as ServiceResponseType<BoardFeedbackDto[]>;
         }
@@ -179,12 +180,12 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
     }
-  };
+};
 
-  export const getBoardBacklogsAsync = async (): Promise<ServiceResponseType<BoardFeedbackDto[]>> => {
+export const getBoardBacklogsAsync = async (): Promise<ServiceResponseType<BoardFeedbackDto[]>> => {
     try {
         const response = await api.get(`/feedback/backlogs`);
-  
+
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<BoardFeedbackDto[]>(response) } as ServiceResponseType<BoardFeedbackDto[]>;
         }
@@ -194,5 +195,20 @@ export const saveFeedbackAttachments = async (dto: FormData): Promise<ServiceRes
     } catch (err) {
         return { Success: false, Message: 'Failed to get feedbacks', ResponseType: 'error' };
     }
-  };
+};
 
+
+export const getRevisionsByFeedbackIdAsync = async (feedbackId : number): Promise<ServiceResponseType<FeedbackRevisionDto[]>> => {
+    try {
+        const response = await api.get(`/feedback/${feedbackId}/revisions`);
+
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<FeedbackRevisionDto[]>(response) } as ServiceResponseType<FeedbackRevisionDto[]>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<FeedbackRevisionDto[]>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get revisions', ResponseType: 'error' };
+    }
+};

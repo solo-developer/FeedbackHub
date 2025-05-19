@@ -13,7 +13,7 @@ const ConsumerSidebar = () => {
                     <Link to='/consumer/dashboard' className="nav-link fw-semibold text-dark active">Dashboard</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to='/consumer/feedback/new' className="nav-link text-dark">Add Feedback</Link>
+                    <Link to='/consumer/feedback/new' className="nav-link text-dark">New Feedback</Link>
                 </li>
                 <li className="nav-item">
                     <Link to='/consumer/feedbacks/Open' className="nav-link text-dark">Open Feedbacks</Link>

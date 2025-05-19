@@ -362,5 +362,28 @@ namespace FeedbackHub.Domain.Services.Implementations
             }).ToListAsync();
             return (feedbacksQueryable, feedbacks);
         }
+
+        public async Task<List<FeedbackRevisionDto>> GetRevisionsAsync(int feedbackId)
+        {
+            var feedback = await _repo.GetQueryable()
+                .Include(a => a.Revisions)
+                .ThenInclude(a=>a.ChangedFields)
+                .AsSplitQuery().FirstOrDefaultAsync(a => a.Id == feedbackId) ?? throw new ItemNotFoundException("Feedback not found");
+
+            return feedback.Revisions.OrderByDescending(a=>a.ChangedAt).Select(a=> new FeedbackRevisionDto
+            {
+                Id = a.Id,
+                FeedbackId = a.FeedbackId,
+                ChangedBy = a.User.FullName,
+                ChangedAt = a.ChangedAt,
+                ChangedFields = a.ChangedFields.Select(b => new FeedbackChangedFieldDto
+                {
+                    FieldName = b.FieldName,
+                    OldValue = b.OldValue,
+                    NewValue = b.NewValue,
+                    DisplayName = b.GetDisplayName()
+                }).ToList()
+            }).ToList();
+        }
     }
 }

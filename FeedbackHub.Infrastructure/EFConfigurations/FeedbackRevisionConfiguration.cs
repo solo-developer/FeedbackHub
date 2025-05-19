@@ -22,6 +22,11 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                    .HasForeignKey(r => r.FeedbackId)
                    .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(r => r.User)
+                 .WithMany(f => f.Revisions)
+                 .HasForeignKey(r => r.ChangedBy)
+                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(r => r.ChangedFields)
                    .WithOne(cf => cf.FeedbackRevision)
                    .HasForeignKey(cf => cf.FeedbackRevisionId)

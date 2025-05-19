@@ -15,6 +15,7 @@
         public int ChangedBy { get;private set; }
         public DateTime ChangedAt { get;private set; } = DateTime.Now;
         public virtual Feedback Feedback { get; set; }
+        public virtual UserDetail User { get; set; }
         public virtual List<FeedbackChangedField> ChangedFields { get; set; } = new();
     }
 

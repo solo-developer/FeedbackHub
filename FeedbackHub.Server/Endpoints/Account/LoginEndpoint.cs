@@ -52,7 +52,12 @@ namespace FeedbackHub.Server.Endpoints.Account
                 if (ModelState.IsValid)
                 {
                     ApplicationUser user = await _userManager.FindByEmailAsync(request.Username) ?? throw new ItemNotFoundException("Email is invalid.");
+                    var userDetail =await _userService.GetUserDetailByAspUserIdAsync(user.Id);
 
+                    if (userDetail.IsDeleted)
+                    {
+                        return ApiResponse.Error("User is disabled");
+                    }
 
                     if (await _userManager.CheckPasswordAsync(user, request.Password) == false)
                     {

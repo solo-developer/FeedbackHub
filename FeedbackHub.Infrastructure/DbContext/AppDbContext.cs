@@ -18,7 +18,7 @@ namespace FeedbackHub.Infrastructure.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new AdminUserApplicationAccessConfiguration());
+            builder.ApplyConfiguration(new UserApplicationAccessConfiguration());
             builder.ApplyConfiguration(new ApplicationConfiguration());
             builder.ApplyConfiguration(new AttachmentConfiguration());
             builder.ApplyConfiguration(new ClientApplicationSubscriptionConfiguration());
@@ -35,12 +35,11 @@ namespace FeedbackHub.Infrastructure.Context
             builder.ApplyConfiguration(new UserDetailConfiguration());
             builder.ApplyConfiguration(new UserFeedbackEmailSubscriptionConfiguration());
             builder.ApplyConfiguration(new UserSubscribedFeedbackTypeNotificationConfiguration());
-            builder.ApplyConfiguration(new UserSubscriptionConfiguration());
             builder.ApplyConfiguration(new UserNotificationTriggerStateConfiguration());
             base.OnModelCreating(builder);           
         }
 
-        public DbSet<AdminUserApplicationAccess> AdminUserApplicationAccesses { get; set; }
+        public DbSet<UserApplicationAccess> AdminUserApplicationAccesses { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<Client> Clients { get; set; }
@@ -56,7 +55,6 @@ namespace FeedbackHub.Infrastructure.Context
         public DbSet<UserDetail> UserDetails { get; set; }
         public DbSet<UserFeedbackEmailSubscription> UserFeedbackEmailSubscriptions { get; set; }
         public DbSet<UserNotificationTriggerState> UserNotificationTriggerStates { get; set; }
-        public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<UserSubscribedFeedbackTypeNotification> UserSubscribedFeedbackTypeNotifications { get; set; }
        
     }

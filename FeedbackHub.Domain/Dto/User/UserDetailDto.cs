@@ -8,6 +8,6 @@
         public int? ClientId { get; set; }
         public string? Client { get; set; }
         public bool IsDeleted { get; set; }
-        public List<string> Applications { get; set; } = new();
+        public List<ApplicationDto> Applications { get; set; } = new();
     }
 }

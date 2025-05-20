@@ -1,9 +1,9 @@
 ﻿namespace FeedbackHub.Domain.Entities
 {
-    public class AdminUserApplicationAccess : BaseEntity
+    public class UserApplicationAccess : BaseEntity
     {
-        protected AdminUserApplicationAccess() { }
-        public AdminUserApplicationAccess(int adminUserId, int clientId, int applicationId)
+        protected UserApplicationAccess() { }
+        public UserApplicationAccess(int adminUserId, int clientId, int applicationId)
         {
             this.AdminUserId = adminUserId;
             this.ClientId = clientId;

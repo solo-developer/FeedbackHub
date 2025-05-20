@@ -123,8 +123,14 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Fullname = a.FullName,
                 Email = a.ApplicationUser.Email,
                 Client = a.RegistrationRequest == null ? string.Empty : a.RegistrationRequest.Client.Name,
+                ClientId = a.RegistrationRequest == null ? null : a.RegistrationRequest.ClientId,
                 IsDeleted = a.IsDeleted,
-                Applications = a.Subscriptions.Select(b => b.Application.Name).ToList()
+                Applications = a.AllowedApplications.Select(b => new ApplicationDto
+                {
+                    Id = b.ApplicationId,
+                    Name = b.Application.Name,
+                    ShortName = b.Application.ShortName
+                }).ToList()
             }).ToListAsync();
 
             return new PaginatedDataResponseDto<UserDetailDto>
@@ -145,7 +151,7 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             var user = await _userRepo.GetQueryableWithNoTracking().SingleOrDefaultAsync(a => a.Id == userId) ?? throw new ItemNotFoundException("User not found");
 
-            return user.Subscriptions.Select(a => new ApplicationDto
+            return user.AllowedApplications.Select(a => new ApplicationDto
             {
                 Id = a.ApplicationId,
                 Name = a.Application.Name,
@@ -164,7 +170,12 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Client = a.RegistrationRequest == null ? string.Empty : a.RegistrationRequest.Client.Name,
                 ClientId = a.RegistrationRequest == null ? null : a.RegistrationRequest.ClientId,
                 IsDeleted = a.IsDeleted,
-                Applications = a.Subscriptions.Select(b => b.Application.Name).ToList()
+                Applications = a.AllowedApplications.Select(b => new ApplicationDto
+                {
+                    Id = b.ApplicationId,
+                    Name = b.Application.Name,
+                    ShortName = b.Application.ShortName
+                }).ToList()
             }).FirstOrDefaultAsync();
 
             return user;
@@ -189,10 +200,10 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Username = user.ApplicationUser.UserName,
                 Email = user.ApplicationUser.Email,
                 Fullname = user.FullName,
-                AvatarBase64=string.IsNullOrEmpty(user.AvatarUrl) ? null: _fileHelper.GetBase64StringOfImageFile(Constants.USER_AVATAR_FOLDER,user.AvatarUrl),
+                AvatarBase64 = string.IsNullOrEmpty(user.AvatarUrl) ? null : _fileHelper.GetBase64StringOfImageFile(Constants.USER_AVATAR_FOLDER, user.AvatarUrl),
                 Role = (await _userManager.GetRolesAsync(user.ApplicationUser)).FirstOrDefault(),
                 Client = user.RegistrationRequest == null ? string.Empty : user.RegistrationRequest.Client.Name,
-                Applications = user.Subscriptions.Select(a => a.Application.Name).ToList()
+                Applications = user.AllowedApplications.Select(a => a.Application.Name).Distinct().ToList()
             };
 
             return userProfile;
@@ -240,6 +251,26 @@ namespace FeedbackHub.Domain.Services.Implementations
             }
         }
 
+        public async Task UpdateApplicationAccessAsync(UpdateApplicationAccessDto dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var user = await _userRepo.GetByIdAsync(dto.UserId) ?? throw new ItemNotFoundException("User not found.");
+                foreach (var application in user.AllowedApplications)
+                {
+                    user.Unsubscribe(application.ClientId, application.ApplicationId);
+                }
+
+                foreach(var application in dto.ApplicationIds)
+                {
+                    user.Subscribe(user.RegistrationRequest.ClientId, application);
+                }
+                await _userRepo.UpdateAsync(user, dto.UserId);
+
+                tx.Complete();
+            }
+        }
+
         public async Task UpdateAvatarAsync(GenericDto<UpdateAvatarDto> dto)
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -250,7 +281,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 if (!string.IsNullOrEmpty(user.AvatarUrl))
                 {
-                  await _fileHelper.DeleteFileAsync(Constants.USER_AVATAR_FOLDER, user.AvatarUrl);
+                    await _fileHelper.DeleteFileAsync(Constants.USER_AVATAR_FOLDER, user.AvatarUrl);
                 }
                 user.UpdateAvatar(fileName);
 

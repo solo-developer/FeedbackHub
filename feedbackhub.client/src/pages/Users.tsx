@@ -2,11 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import PagePanel from '../components/PagePanel';
 import GenericTable from '../components/GenericTable';
 import { useToast } from '../contexts/ToastContext';
-import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync, resetPasswordAsync } from '../services/UserService';
+import { getUsersAsync, deleteUserAsync, undoDeleteUserAsync, resetPasswordAsync, updateApplicationAccessAsync } from '../services/UserService';
 import { ClientUserDetailDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useNavigate } from 'react-router-dom';
+import Modal from '../components/Modal';
+import { ApplicationDto } from '../types/application/ApplicationDto';
+import { getApplicationsByClientIdAsync } from '../services/ApplicationService';
+import Select from 'react-select';
 
 interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';
@@ -140,6 +144,96 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
             setIsLoading(false);
         }
     };
+
+
+
+    const [selectedUserForApplicationAccess, setSelectedUserForApplicationAccess] = useState<ClientUserDetailDto | undefined>();
+    const EditApplicationAccessClicked = (userId: number) => {
+        let selectedUser = data.find(a => a.Id == userId);
+        if (!selectedUser) return;
+        setSelectedUserForApplicationAccess(selectedUser);
+        setSelectedOptions(selectedUser.Applications.map(a => a.Id))
+        openApplicationAccessModal();
+    }
+    const [applications, setApplications] = useState<ApplicationDto[]>([]);
+    useEffect(() => {
+        getClientSubscribedApplications();
+    }, [selectedUserForApplicationAccess])
+
+    const getClientSubscribedApplications = async () => {
+        try {
+            if (!selectedUserForApplicationAccess || !selectedUserForApplicationAccess.ClientId) {
+                return;
+            }
+            const response = await getApplicationsByClientIdAsync(selectedUserForApplicationAccess.ClientId);
+
+            if (response.Success) {
+                setApplications(response.Data);
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+        }
+        catch (ex) {
+            showToast('Failed to load applications', 'error');
+        }
+    };
+
+    const [showApplicationAccessModal, setShowApplicationAccessModal] = useState(false);
+    const openApplicationAccessModal = () => {
+        setShowApplicationAccessModal(true);
+    };
+
+    const closeApplicationAccessModal = () => setShowApplicationAccessModal(false);
+    const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
+    const [inputValue, setInputValue] = useState('');
+
+    const handleChange = (selectedOptions: any[]) => {
+        setSelectedOptions(selectedOptions);
+    };
+
+    const handleInputChange = (newInputValue: string) => {
+        setInputValue(newInputValue);
+    };
+
+    const saveApplicationAccess = async () => {
+        console.log('selected user', selectedUserForApplicationAccess);
+        console.log('selected applications', selectedOptions);
+        if (!selectedUserForApplicationAccess) return;
+        if (selectedOptions.length == 0) {
+            showToast('Please select application/s', 'info');
+        }
+        try {
+            const response = await updateApplicationAccessAsync({
+                UserId: selectedUserForApplicationAccess.Id,
+                ApplicationIds: selectedOptions.map(a => parseInt(a.Id))
+            });
+
+            if (response.Success) {
+                setShowApplicationAccessModal(false);
+                setSelectedOptions([]);
+                setSelectedUserForApplicationAccess(undefined);
+                showToast('Application access updated successfully', 'success', {
+                    autoClose: 3000,
+                    draggable: true
+                });
+                await fetchData();
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+            }
+
+        } catch (err) {
+            showToast('Failed to update application access', 'error');
+        }
+    }
+
     const columns = React.useMemo(
         () => [
             {
@@ -181,7 +275,18 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 cell: ({ row }) => {
                     return (
                         <div className="d-flex gap-2">
-                            {/* Conditional Delete or Undo Delete */}
+                            {userType == 'Client' &&
+                                <span
+                                    role="button"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Edit Application Access"
+                                    onClick={() => EditApplicationAccessClicked(row.original.Id)}
+                                >
+                                    <i className="fas fa-lock text-primary"></i>
+                                </span>}
+
+
                             {row.original.IsDeleted ? (
                                 <span
                                     role="button"
@@ -204,7 +309,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                                 </span>
                             )}
 
-                            {/* Always show Reset Password */}
+
                             <span
                                 role="button"
                                 data-bs-toggle="tooltip"
@@ -224,9 +329,19 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         [userType, data]
     );
 
+
     const headerContent = (
         <div>
             <button onClick={() => { navigate('/admin/users/new') }} className="btn btn-primary btn-sm"><i className='fas fa-plus'></i>&nbsp; Add</button>
+        </div>
+    );
+
+    const editApplicationAccessFooter = (
+        <div>
+            <button onClick={closeApplicationAccessModal} style={{ marginRight: '10px' }} className='pull-left'>
+                Cancel
+            </button>
+            <button onClick={saveApplicationAccess} className='btn btn-primary'>Save</button>
         </div>
     );
 
@@ -244,18 +359,18 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                         totalCount: totalCount,
                         onPageChange: (newPage) => {
                             setCurrentPage(newPage);
-                             setFilter(prev => ({
+                            setFilter(prev => ({
                                 ...prev,
-                                Take: prev.Take ,
-                                Skip : ((newPage-1) * prev.Take)
+                                Take: prev.Take,
+                                Skip: ((newPage - 1) * prev.Take)
                             }));
                         },
                         onPageSizeChange: (newSize) => {
                             setFilter(prev => ({
                                 ...prev,
-                                 Take: newSize ,
-                                Skip : 0,
-                                
+                                Take: newSize,
+                                Skip: 0,
+
                             }));
                             setCurrentPage(1);
                         },
@@ -285,6 +400,33 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 cancelText="Cancel"
                 variant="danger"
             />
+
+            {selectedUserForApplicationAccess &&
+                <Modal show={showApplicationAccessModal} onClose={closeApplicationAccessModal} title={`Application Access for  ${selectedUserForApplicationAccess?.Fullname}`} footer={editApplicationAccessFooter}>
+                    <form onSubmit={saveApplicationAccess}>
+
+                        <div className="form-group">
+                            <label>Select Applications</label>
+                            {
+                                applications.length > 0 && <Select
+                                    isMulti
+                                    options={applications}
+                                    getOptionLabel={(e) => e.Name}
+                                    getOptionValue={(e) => e.Id.toString()}
+                                    value={selectedOptions}
+                                    onChange={handleChange}
+                                    inputValue={inputValue}
+                                    onInputChange={handleInputChange}
+                                    onMenuOpen={() => console.log('Menu opened')}
+                                    onMenuClose={() => console.log('Menu closed')}
+                                />
+                            }
+
+
+                        </div>
+                    </form>
+                </Modal>
+            }
         </>
 
     );

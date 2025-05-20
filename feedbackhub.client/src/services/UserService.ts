@@ -1,14 +1,13 @@
 import { faL } from '@fortawesome/free-solid-svg-icons';
 import { ChangePasswordDto } from '../types/account/ChangePasswordDto';
 import { CreateAdminUserDto } from '../types/account/CreateAdminUserDto';
-import { ClientUserDetailDto, UserProfileDto } from '../types/account/UserDetailDto';
+import { ApplicationAccessDto, ClientUserDetailDto, UserProfileDto } from '../types/account/UserDetailDto';
 import { UserFilterDto } from '../types/account/UserFilterDto';
 import { GenericDropdownDto } from '../types/GenericDropdownDto';
 import { PaginatedDataResponseDto } from '../types/PaginatedDataResponseDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
 import api from '../utils/HttpMiddleware';
 import { isSuccess, parseMessage, parseData, parseResponseType } from '../utils/HttpResponseParser';
-import { UpdateAvatarDto } from '../types/account/UpdateAvatarDto';
 
 
 export const getUsersAsync = async (dto: UserFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<ClientUserDetailDto>>> => {
@@ -147,6 +146,21 @@ export const updateAvatarAsync = async (dto: FormData): Promise<ServiceResponseT
         }
     } catch (err) {
         return { Success: false, Message: 'Failed to update avator', ResponseType: 'error' };
+    }
+};
+
+export const updateApplicationAccessAsync = async (dto: ApplicationAccessDto): Promise<ServiceResponseType<any>> => {
+    try {
+        const response = await api.post('/user/application-access', dto);
+
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<any>(response) } as ServiceResponseType<any>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<any>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to update application access.', ResponseType: 'error' };
     }
 };
 

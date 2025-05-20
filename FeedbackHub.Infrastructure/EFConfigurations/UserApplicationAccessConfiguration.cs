@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FeedbackHub.Infrastructure.EFConfigurations
 {
-    public class AdminUserApplicationAccessConfiguration : IEntityTypeConfiguration<AdminUserApplicationAccess>
+    public class UserApplicationAccessConfiguration : IEntityTypeConfiguration<UserApplicationAccess>
     {
-        public void Configure(EntityTypeBuilder<AdminUserApplicationAccess> builder)
+        public void Configure(EntityTypeBuilder<UserApplicationAccess> builder)
         {
             builder.HasKey(e => e.Id);
 
@@ -21,7 +21,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(e => e.Application)
-                .WithMany(a=>a.AdminUsersWithAccess)
+                .WithMany(a=>a.UsersWithAccess)
                 .HasForeignKey(e => e.ApplicationId)
                 .OnDelete(DeleteBehavior.SetNull);
 

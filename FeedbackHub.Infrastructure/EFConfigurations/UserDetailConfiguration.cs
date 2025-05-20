@@ -27,18 +27,13 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.HasOne(ud => ud.ApplicationUser)
                 .WithOne()
                 .HasForeignKey<UserDetail>(ud => ud.AppUserId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent accidental deletion of ApplicationUser
+                .OnDelete(DeleteBehavior.Restrict); 
 
             builder.HasOne(ud => ud.RegistrationRequest)
         .WithOne(rr => rr.User)
-        .HasForeignKey<UserDetail>(ud => ud.RegistrationRequestId) // FK is in UserDetail
+        .HasForeignKey<UserDetail>(ud => ud.RegistrationRequestId)
         .IsRequired(false)
         .OnDelete(DeleteBehavior.SetNull);
-
-            builder.HasMany(ud => ud.Subscriptions)
-                .WithOne(us => us.User)
-                .HasForeignKey(us => us.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(ud => ud.EmailSubscriptions)
                 .WithOne(us => us.User)

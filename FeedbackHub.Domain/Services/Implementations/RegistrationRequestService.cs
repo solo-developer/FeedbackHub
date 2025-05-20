@@ -35,7 +35,7 @@ namespace FeedbackHub.Domain.Services.Implementations
                 regRequest = await _registrationRequestRepo.GetByIdAsync(dto.RegistrationRequestId);
                 if (regRequest == null) throw new ItemNotFoundException("Registration not found");
 
-                var userDetail = UserDetail.CreateClientUser(regRequest.Id, regRequest.FullName, regRequest.Email.Value, dto.ApplicationIds);
+                var userDetail = UserDetail.CreateClientUser(regRequest.Id, regRequest.FullName, regRequest.Email.Value,regRequest.ClientId, dto.ApplicationIds);
 
                 var appUser = userDetail.ApplicationUser;
                 var result = await _userManager.CreateAsync(appUser, dto.Password);

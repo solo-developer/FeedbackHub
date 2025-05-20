@@ -23,11 +23,6 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.Property(a => a.IsDeleted)
                 .HasDefaultValue(false);
 
-            builder.HasMany(a => a.Subscriptions)
-                .WithOne(s => s.Application)
-                .HasForeignKey(s => s.ApplicationId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasMany(a => a.NotificationSubscriptions)
              .WithOne(s => s.Application)
              .HasForeignKey(s => s.ApplicationId)
@@ -38,7 +33,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
              .HasForeignKey(s => s.ApplicationId)
              .OnDelete(DeleteBehavior.Cascade);
             
-            builder.HasMany(a => a.AdminUsersWithAccess)
+            builder.HasMany(a => a.UsersWithAccess)
              .WithOne(s => s.Application)
              .HasForeignKey(s => s.ApplicationId)
              .OnDelete(DeleteBehavior.Cascade);

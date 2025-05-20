@@ -16,10 +16,9 @@
         public byte[] Logo { get; set; }
 
         public bool IsDeleted { get;private set; }
-        public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
         public virtual List<UserFeedbackEmailSubscription> NotificationSubscriptions { get; private set; } = new();
         public virtual List<ClientApplicationSubscription> ClientSubscriptions { get; private set; } = new();
-        public virtual List<AdminUserApplicationAccess> AdminUsersWithAccess { get; private set; } = new();
+        public virtual List<UserApplicationAccess> UsersWithAccess { get; private set; } = new();
         public void MarkDeleted()
         {
             this.IsDeleted=true;

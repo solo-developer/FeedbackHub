@@ -21,7 +21,7 @@ namespace FeedbackHub.Domain.Entities
             };
             return userDetail;
         }
-        public static UserDetail CreateClientUser(int registrationRequestId, string fullName, string email, List<int> applicationIds)
+        public static UserDetail CreateClientUser(int registrationRequestId, string fullName, string email,int clientId, List<int> applicationIds)
         {
             var userDetail = new UserDetail
             {
@@ -32,12 +32,11 @@ namespace FeedbackHub.Domain.Entities
                     UserName = email,
                     Email = email
                 },
-
             };
 
             foreach (var subscription in applicationIds)
             {
-                userDetail.Subscribe(subscription);
+                userDetail.Subscribe(clientId, subscription);
             }
             return userDetail;
 
@@ -60,7 +59,7 @@ namespace FeedbackHub.Domain.Entities
                 {
                     userDetail.AllowedApplications.AddRange(
                         access.ApplicationIds.Select(a =>
-                        new AdminUserApplicationAccess(userDetail.Id, access.ClientId, a)));
+                        new UserApplicationAccess(userDetail.Id, access.ClientId, a)));
                 }
             }
             return userDetail;
@@ -76,9 +75,8 @@ namespace FeedbackHub.Domain.Entities
 
         public virtual ApplicationUser ApplicationUser { get; private set; }
         public virtual RegistrationRequest RegistrationRequest { get; private set; }
-        public virtual List<UserSubscription> Subscriptions { get; private set; } = new();
         public virtual List<UserFeedbackEmailSubscription> EmailSubscriptions { get; private set; } = new();
-        public virtual List<AdminUserApplicationAccess> AllowedApplications { get; private set; } = new();
+        public virtual List<UserApplicationAccess> AllowedApplications { get; private set; } = new();
         public virtual List<FeedbackRevision> Revisions { get; private set; } = new();
 
         public void MarkDeleted()
@@ -96,16 +94,16 @@ namespace FeedbackHub.Domain.Entities
             this.AvatarUrl = avatarUrl;
         }
 
-        public void Subscribe(int applicationId)
+        public void Subscribe(int clientId, int applicationId)
         {
-            if (Subscriptions.Any(a => a.ApplicationId == applicationId)) return;
-            Subscriptions.Add(new UserSubscription(this.Id, applicationId));
+            if (AllowedApplications.Any(a => a.ApplicationId == applicationId && a.ClientId == clientId)) return;
+            AllowedApplications.Add(new UserApplicationAccess(this.Id,clientId, applicationId));
         }
 
-        public void Unsubscribe(int applicationId)
+        public void Unsubscribe(int clientId,int applicationId)
         {
-            var subscribedApp = Subscriptions.Find(a => a.ApplicationId == applicationId);
-            Subscriptions.Remove(subscribedApp);
+            var subscribedApp = AllowedApplications.Find(a => a.ApplicationId == applicationId && a.ClientId == clientId);
+            AllowedApplications.Remove(subscribedApp);
         }
 
         internal void ChangePassword(string newPassword)

@@ -18,5 +18,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<List<GenericDropdownDto<int, string>>> GetUserDropdownOptions(bool includeDeleted = false);
 
         Task UpdateAvatarAsync(GenericDto<UpdateAvatarDto> dto);
+
+        Task UpdateApplicationAccessAsync(UpdateApplicationAccessDto dto);
     }
 }

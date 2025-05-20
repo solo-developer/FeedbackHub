@@ -78,6 +78,7 @@ namespace FeedbackHub.Domain.Entities
         public virtual List<UserFeedbackEmailSubscription> EmailSubscriptions { get; private set; } = new();
         public virtual List<UserApplicationAccess> AllowedApplications { get; private set; } = new();
         public virtual List<FeedbackRevision> Revisions { get; private set; } = new();
+        public virtual List<FeedbacksLink> FeedbackLinks { get; private set; } = new();
 
         public void MarkDeleted()
         {

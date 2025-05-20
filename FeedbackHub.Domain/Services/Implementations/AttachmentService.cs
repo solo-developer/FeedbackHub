@@ -10,7 +10,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 {
     public class AttachmentService : IAttachmentService
     {
-        private const string _feedbackPath = "feedbacks";
+        private const string _feedbackPath = Constants.FEEDBACK_ATTACHMENTS_FOLDERS;
         private readonly IFileHelper _fileHelper;
         private readonly IBaseRepository<Attachment> _attachmentRepo;
         public AttachmentService(IFileHelper fileHelper, IBaseRepository<Attachment> attachmentRepo)

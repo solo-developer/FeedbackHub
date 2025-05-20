@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FeedbackHub.Domain.Dto.User;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using System.IO.Compression;
 
@@ -75,5 +77,24 @@ namespace FeedbackHub.Domain.Helpers
         }
 
         public string GetBasePath() => _attachmentBasePath;
+
+        public string GetBase64StringOfImageFile(string folder, string identifier)
+        {
+            var imagePath = Path.Combine(_attachmentBasePath, folder, identifier);
+            if (File.Exists(imagePath))
+            {
+
+                var fileBytes= File.ReadAllBytes(imagePath);
+
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(imagePath, out var mimeType))
+                    mimeType = "application/octet-stream"; 
+
+                var base64 = Convert.ToBase64String(fileBytes);
+                return $"data:{mimeType};base64,{base64}";
+            }
+
+            throw new FileNotFoundException("Image file not found.", imagePath);
+        }
     }
 }

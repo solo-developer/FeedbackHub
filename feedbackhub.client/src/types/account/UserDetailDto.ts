@@ -18,5 +18,6 @@ export interface UserProfileDto {
     Fullname: string;
     Role : string;
     Client: string;
-    Avatar? : Uint8Array;
+    AvatarBase64? : string;
+    Applications : string[];
 }

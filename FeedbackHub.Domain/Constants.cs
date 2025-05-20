@@ -12,5 +12,9 @@
         public const string EMAIL_USERNAME_SETTINGS_KEY = "EmailUsername";
         public const string EMAIL_PASSWORD_SETTINGS_KEY = "EmailPassword";
         public const string EMAIL_SENDER_SETTINGS_KEY = "SenderEmail";
+
+        public const string USER_AVATAR_FOLDER = "Avatars";
+        public const string FEEDBACK_ATTACHMENTS_FOLDERS = "feedbacks";
+
     }
 }

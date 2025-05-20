@@ -10,6 +10,7 @@ using FeedbackHub.Domain.Templating;
 using FeedbackHub.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.FileIO;
 using System.Reflection.Emit;
 using System.Transactions;
 
@@ -21,13 +22,15 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly IEmailContentComposer _emailContentComposerService;
         private readonly IEmailSenderService _emailSenderService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileHelper _fileHelper;
 
-        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService, UserManager<ApplicationUser> userManager)
+        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService, UserManager<ApplicationUser> userManager, IFileHelper fileHelper)
         {
             _userRepo = userRepo;
             _emailContentComposerService = emailContentComposer;
             _emailSenderService = emailSenderService;
             _userManager = userManager;
+            _fileHelper = fileHelper;
         }
 
         public async Task ChangePasswordAsync(GenericDto<ChangePasswordDto> dto)
@@ -40,8 +43,8 @@ namespace FeedbackHub.Domain.Services.Implementations
                 var isPasswordCorrect = await _userManager.CheckPasswordAsync(userDetail.ApplicationUser, dto.Model.CurrentPassword);
                 if (!isPasswordCorrect) throw new InvalidValueException("Current password doesn't match.");
 
-                var updatePassword =await _userManager.ChangePasswordAsync(userDetail.ApplicationUser, dto.Model.CurrentPassword, dto.Model.NewPassword);
-                if (updatePassword.Succeeded ==false)
+                var updatePassword = await _userManager.ChangePasswordAsync(userDetail.ApplicationUser, dto.Model.CurrentPassword, dto.Model.NewPassword);
+                if (updatePassword.Succeeded == false)
                 {
                     throw new CustomException(updatePassword.Errors.FirstOrDefault().Description);
                 }
@@ -53,7 +56,7 @@ namespace FeedbackHub.Domain.Services.Implementations
         {
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email,dto.Accesses);
+                var userDetail = UserDetail.CreateAdminUser(dto.FullName, dto.Email, dto.Accesses);
 
                 var appUser = userDetail.ApplicationUser;
                 var result = await _userManager.CreateAsync(appUser, dto.Password);
@@ -114,7 +117,7 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var totalCount = await queryable.CountAsync();
 
-            var users = await queryable.OrderBy(a=>a.ApplicationUser.Email).Skip(dto.Skip).Take(dto.Take).Select(a => new UserDetailDto
+            var users = await queryable.OrderBy(a => a.ApplicationUser.Email).Skip(dto.Skip).Take(dto.Take).Select(a => new UserDetailDto
             {
                 Id = a.Id,
                 Fullname = a.FullName,
@@ -186,8 +189,10 @@ namespace FeedbackHub.Domain.Services.Implementations
                 Username = user.ApplicationUser.UserName,
                 Email = user.ApplicationUser.Email,
                 Fullname = user.FullName,
+                AvatarBase64=string.IsNullOrEmpty(user.AvatarUrl) ? null: _fileHelper.GetBase64StringOfImageFile(Constants.USER_AVATAR_FOLDER,user.AvatarUrl),
                 Role = (await _userManager.GetRolesAsync(user.ApplicationUser)).FirstOrDefault(),
-                Client = user.RegistrationRequest == null ? string.Empty : user.RegistrationRequest.Client.Name
+                Client = user.RegistrationRequest == null ? string.Empty : user.RegistrationRequest.Client.Name,
+                Applications = user.Subscriptions.Select(a => a.Application.Name).ToList()
             };
 
             return userProfile;
@@ -231,6 +236,25 @@ namespace FeedbackHub.Domain.Services.Implementations
 
                 user.UndoDelete();
                 await _userRepo.UpdateAsync(user, id);
+                tx.Complete();
+            }
+        }
+
+        public async Task UpdateAvatarAsync(GenericDto<UpdateAvatarDto> dto)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var fileName = await _fileHelper.SaveFileAsync(dto.Model.Avatar, Constants.USER_AVATAR_FOLDER);
+
+                var user = await _userRepo.GetByIdAsync(dto.LoggedInUserId) ?? throw new ItemNotFoundException("User not found.");
+
+                if (!string.IsNullOrEmpty(user.AvatarUrl))
+                {
+                  await _fileHelper.DeleteFileAsync(Constants.USER_AVATAR_FOLDER, user.AvatarUrl);
+                }
+                user.UpdateAvatar(fileName);
+
+                await _userRepo.UpdateAsync(user, dto.LoggedInUserId);
                 tx.Complete();
             }
         }

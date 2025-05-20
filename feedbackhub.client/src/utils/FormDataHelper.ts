@@ -11,10 +11,12 @@ export function buildFormData(data: AnyObject): FormData {
 
   Object.entries(data).forEach(([key, value]) => {
     if (value == null) return;
-
-    if (Array.isArray(value) && value[0] instanceof File) {
+    if (value instanceof File) {
+      formData.append(key, value);
+    } else if (Array.isArray(value) && value[0] instanceof File) {
       value.forEach((file) => formData.append(key, file));
-    } else {
+    }
+    else {
       formData.append(key, value.toString());
     }
   });

@@ -7,7 +7,10 @@
         public required string Email { get; set; }
         public required string Fullname { get; set; }
         public required string Role { get; set; }
-        public byte[] Avatar { get; set; }
-        public required string Client { get; set; }
+        public string AvatarBase64 { get; set; }
+        public string Client { get; set; }
+
+        public List<string> Applications { get; set; } = new();
+
     }
 }

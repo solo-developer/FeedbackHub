@@ -31,7 +31,7 @@ const AdminNavbar = () => {
               title={
                 <span className="d-flex align-items-center">
                   <img
-                    src= '/assets/images/default-user.png' 
+                    src={user?.AvatarBase64 ?? '/assets/images/default-user.png'}  
                     alt="Profile"
                     className="rounded-circle me-2"
                     style={{ width: '30px', height: '30px' }}

@@ -16,5 +16,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task ChangePasswordAsync(GenericDto<ChangePasswordDto> dto);
         Task<UserProfileDto> GetUserProfileAsync(int userId);
         Task<List<GenericDropdownDto<int, string>>> GetUserDropdownOptions(bool includeDeleted = false);
+
+        Task UpdateAvatarAsync(GenericDto<UpdateAvatarDto> dto);
     }
 }

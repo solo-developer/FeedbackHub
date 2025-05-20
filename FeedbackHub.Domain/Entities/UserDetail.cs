@@ -70,6 +70,8 @@ namespace FeedbackHub.Domain.Entities
         public int AppUserId { get;private set; }
         public bool IsDeleted { get; private set; }
 
+        public string? AvatarUrl { get;private set; }
+
         public int? RegistrationRequestId { get; private set; }
 
         public virtual ApplicationUser ApplicationUser { get; private set; }
@@ -87,6 +89,11 @@ namespace FeedbackHub.Domain.Entities
         public void UndoDelete()
         {
             this.IsDeleted = false;
+        }
+
+        public void UpdateAvatar(string avatarUrl)
+        {
+            this.AvatarUrl = avatarUrl;
         }
 
         public void Subscribe(int applicationId)

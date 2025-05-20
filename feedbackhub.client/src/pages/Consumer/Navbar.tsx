@@ -5,12 +5,14 @@ import { handleLogout } from '../../services/AuthService';
 import { useAppSwitcher } from '../../contexts/AppSwitcherContext';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
+import FullScreenLoader from '../../components/FullScreenLoader';
 
 const ConsumerNavbar = () => {
   const { selectedApp, setSelectedApp, apps } = useAppSwitcher();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const { user } = useUser();
+  if(!user) return (<FullScreenLoader></FullScreenLoader>)
 
   const handleAppSwitch = (app: typeof selectedApp) => {
     if (app?.Id !== selectedApp?.Id && app) {
@@ -59,8 +61,8 @@ const ConsumerNavbar = () => {
                 <span className="d-flex align-items-center">
                   <img
                     src={
-                      user?.Avatar && user.Avatar.length > 0
-                        ? URL.createObjectURL(new Blob([new Uint8Array(user.Avatar)], { type: 'image/png' }))
+                      user?.AvatarBase64
+                        ? user?.AvatarBase64
                         : '/assets/images/default-user.png' 
                     }
                     alt="Profile"
@@ -74,7 +76,7 @@ const ConsumerNavbar = () => {
               align="end"
             >
 
-              <NavDropdown.Item href="#">Profile</NavDropdown.Item>
+              <NavDropdown.Item href="/consumer/profile">Profile</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="/profile/change-password" className='text-warning'>Change Password</NavDropdown.Item>
               <NavDropdown.Divider />

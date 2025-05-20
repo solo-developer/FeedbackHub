@@ -19,6 +19,10 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.Property(ud => ud.IsDeleted)
                 .HasDefaultValue(false);
 
+            builder.Property(ud => ud.AvatarUrl)
+                .HasMaxLength(500)
+    .IsRequired(false);
+
             // Relationships
             builder.HasOne(ud => ud.ApplicationUser)
                 .WithOne()

@@ -9,5 +9,7 @@ namespace FeedbackHub.Domain.Helpers
         Task<string> CompressFileAsync(string filePath);
 
         string GetBasePath();
+
+        string GetBase64StringOfImageFile(string folder, string identifier);
     }
 }

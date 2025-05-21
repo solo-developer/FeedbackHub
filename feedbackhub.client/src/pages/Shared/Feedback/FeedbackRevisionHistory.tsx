@@ -53,11 +53,15 @@ const FeedbackRevisionHistory: React.FC<Props> = ({ feedbackId }) => {
 
                             {rev.ChangedFields.map((field, i) => (
                                 <div key={i} className="ms-3 mb-1">
-                                    <span className="fw-bold">📝 {field.DisplayName}</span>
+                                    {field.DisplayName== "Linked Ticket"? ( 
+                                        field.OldValue ? <> <span className="text-danger">Unlinked {field.OldValue}</span> </> :
+                                        <> <span className="text-success">Linked {field.NewValue}</span> </>) : 
+                                    ( <><span className="fw-bold">📝 {field.DisplayName}</span>
                                     <div className="ms-3 small text-secondary">
                                         <span className="text-danger">“{field.OldValue}”</span> →{' '}
                                         <span className="text-success">“{field.NewValue}”</span>
-                                    </div>
+                                    </div></>)}
+                                   
                                 </div>
                             ))}
                         </li>

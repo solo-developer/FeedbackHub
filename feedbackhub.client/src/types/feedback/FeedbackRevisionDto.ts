@@ -1,7 +1,7 @@
 export interface FeedbackChangedFieldDto {
     FieldName: string;
-    OldValue: string;
-    NewValue: string;
+    OldValue?: string;
+    NewValue?: string;
     DisplayName: string; 
 }
 

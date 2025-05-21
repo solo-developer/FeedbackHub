@@ -11,6 +11,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto: FeedbackFilterDto;
 
         Task<FeedbackDetailDto> GetByIdAsync(int id);
+        Task<FeedbackBasicDetailDto> GetByTicketIdAsync(int id);
 
         Task AddCommentAsync(GenericDto<AddFeedbackCommentDto> dto);
         Task<List<BoardFeedbackDto>> GetBoardFeedbacksAsync(GenericDto<BoardFeedbackFilterDto> dto);
@@ -27,5 +28,8 @@ namespace FeedbackHub.Domain.Services.Interface
         Task UpdateStatusAsync(GenericDto<FeedbackStatusUpdateDto> dto);
 
         Task LinkFeedbackAsync(GenericDto<LinkFeedbackDto> dto);
+        Task UnlinkFeedbackAsync(int linkId, int userId);
+
+        Task<List<LinkedFeedbackDto>> GetLinkedFeedbacks(int feedbackId);
     }
 }

@@ -89,6 +89,8 @@ namespace FeedbackHub.Domain.Entities
 
         public void LinkFeedback(Feedback targetFeedback, int userId, FeedbackLinkType linkType)
         {
+            if (targetFeedback.Id == this.Id)
+                throw new InvalidStateTransitionException("Cannot link with itself");
             var targetFeedbackId = targetFeedback.Id;
             if (this.TargetLinks.Any(a => a.SourceFeedbackId == this.Id && a.TargetFeedbackId == targetFeedbackId))
                 throw new DuplicateItemException("The feedbacks are already linked.");
@@ -105,10 +107,10 @@ namespace FeedbackHub.Domain.Entities
             }
         }
 
-        public void UnlinkFeedback(Feedback otherFeedback)
+        public void UnlinkFeedback(Feedback otherFeedback, int userId)
         {
             var otherFeedbackId = otherFeedback.Id;
-            var revision = new FeedbackRevision(this.Id, this.UserId);
+            var revision = new FeedbackRevision(this.Id, userId);
 
             FeedbacksLink linkToRemove = this.TargetLinks
                 .FirstOrDefault(l => l.TargetFeedbackId == otherFeedbackId);
@@ -150,7 +152,7 @@ namespace FeedbackHub.Domain.Entities
 
         private void TrackChangeIfDifferent(FeedbackRevision revision, TrackedField field, string? oldValue, string newValue)
         {
-            if (!oldValue.Equals(newValue))
+            if (oldValue == null && newValue != null || (!oldValue.Equals(newValue)))
             {
                 revision.ChangedFields.Add(new FeedbackChangedField(
                     field.ToString(),

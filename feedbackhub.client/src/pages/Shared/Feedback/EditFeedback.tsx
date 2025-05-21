@@ -4,7 +4,7 @@ import ConsumerLayout from '../../Consumer/ConsumerLayout';
 import { useAuth } from '../../../contexts/AuthContext';
 import { ADMIN_ROLE } from '../../../utils/Constants';
 import PagePanel from '../../../components/PagePanel';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AppSwitcherProvider } from '../../../contexts/AppSwitcherContext';
 import { getFeedbackByIdAsync, updateFeedbackAsync } from '../../../services/FeedbackService';
 import { useToast } from '../../../contexts/ToastContext';
@@ -20,6 +20,7 @@ import FeedbackRevisionHistory from './FeedbackRevisionHistory';
 import AttachmentSection from './AttachmentSection';
 import FeedbackHistoryComments from './FeedbackHistoryComment';
 import { handleApiResponse } from '../../../utils/ResponseHandler';
+import LinkedFeedbacksSection from './LinkedFeedbacksSection';
 
 const EditFeedbackPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -32,7 +33,7 @@ const EditFeedbackPage: React.FC = () => {
 
     const [feedbackDetail, setFeedbackDetail] = useState<FeedbackDto>();
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
-    const [activeTab, setActiveTab] = useState<'attachments' | 'history' | 'revisions'>('history');
+    const [activeTab, setActiveTab] = useState<'attachments' | 'history' | 'revisions' | 'links'>('history');
     const [revisionReloadKey, setRevisionReloadKey] = useState(0);
 
     const refreshRevisions = () => {
@@ -215,7 +216,24 @@ const EditFeedbackPage: React.FC = () => {
                                         History
                                     </button>
                                 </li>
+                                 <li className="nav-item">
+                                    <button
+                                        className={`nav-link ${activeTab === 'links' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('links')}
+                                    >
+                                        Links
+                                    </button>
+                                </li>
+                              
                                 <li className="nav-item">
+                                    <button
+                                        className={`nav-link ${activeTab === 'attachments' ? 'active' : ''}`}
+                                        onClick={() => setActiveTab('attachments')}
+                                    >
+                                        Attachments
+                                    </button>
+                                </li>
+                                  <li className="nav-item">
                                     <button
                                         className={`nav-link ${activeTab === 'revisions' ? 'active' : ''}`}
                                         onClick={() => {
@@ -226,14 +244,6 @@ const EditFeedbackPage: React.FC = () => {
                                         Revisions
                                     </button>
                                 </li>
-                                <li className="nav-item">
-                                    <button
-                                        className={`nav-link ${activeTab === 'attachments' ? 'active' : ''}`}
-                                        onClick={() => setActiveTab('attachments')}
-                                    >
-                                        Attachments
-                                    </button>
-                                </li>
                             </ul>
 
                             <div className="border p-3 rounded">
@@ -241,15 +251,19 @@ const EditFeedbackPage: React.FC = () => {
                                     <FeedbackHistoryComments feedbackId={feedbackId} />
                                 )}
 
-                                {activeTab === 'revisions' && (
-                                    <div>
-                                        {showRevisions && <FeedbackRevisionHistory key={revisionReloadKey} feedbackId={feedbackId} />}
-                                    </div>
+                                {activeTab === 'links' && (
+                                    <LinkedFeedbacksSection key={feedbackId} feedbackId={feedbackId} />
                                 )}
 
 
                                 {activeTab === 'attachments' && (
                                     <AttachmentSection key={feedbackId} feedbackId={feedbackId} />
+                                )}
+
+                                 {activeTab === 'revisions' && (
+                                    <div>
+                                        {showRevisions && <FeedbackRevisionHistory key={revisionReloadKey} feedbackId={feedbackId} />}
+                                    </div>
                                 )}
 
                             </div>

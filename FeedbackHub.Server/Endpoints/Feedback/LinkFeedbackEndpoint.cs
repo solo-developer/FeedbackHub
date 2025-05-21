@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FeedbackHub.Server.Endpoints.Feedback
 {
-    [Authorize(Roles = Constants.ADMIN_ROLE)]
+    [Authorize]
     public class LinkFeedbackEndpoint : EndpointBaseAsync.WithRequest<LinkFeedbackDto>.WithResult<IActionResult>
     {
         private readonly IFeedbackService _feedbackService;

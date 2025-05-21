@@ -3,10 +3,12 @@ using FeedbackHub.Domain.Dto.Feedback;
 using FeedbackHub.Domain.Entities;
 using FeedbackHub.Domain.Enums;
 using FeedbackHub.Domain.Exceptions;
+using FeedbackHub.Domain.Helpers;
 using FeedbackHub.Domain.Repositories.Interface;
 using FeedbackHub.Domain.Services.Interface;
 using FeedbackHub.Domain.Templating;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Transactions;
 
@@ -21,8 +23,9 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly IEmailContentComposer _emailContentComposerService;
         private readonly IEmailSenderService _emailSenderService;
         private readonly IUserNotificationService _userNotificationService;
+        private readonly IBaseRepository<FeedbacksLink> _feedbacksLinkRepo;
 
-        public FeedbackService(IBaseRepository<Feedback> repo, ITicketSequenceRepository ticketSequenceRepo, IAttachmentService attachmentService, IBaseRepository<RegistrationRequest> registrationRequestRepo, IEmailContentComposer emailContentComposerService, IEmailSenderService emailSenderService, IUserNotificationService userNotificationService)
+        public FeedbackService(IBaseRepository<Feedback> repo, ITicketSequenceRepository ticketSequenceRepo, IAttachmentService attachmentService, IBaseRepository<RegistrationRequest> registrationRequestRepo, IEmailContentComposer emailContentComposerService, IEmailSenderService emailSenderService, IUserNotificationService userNotificationService, IBaseRepository<FeedbacksLink> feedbacksLinkRepo)
         {
             _repo = repo;
             _ticketSequenceRepo = ticketSequenceRepo;
@@ -31,6 +34,7 @@ namespace FeedbackHub.Domain.Services.Implementations
             _emailContentComposerService = emailContentComposerService;
             _emailSenderService = emailSenderService;
             _userNotificationService = userNotificationService;
+            _feedbacksLinkRepo = feedbacksLinkRepo;
         }
 
         public async Task<PaginatedDataResponseDto<FeedbackBasicDetailDto>> GetAsync<TFilterDto>(GenericDto<TFilterDto> request) where TFilterDto : FeedbackFilterDto
@@ -396,11 +400,11 @@ namespace FeedbackHub.Domain.Services.Implementations
                 tx.Complete();
             }
 
-            if (await IsValidForNotification(dto.LoggedInUserId,entity,status,dto.Model.NewStatus) == false)
+            if (await IsValidForNotification(dto.LoggedInUserId, entity, status, dto.Model.NewStatus) == false)
             {
                 return;
             }
-          
+
 
             var (subject, body) = await _emailContentComposerService.ComposeAsync(TemplateType.FeedbackStatusChanged, new FeedbackStatusUpdatedEmailNotificationDto
             {
@@ -442,11 +446,58 @@ namespace FeedbackHub.Domain.Services.Implementations
 
         public async Task LinkFeedbackAsync(GenericDto<LinkFeedbackDto> dto)
         {
-           using(TransactionScope tx= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var sourceFeedback = await _repo.GetByIdAsync(dto.Model.SourceId) ?? throw new ItemNotFoundException("Source feedback not found.");
                 var targetFeedback = await _repo.GetByIdAsync(dto.Model.TargetId) ?? throw new ItemNotFoundException("Target feedback not found.");
-                sourceFeedback.LinkFeedback( targetFeedback, dto.LoggedInUserId, dto.Model.LinkType);
+                sourceFeedback.LinkFeedback(targetFeedback, dto.LoggedInUserId, dto.Model.LinkType);
+                await _repo.UpdateAsync(sourceFeedback, sourceFeedback.Id);
+                tx.Complete();
+            }
+        }
+
+        public async Task<List<LinkedFeedbackDto>> GetLinkedFeedbacks(int feedbackId)
+        {
+            var links = await _feedbacksLinkRepo.GetQueryable().Where(a => a.SourceFeedbackId == feedbackId || a.TargetFeedbackId == feedbackId).ToListAsync();
+
+            List<LinkedFeedbackDto> response = new();
+
+            foreach (var link in links)
+            {
+                var relatedFeedback = link.SourceFeedbackId == feedbackId ? link.TargetFeedback : link.SourceFeedback;
+                response.Add(new LinkedFeedbackDto()
+                {
+                    LinkId = link.Id,
+                    SourceFeedbackId = link.SourceFeedbackId,
+                    TargetFeedbackId = link.TargetFeedbackId,
+                    RelatedTicketId = relatedFeedback.TicketId,
+                    RelatedFeedbackTitle = relatedFeedback.Title,
+                    LinkType =FeedbackLinkTypeHelper.GetLinkDisplayName(link.LinkType, link.TargetFeedbackId == feedbackId),
+                    LinkedDate = link.CreatedDate,
+                    LinkedBy = link.UserDetail.FullName
+                });
+            }
+
+            return response;
+        }
+
+        public async Task<FeedbackBasicDetailDto> GetByTicketIdAsync(int ticketId)
+        {
+            var feedback = await _repo.GetQueryable().Where(a=>a.TicketId ==ticketId ).Select(MapToFeedbackBasicDetail()).FirstOrDefaultAsync();
+
+            return feedback;
+        }
+
+        public async Task UnlinkFeedbackAsync(int linkId, int userId)
+        {
+            using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var link = await _feedbacksLinkRepo.GetByIdAsync(linkId) ?? throw new ItemNotFoundException("Link not found.");
+
+                var sourceFeedback = link.SourceFeedback;
+                var targetFeedback = link.TargetFeedback;
+
+                sourceFeedback.UnlinkFeedback(targetFeedback,userId);
                 await _repo.UpdateAsync(sourceFeedback, sourceFeedback.Id);
                 tx.Complete();
             }

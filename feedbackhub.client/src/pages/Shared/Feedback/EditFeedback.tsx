@@ -6,20 +6,19 @@ import { ADMIN_ROLE } from '../../../utils/Constants';
 import PagePanel from '../../../components/PagePanel';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppSwitcherProvider } from '../../../contexts/AppSwitcherContext';
-import { addFeedbackCommentAsync, getAttachmentsAsync, getCommentsAsync, getFeedbackByIdAsync, saveFeedbackAttachments, updateFeedbackAsync } from '../../../services/FeedbackService';
+import { getFeedbackByIdAsync, updateFeedbackAsync } from '../../../services/FeedbackService';
 import { useToast } from '../../../contexts/ToastContext';
 import { FeedbackUpdateDto } from '../../../types/feedback/FeedbackUpdateDto';
-import { FeedbackBasicDetailDto, FeedbackDto } from '../../../types/feedback/FeedbackBasicDetailDto';
+import { FeedbackDto } from '../../../types/feedback/FeedbackBasicDetailDto';
 import { FeedbackTypeDto } from '../../../types/feedbacktype/FeedbackTypeDto';
 import { getAllFeedbackTypesAsync } from '../../../services/FeedbackTypeService';
 import { EnumToDropdownOptions } from '../../../utils/EnumHelper';
 import { TicketStatus } from '../../../types/feedback/TicketStatus';
 import RichTextEditor from '../../../components/RichTextEditor';
 import { formatToCustomDateTime } from '../../../utils/DateHelper';
-import ConfirmDialog from '../../../components/ConfirmDialog';
-import { FeedbackCommentDto } from '../../../types/feedback/FeedbackCommentDto';
 import FeedbackRevisionHistory from './FeedbackRevisionHistory';
 import AttachmentSection from './AttachmentSection';
+import FeedbackHistoryComments from './FeedbackHistoryComment';
 
 const EditFeedbackPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -27,19 +26,12 @@ const EditFeedbackPage: React.FC = () => {
     const { role, loading } = useAuth();
 
     if (loading) return (<div>Loading.....</div>);
-    const navigate = useNavigate();
     const { showToast } = useToast();
     const statusOptions = EnumToDropdownOptions(TicketStatus);
 
     const [feedbackDetail, setFeedbackDetail] = useState<FeedbackDto>();
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
     const [activeTab, setActiveTab] = useState<'attachments' | 'history' | 'revisions'>('history');
-    const [historyComments, setHistoryComments] = useState<FeedbackCommentDto[]>([]);
-
-    const [newComment, setNewComment] = useState<string>('');
-    const [showAddCommentConfirmation, setShowAddCommentConfirmation] = useState(false);
-
-
     const [revisionReloadKey, setRevisionReloadKey] = useState(0);
 
     const refreshRevisions = () => {
@@ -58,7 +50,6 @@ const EditFeedbackPage: React.FC = () => {
     useEffect(() => {
         fetchFeedbackTypes();
         fetchFeedbackDetail();
-        fetchFeedbackComments();
     }, [id]);
 
     const fetchFeedbackDetail = async () => {
@@ -104,26 +95,6 @@ const EditFeedbackPage: React.FC = () => {
         }
     };
 
-    const fetchFeedbackComments = async () => {
-        try {
-
-            const response = await getCommentsAsync(feedbackId);
-
-            if (response.Success) {
-                setHistoryComments(response.Data);
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
-        } catch (err) {
-            showToast('Failed to load comments', 'error');
-        }
-    };
-
     const saveButtonClicked = async () => {
         try {
 
@@ -156,42 +127,6 @@ const EditFeedbackPage: React.FC = () => {
         }));
     };
 
-    const addCommentBtnClicked = () => {
-        if (newComment.trim().length == 0) {
-            showToast('Please enter comment.', 'info', {
-                autoClose: 3000,
-                draggable: true
-            });
-            return;
-        }
-        setShowAddCommentConfirmation(true);
-    };
-
-    const addRecordInHistory = async () => {
-        try {
-            setShowAddCommentConfirmation(false);
-
-            const response = await addFeedbackCommentAsync({
-                FeedbackId: feedbackId,
-                Comment: newComment
-            });
-
-            if (response.Success) {
-                fetchFeedbackComments();
-                setNewComment('');
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
-        } catch (err) {
-            showToast('Failed to add comment', 'error');
-        }
-    }
-
     const handleDescriptionChange = (content: string) => {
         setFormData(prev => ({
             ...prev,
@@ -199,13 +134,7 @@ const EditFeedbackPage: React.FC = () => {
         }));
     };
 
-
-
-
     const [showRevisions, setShowRevisions] = useState(false);
-
-
-
     const content = (
         <>
             <PagePanel title={`Ticket No : #${feedbackDetail?.TicketId} | Client : ${feedbackDetail?.Client} | Application : ${feedbackDetail?.Application} | Raised By : ${feedbackDetail?.CreatedBy} | Raised Date : ${feedbackDetail?.CreatedDate ? formatToCustomDateTime(feedbackDetail.CreatedDate.toString()) : 'N/A'}`}>
@@ -336,41 +265,7 @@ const EditFeedbackPage: React.FC = () => {
 
                             <div className="border p-3 rounded">
                                 {activeTab === 'history' && (
-                                    <div>
-                                        <div className="mb-3">
-
-                                            <textarea
-                                                className="form-control"
-                                                rows={3}
-                                                value={newComment}
-                                                onChange={(e) => setNewComment(e.target.value)}
-                                                placeholder="Add Comment ......."
-                                            />
-                                            <button className="btn btn-sm btn-primary mt-2" onClick={addCommentBtnClicked}>
-                                                Add Comment
-                                            </button>
-                                            <br />
-                                            {historyComments.length > 0 &&
-                                                <> <h6>Previous Comments</h6>
-
-
-                                                    <div className="comment-history">
-                                                        {historyComments.map((cmt, index) => (
-                                                            <div key={index} className="card mb-2 p-3 shadow-sm mt-2">
-                                                                <div className="d-flex justify-content-between align-items-center mb-1">
-                                                                    <strong>{cmt.EnteredBy}</strong>
-                                                                    <small className="text-muted">
-                                                                        {formatToCustomDateTime(cmt.EnteredDate.toString())}
-                                                                    </small>
-                                                                </div>
-                                                                <div>{cmt.Comment}</div>
-                                                            </div>
-                                                        ))}
-                                                    </div> </>
-                                            }
-
-                                        </div>
-                                    </div>
+                                    <FeedbackHistoryComments feedbackId={feedbackId} />
                                 )}
 
                                 {activeTab === 'revisions' && (
@@ -389,18 +284,6 @@ const EditFeedbackPage: React.FC = () => {
                     </div>
                 </div>
             </PagePanel>
-            <ConfirmDialog
-                show={showAddCommentConfirmation}
-                onHide={() => setShowAddCommentConfirmation(false)}
-                onConfirm={() => addRecordInHistory()}
-                title="Confirm Save"
-                message="Are you sure you want to add the comment? This action cannot be undone."
-                confirmText="Save"
-                cancelText="Cancel"
-                variant="primary"
-            />
-
-
         </>
     );
 

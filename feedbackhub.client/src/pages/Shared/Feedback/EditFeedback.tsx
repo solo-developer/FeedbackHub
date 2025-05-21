@@ -18,10 +18,8 @@ import RichTextEditor from '../../../components/RichTextEditor';
 import { formatToCustomDateTime } from '../../../utils/DateHelper';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { FeedbackCommentDto } from '../../../types/feedback/FeedbackCommentDto';
-import { FeedbackAttachmentDto } from '../../../types/feedback/FeedbackAttachmentDto';
-import { buildFormData } from '../../../utils/FormDataHelper';
-import { deleteAttachmentAsync, downloadAttachment } from '../../../services/AttachmentService';
 import FeedbackRevisionHistory from './FeedbackRevisionHistory';
+import AttachmentSection from './AttachmentSection';
 
 const EditFeedbackPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -37,10 +35,10 @@ const EditFeedbackPage: React.FC = () => {
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackTypeDto[]>([]);
     const [activeTab, setActiveTab] = useState<'attachments' | 'history' | 'revisions'>('history');
     const [historyComments, setHistoryComments] = useState<FeedbackCommentDto[]>([]);
-    const [attachments, setAttachments] = useState<FeedbackAttachmentDto[]>([]);
+
     const [newComment, setNewComment] = useState<string>('');
     const [showAddCommentConfirmation, setShowAddCommentConfirmation] = useState(false);
-    const [showRemoveFileConfirmation, setShowRemoveFileConfirmation] = useState(false);
+
 
     const [revisionReloadKey, setRevisionReloadKey] = useState(0);
 
@@ -61,7 +59,6 @@ const EditFeedbackPage: React.FC = () => {
         fetchFeedbackTypes();
         fetchFeedbackDetail();
         fetchFeedbackComments();
-        fetchAttachmentsAsync();
     }, [id]);
 
     const fetchFeedbackDetail = async () => {
@@ -124,26 +121,6 @@ const EditFeedbackPage: React.FC = () => {
 
         } catch (err) {
             showToast('Failed to load comments', 'error');
-        }
-    };
-
-    const fetchAttachmentsAsync = async () => {
-        try {
-
-            const response = await getAttachmentsAsync(feedbackId);
-
-            if (response.Success) {
-                setAttachments(response.Data);
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
-        } catch (err) {
-            showToast('Failed to load attachments', 'error');
         }
     };
 
@@ -221,69 +198,12 @@ const EditFeedbackPage: React.FC = () => {
             Description: content
         }));
     };
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-    const handleUpload = async () => {
 
-        const fullForm = {
-            FeedbackId: feedbackId,
-            Attachments: selectedFiles,
-        };
 
-        const formToSend = buildFormData(fullForm as Record<string, any>);
 
-        try {
-            const response = await saveFeedbackAttachments(formToSend);
-
-            if (response.Success) {
-                fetchAttachmentsAsync();
-                showToast("Attachments submitted successfully", response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
-        } catch (err) {
-            showToast('Failed to submit attachment', 'error');
-        }
-
-    };
-
-    const [fileSelectionForDelete, setFileSelectionForDelete] = useState<string>('');
     const [showRevisions, setShowRevisions] = useState(false);
-    const removeAttachmentBtnClicked = (identifier: string) => {
-        setFileSelectionForDelete(identifier);
 
-        setShowRemoveFileConfirmation(true);
-    };
-
-    const removeAttachment = async (identifier: string) => {
-        try {
-            setShowRemoveFileConfirmation(false);
-
-            const response = await deleteAttachmentAsync(identifier);
-
-            if (response.Success) {
-                setFileSelectionForDelete('');
-                fetchAttachmentsAsync();
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
-        } catch (err) {
-            showToast('Failed to remove attachment', 'error');
-        }
-    }
 
 
     const content = (
@@ -316,7 +236,6 @@ const EditFeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Full-width ticket details */}
                     <div className="row">
                         <div className="col-12">
                             {/* Basic Details */}
@@ -333,7 +252,6 @@ const EditFeedbackPage: React.FC = () => {
                             </div>
 
 
-                            {/* Ticket State (State) */}
                             <div className="row">
                                 <div className="col-md-4 mb-3 align-items-center">
                                     <label className="form-label me-2">Type</label>
@@ -372,7 +290,6 @@ const EditFeedbackPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Two-column layout: Description + Tabs */}
                     <div className="row">
                         {/* Description column */}
                         <div className="col-md-6">
@@ -433,23 +350,23 @@ const EditFeedbackPage: React.FC = () => {
                                                 Add Comment
                                             </button>
                                             <br />
-                                            {historyComments.length > 0 && 
-                                            <> <h6>Previous Comments</h6>
+                                            {historyComments.length > 0 &&
+                                                <> <h6>Previous Comments</h6>
 
 
-                                            <div className="comment-history">
-                                                {historyComments.map((cmt, index) => (
-                                                    <div key={index} className="card mb-2 p-3 shadow-sm mt-2">
-                                                        <div className="d-flex justify-content-between align-items-center mb-1">
-                                                            <strong>{cmt.EnteredBy}</strong>
-                                                            <small className="text-muted">
-                                                                {formatToCustomDateTime(cmt.EnteredDate.toString())}
-                                                            </small>
-                                                        </div>
-                                                        <div>{cmt.Comment}</div>
-                                                    </div>
-                                                ))}
-                                            </div> </>
+                                                    <div className="comment-history">
+                                                        {historyComments.map((cmt, index) => (
+                                                            <div key={index} className="card mb-2 p-3 shadow-sm mt-2">
+                                                                <div className="d-flex justify-content-between align-items-center mb-1">
+                                                                    <strong>{cmt.EnteredBy}</strong>
+                                                                    <small className="text-muted">
+                                                                        {formatToCustomDateTime(cmt.EnteredDate.toString())}
+                                                                    </small>
+                                                                </div>
+                                                                <div>{cmt.Comment}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div> </>
                                             }
 
                                         </div>
@@ -464,61 +381,7 @@ const EditFeedbackPage: React.FC = () => {
 
 
                                 {activeTab === 'attachments' && (
-                                    <div>
-                                        {/* Upload Section */}
-                                        <div className="mb-3">
-                                            <label className="form-label">Upload Attachment</label>
-                                            <div className="input-group">
-                                                <input
-                                                    type="file"
-                                                    multiple
-                                                    className="form-control"
-                                                    onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
-                                                />
-                                                <button
-                                                    className="btn btn-outline-success"
-                                                    onClick={handleUpload}
-                                                    disabled={!selectedFiles.length}
-                                                >
-                                                    Upload
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Attachments List */}
-                                        <ul className="list-group">
-                                            {attachments.map((att, index) => (
-                                                <li key={index} className="list-group-item">
-                                                    <div className="d-flex justify-content-between align-items-start">
-                                                        <div>
-                                                            📎 <strong>{att.DisplayName}</strong>
-                                                            <br />
-                                                            <small className="text-secondary">
-                                                                Uploaded by <strong>{att.EnteredBy}</strong> on{" "}
-                                                                {formatToCustomDateTime(att.EnteredDate.toString())}
-                                                            </small>
-                                                        </div>
-                                                        <div className="d-flex gap-2">
-                                                            <a
-                                                                href='#'
-                                                                rel="noopener noreferrer"
-                                                                className="btn btn-sm btn-outline-primary"
-                                                                onClick={() => downloadAttachment(att.AttachmentIdentifier, att.DisplayName)}
-                                                            >
-                                                                View
-                                                            </a>
-                                                            <button
-                                                                className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => removeAttachmentBtnClicked(att.AttachmentIdentifier)}
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    <AttachmentSection key={feedbackId} feedbackId={feedbackId} />
                                 )}
 
                             </div>
@@ -537,16 +400,7 @@ const EditFeedbackPage: React.FC = () => {
                 variant="primary"
             />
 
-            <ConfirmDialog
-                show={showRemoveFileConfirmation}
-                onHide={() => setShowRemoveFileConfirmation(false)}
-                onConfirm={() => removeAttachment(fileSelectionForDelete)}
-                title="Confirm Remove"
-                message="Are you sure you want to remove the file? This action cannot be undone."
-                confirmText="Remove"
-                cancelText="Cancel"
-                variant="danger"
-            />
+
         </>
     );
 

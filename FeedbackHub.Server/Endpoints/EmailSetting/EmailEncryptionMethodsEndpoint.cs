@@ -1,6 +1,7 @@
 ﻿using Ardalis.ApiEndpoints;
 using FeedbackHub.Domain;
 using FeedbackHub.Domain.Enums;
+using FeedbackHub.Domain.Extensions;
 using FeedbackHub.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

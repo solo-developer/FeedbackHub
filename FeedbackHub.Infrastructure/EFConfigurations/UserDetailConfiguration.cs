@@ -27,7 +27,7 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
             builder.HasOne(ud => ud.ApplicationUser)
                 .WithOne()
                 .HasForeignKey<UserDetail>(ud => ud.AppUserId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(ud => ud.RegistrationRequest)
         .WithOne(rr => rr.User)
@@ -44,6 +44,11 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
                 .WithOne(us => us.AdminUser)
                 .HasForeignKey(us => us.AdminUserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(ud => ud.FeedbackHistories)
+    .WithOne(us => us.User)
+    .HasForeignKey(us => us.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

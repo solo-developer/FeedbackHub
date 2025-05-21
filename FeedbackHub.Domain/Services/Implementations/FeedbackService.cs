@@ -439,5 +439,17 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             return true;
         }
+
+        public async Task LinkFeedbackAsync(GenericDto<LinkFeedbackDto> dto)
+        {
+           using(TransactionScope tx= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var sourceFeedback = await _repo.GetByIdAsync(dto.Model.SourceId) ?? throw new ItemNotFoundException("Source feedback not found.");
+                var targetFeedback = await _repo.GetByIdAsync(dto.Model.TargetId) ?? throw new ItemNotFoundException("Target feedback not found.");
+                sourceFeedback.LinkFeedback( targetFeedback, dto.LoggedInUserId, dto.Model.LinkType);
+                await _repo.UpdateAsync(sourceFeedback, sourceFeedback.Id);
+                tx.Complete();
+            }
+        }
     }
 }

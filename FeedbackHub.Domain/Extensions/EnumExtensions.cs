@@ -1,6 +1,7 @@
 ﻿using FeedbackHub.Domain.Dto;
+using System.ComponentModel.DataAnnotations;
 
-namespace FeedbackHub.Domain
+namespace FeedbackHub.Domain.Extensions
 {
     public static class EnumExtensions
     {
@@ -14,6 +15,16 @@ namespace FeedbackHub.Domain
                            Value = Convert.ToInt32(e)
                        })
                        .ToList();
+        }
+
+        public static string GetDisplayName(this Enum enumValue)
+        {
+            return enumValue.GetType()
+                            .GetField(enumValue.ToString())
+                            ?.GetCustomAttributes(typeof(DisplayAttribute), false)
+                            is DisplayAttribute[] attrs && attrs.Length > 0
+                ? attrs[0].Name
+                : enumValue.ToString();
         }
     }
 }

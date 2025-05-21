@@ -29,12 +29,12 @@ namespace FeedbackHub.Infrastructure.EFConfigurations
 
 
             builder.HasOne(fh => fh.User)
-                .WithMany() 
+                .WithMany(a=>a.FeedbackHistories) 
                 .HasForeignKey(fh => fh.UserId)
                 .OnDelete(DeleteBehavior.Restrict); 
 
             builder.HasOne(fh => fh.Feedback)
-                .WithMany()
+                .WithMany(a=>a.Histories)
                 .HasForeignKey(fh => fh.FeedbackId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

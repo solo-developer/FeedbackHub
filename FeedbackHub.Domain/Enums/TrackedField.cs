@@ -17,6 +17,9 @@ namespace FeedbackHub.Domain.Enums
         FeedbackTypeId,
 
         [Display(Name = "Status")]
-        Status
+        Status,
+
+        [Display(Name = "Linked Ticket")]
+        LinkedTicket
     }
 }

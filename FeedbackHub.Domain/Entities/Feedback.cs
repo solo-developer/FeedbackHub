@@ -1,4 +1,5 @@
 ﻿using FeedbackHub.Domain.Enums;
+using FeedbackHub.Domain.Exceptions;
 
 namespace FeedbackHub.Domain.Entities
 {
@@ -86,7 +87,68 @@ namespace FeedbackHub.Domain.Entities
             this.Histories.Add(new FeedbackHistory(this.Id, userId, comment, DateTime.Now));
         }
 
-        private void TrackChangeIfDifferent(FeedbackRevision revision,TrackedField field,string oldValue,string newValue)
+        public void LinkFeedback(Feedback targetFeedback, int userId, FeedbackLinkType linkType)
+        {
+            var targetFeedbackId = targetFeedback.Id;
+            if (this.TargetLinks.Any(a => a.SourceFeedbackId == this.Id && a.TargetFeedbackId == targetFeedbackId))
+                throw new DuplicateItemException("The feedbacks are already linked.");
+            if (this.SourceLinks.Any(a => a.SourceFeedbackId == targetFeedbackId && a.TargetFeedbackId == this.Id))
+                throw new DuplicateItemException("The feedbacks are already linked.");
+            this.TargetLinks.Add(new FeedbacksLink(this.Id, targetFeedbackId, userId, linkType));
+
+            var revision = new FeedbackRevision(this.Id, this.UserId);
+            TrackChangeIfDifferent(revision, TrackedField.LinkedTicket, null, $"#{targetFeedback.TicketId} ({linkType.ToString()})");
+
+            if (revision.ChangedFields.Count > 0)
+            {
+                this.Revisions.Add(revision);
+            }
+        }
+
+        public void UnlinkFeedback(Feedback otherFeedback)
+        {
+            var otherFeedbackId = otherFeedback.Id;
+            var revision = new FeedbackRevision(this.Id, this.UserId);
+
+            FeedbacksLink linkToRemove = this.TargetLinks
+                .FirstOrDefault(l => l.TargetFeedbackId == otherFeedbackId);
+
+            bool isOutgoing = true;
+
+            if (linkToRemove == null)
+            {
+                linkToRemove = this.SourceLinks
+                    .FirstOrDefault(l => l.SourceFeedbackId == otherFeedbackId);
+                isOutgoing = false;
+            }
+
+            if (linkToRemove == null)
+            {
+                throw new ItemNotFoundException("Link does not exist");
+            }
+
+            var linkType = linkToRemove.LinkType;
+
+            if (isOutgoing)
+                this.TargetLinks.Remove(linkToRemove);
+            else
+                this.SourceLinks.Remove(linkToRemove);
+
+            TrackChangeIfDifferent(
+                revision,
+                TrackedField.LinkedTicket,
+                $"#{otherFeedback.TicketId} ({linkType.ToString()})",
+                null
+            );
+
+            if (revision.ChangedFields.Count > 0)
+            {
+                this.Revisions.Add(revision);
+            }
+        }
+
+
+        private void TrackChangeIfDifferent(FeedbackRevision revision, TrackedField field, string? oldValue, string newValue)
         {
             if (!oldValue.Equals(newValue))
             {

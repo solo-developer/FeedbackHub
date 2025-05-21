@@ -25,5 +25,7 @@ namespace FeedbackHub.Domain.Services.Interface
         Task<List<FeedbackRevisionDto>> GetRevisionsAsync(int feedbackId);
 
         Task UpdateStatusAsync(GenericDto<FeedbackStatusUpdateDto> dto);
+
+        Task LinkFeedbackAsync(GenericDto<LinkFeedbackDto> dto);
     }
 }

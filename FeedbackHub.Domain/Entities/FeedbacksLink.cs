@@ -7,11 +7,12 @@ namespace FeedbackHub.Domain.Entities
         protected FeedbacksLink()
         {
         }
-        public FeedbacksLink(int sourceId, int targetId,int userId)
+        public FeedbacksLink(int sourceId, int targetId,int userId, FeedbackLinkType linkType)
         {
             this.SourceFeedbackId = sourceId;
             this.TargetFeedbackId = targetId;
             this.CreatedBy = userId;
+            this.LinkType = linkType;
             this.CreatedDate = DateTime.Now;
         }
 

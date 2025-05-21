@@ -15,6 +15,7 @@
     Success: false;
     Message: string;
     ResponseType : 'info' | 'error';
+    Data? : any;
   };
   
   export type ServiceResponseType<T> = ServiceSuccess<T> | ServiceError;

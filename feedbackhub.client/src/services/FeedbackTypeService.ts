@@ -1,3 +1,4 @@
+import { data } from 'jquery';
 import { FeedbackTypeDto } from '../types/feedbacktype/FeedbackTypeDto';
 import { ServiceResponseType } from '../types/ServiceResponseType';
 import api  from '../utils/HttpMiddleware';

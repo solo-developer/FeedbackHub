@@ -19,6 +19,7 @@ import { formatToCustomDateTime } from '../../../utils/DateHelper';
 import FeedbackRevisionHistory from './FeedbackRevisionHistory';
 import AttachmentSection from './AttachmentSection';
 import FeedbackHistoryComments from './FeedbackHistoryComment';
+import { handleApiResponse } from '../../../utils/ResponseHandler';
 
 const EditFeedbackPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -56,9 +57,8 @@ const EditFeedbackPage: React.FC = () => {
         try {
 
             const response = await getFeedbackByIdAsync(feedbackId);
-            if (response.Success) {
-
-                setFeedbackDetail(response.Data);
+            handleApiResponse(response, showToast, undefined, () => {
+                 setFeedbackDetail(response.Data);
 
                 setFormData({
                     Id: feedbackId,
@@ -68,28 +68,15 @@ const EditFeedbackPage: React.FC = () => {
                     Priority: response.Data.Priority,
                     Description: response.Data.Description
                 });
-            } else {
-                showToast(response.Message, response.ResponseType);
-            }
+            });
         } catch {
             showToast('Failed to load feedback detail', 'error');
         }
     };
     const fetchFeedbackTypes = async () => {
         try {
-
             const response = await getAllFeedbackTypesAsync();
-
-            if (response.Success) {
-                setFeedbackTypes(response.Data);
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
-
+            handleApiResponse(response, showToast, undefined, () => { setFeedbackTypes(response.Data); });
         } catch (err) {
             showToast('Failed to load feedback types', 'error');
         }
@@ -100,19 +87,7 @@ const EditFeedbackPage: React.FC = () => {
 
             const response = await updateFeedbackAsync(formData);
 
-            if (response.Success) {
-                showToast('Feedback updated successfully', 'success', {
-                    autoClose: 3000,
-                    draggable: true
-                });
-                refreshRevisions();
-            }
-            else {
-                showToast(response.Message, response.ResponseType, {
-                    autoClose: 3000,
-                    draggable: true
-                });
-            }
+            handleApiResponse(response, showToast, "Feedback updated successfully", refreshRevisions);
 
         } catch (err) {
             showToast('Failed to update feedback', 'error');
@@ -188,7 +163,6 @@ const EditFeedbackPage: React.FC = () => {
                                         name="FeedbackTypeId"
                                         value={formData.FeedbackTypeId}
                                         onChange={handleChange}>
-                                        <option value="">Feedback Type</option>
                                         {feedbackTypes.map(ft => (
                                             <option key={ft.Id} value={ft.Id}>{ft.Type}</option>
                                         ))}
@@ -201,7 +175,6 @@ const EditFeedbackPage: React.FC = () => {
                                         name="Status"
                                         value={formData.Status}
                                         onChange={handleChange}>
-                                        <option value="">Select...</option>
                                         {statusOptions.map(ft => (
                                             <option key={ft.value} value={ft.value}>{ft.label}</option>
                                         ))}

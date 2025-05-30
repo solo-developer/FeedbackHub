@@ -23,7 +23,7 @@ const AdminFeedbackListPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const pageSize = 10;
+  const [pageSize,setPageSize] = useState(10);
 
   const [filterDto, setFilterDto] = useState<AdminFeedbackFilterDto>({
     Take: pageSize,
@@ -104,7 +104,6 @@ const AdminFeedbackListPage: React.FC = () => {
     }
   };
 
-
   const [userOptions, setUserOptions] = useState<GenericDropdownDto<number, string>[]>([]);
   const fetchUserOptions = async () => {
     try {
@@ -125,16 +124,11 @@ const AdminFeedbackListPage: React.FC = () => {
     }
   };
 
-
   const [searchFilters, setSearchFilters] = useState<AdminFeedbackFilterDto | null>(null);
   const [data, setData] = useState<FeedbackBasicDetailDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Date range states
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
 
   const handleFilterChange = (key: keyof AdminFeedbackFilterDto, value: any) => {
     setFilterDto(prev => ({
@@ -147,43 +141,50 @@ const AdminFeedbackListPage: React.FC = () => {
     const newFilters: AdminFeedbackFilterDto = {
       ...filterDto,
       Take: pageSize,
-      Skip: 0,
-      FromDate: fromDate ? fromDate : undefined,
-      ToDate: toDate ? toDate : undefined
+      Skip: 0
     };
 
     setSearchFilters(newFilters);
     setCurrentPage(1);
-    fetchData(newFilters, 1);
+    fetchData(newFilters);
   };
 
   const handleReset = () => {
     setFilterDto({
       Take: pageSize,
-      Skip: 0
+      Skip: 0,
+      FromDate: undefined,
+      ToDate: undefined
     });
     setSearchFilters(null);
-    setFromDate(null);
-    setToDate(null);
     setCurrentPage(1);
-    fetchData({ Take: pageSize, Skip: 0 }, 1);
+    fetchData({ Take: pageSize, Skip: 0 });
   };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    if (searchFilters) {
-      fetchData(searchFilters, newPage);
+    const updatedFilter = {
+      ...filterDto,
+      Skip: (newPage - 1) * pageSize,
+      Take : pageSize
     }
+    searchFilters && fetchData(updatedFilter);
   };
 
-  const fetchData = async (filters: AdminFeedbackFilterDto, page: number) => {
+  const handlePageSizeChange = (pageSize: number) => {
+    setPageSize(pageSize);
+    const updatedFilter = {
+      ...filterDto,
+      Skip:0,
+      Take: pageSize
+    }
+    searchFilters && fetchData(updatedFilter);
+  };
+
+  const fetchData = async (request: AdminFeedbackFilterDto) => {
     try {
       setIsLoading(true);
-      const request: AdminFeedbackFilterDto = {
-        ...filters,
-        Skip: (page - 1) * filters.Take
-      };
-
+      console.log('request',request);
       const response = await getForAdminAsync(request);
       if (response.Success) {
         setData(response.Data.Data);
@@ -335,8 +336,8 @@ const AdminFeedbackListPage: React.FC = () => {
           <div className="col-md-2">
             <label className="form-label">From Date</label>
             <DatePicker
-              selected={fromDate}
-              onChange={(date: Date) => setFromDate(date)}
+              selected={filterDto.FromDate}
+              onChange={(date: Date) => handleFilterChange('FromDate', date)}
               className="form-control"
               placeholderText="Start Date"
             />
@@ -345,8 +346,8 @@ const AdminFeedbackListPage: React.FC = () => {
           <div className="col-md-2">
             <label className="form-label">To Date</label>
             <DatePicker
-              selected={toDate}
-              onChange={(date: Date) => setToDate(date)}
+              selected={filterDto.ToDate}
+              onChange={(date: Date) => handleFilterChange('ToDate', date)}
               className="form-control"
               placeholderText="End Date"
             />
@@ -402,12 +403,7 @@ const AdminFeedbackListPage: React.FC = () => {
           currentPage: currentPage,
           totalCount: totalCount,
           onPageChange: handlePageChange,
-          onPageSizeChange: (newSize) => {
-            setCurrentPage(1);
-            if (searchFilters) {
-              fetchData(searchFilters, 1);
-            }
-          }
+          onPageSizeChange: handlePageSizeChange
         }}
       />
     </PagePanel>

@@ -13,10 +13,8 @@ import { getAsync } from '../../../services/FeedbackService';
 import { useAppSwitcher } from '../../../contexts/AppSwitcherContext';
 import DatePicker from 'react-datepicker';
 
-
 const FeedbacksPage: React.FC = () => {
   const { ticketstatus } = useParams<{ ticketstatus: keyof typeof TicketStatus }>();
-
   const statusEnum = TicketStatus[ticketstatus as keyof typeof TicketStatus];
 
   const navigate = useNavigate();
@@ -28,8 +26,7 @@ const FeedbacksPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [data, setData] = useState<FeedbackBasicDetailDto[]>([]);
-  const pageSize = 10;
-
+  const [pageSize, setPageSize] = useState(10);
 
   const [filterDto, setFilter] = useState<FeedbackFilterDto>({
     Take: pageSize,
@@ -38,31 +35,22 @@ const FeedbacksPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const statusEnum = TicketStatus[ticketstatus as keyof typeof TicketStatus];
+    const updatedStatus = TicketStatus[ticketstatus as keyof typeof TicketStatus];
 
     setCurrentPage(1);
-    setFilter(prev => ({
-      ...prev,
+    const newFilter = {
+      ...filterDto,
+      Take: pageSize,
       Skip: 0,
-      Status: statusEnum
-    }));
-  }, [ticketstatus]);
-
+      Status: updatedStatus
+    };
+    setFilter(newFilter);
+    handleSearch(newFilter);
+  }, [ticketstatus, selectedApp]);
 
   useEffect(() => {
     fetchFeedbackTypes();
-    handleSearch();
   }, []);
-
-  useEffect(() => {
-    setFilter(prev => ({
-      ...prev,
-      Skip: (currentPage - 1) * pageSize,
-      Status: statusEnum,
-    }));
-    handleSearch();
-  }, [statusEnum, selectedApp]);
-
 
   const fetchFeedbackTypes = async () => {
     try {
@@ -77,9 +65,9 @@ const FeedbacksPage: React.FC = () => {
   const fetchData = async (filters: FeedbackFilterDto, page: number) => {
     try {
       setIsLoading(true);
-      const request: FeedbackFilterDto = {
+      const request = {
         ...filters,
-        Skip: (page - 1) * filters.Take
+        Skip: (page - 1) * filters.Take,
       };
 
       const response = await getAsync(request);
@@ -96,9 +84,6 @@ const FeedbacksPage: React.FC = () => {
     }
   };
 
-  const [searchFilters, setSearchFilters] = useState<FeedbackFilterDto | null>(null);
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
 
   const handleFilterChange = (key: keyof FeedbackFilterDto, value: any) => {
     setFilter(prev => ({
@@ -107,40 +92,60 @@ const FeedbacksPage: React.FC = () => {
     }));
   };
 
-  const handleSearch = () => {
+  const handleSearch = (customFilter?: FeedbackFilterDto) => {
+    const baseFilter = customFilter ?? filterDto;
+
     const newFilters: FeedbackFilterDto = {
-      ...filterDto,
+      ...baseFilter,
       Take: pageSize,
       Skip: 0,
-      Status : statusEnum,
-      FromDate: fromDate ? fromDate : undefined,
-      ToDate: toDate ? toDate : undefined
+      Status: statusEnum
     };
 
-    setSearchFilters(newFilters);
+    setFilter(newFilters);
     setCurrentPage(1);
     fetchData(newFilters, 1);
   };
 
   const handleReset = () => {
-    setFilter({
+    const resetFilters: FeedbackFilterDto = {
       Take: pageSize,
       Skip: 0,
-      Status : statusEnum
-    });
-    setSearchFilters(null);
-    setFromDate(null);
-    setToDate(null);
+      FromDate: undefined,
+      ToDate: undefined,
+      Status: statusEnum
+    };
+
+    setFilter(resetFilters);
     setCurrentPage(1);
-    fetchData({ Take: pageSize, Skip: 0,Status : statusEnum }, 1);
+    fetchData(resetFilters, 1);
   };
 
   const handlePageChange = (newPage: number) => {
+    const updatedFilters = {
+      ...filterDto,
+      Skip: (newPage - 1) * filterDto.Take,
+    };
+
     setCurrentPage(newPage);
-    if (searchFilters) {
-      fetchData(searchFilters, newPage);
-    }
+    fetchData(updatedFilters, newPage);
   };
+
+  const handlePageSizeChange = (newSize: number) => {
+
+    const updatedFilters = {
+      ...filterDto,
+      Take: newSize,
+      Skip: 0,
+    };
+
+    fetchData(updatedFilters, 1);
+
+    setPageSize(newSize);
+    setCurrentPage(1);
+    setFilter(updatedFilters);
+  };
+
 
   const columns = React.useMemo(() => [
     {
@@ -185,7 +190,7 @@ const FeedbacksPage: React.FC = () => {
         </div>
       ),
     }
-  ], []);
+  ], [navigate]);
 
   return (
     <PagePanel title={`${TicketStatus[statusEnum]} Feedbacks`}>
@@ -215,8 +220,12 @@ const FeedbacksPage: React.FC = () => {
           <div className="col-md-2">
             <label className="form-label">From Date</label>
             <DatePicker
-              selected={fromDate}
-              onChange={(date: Date) => setFromDate(date)}
+              selected={filterDto.FromDate}
+              onChange={(date: Date) =>
+                handleFilterChange(
+                  'FromDate', date
+                )
+              }
               className="form-control"
               placeholderText="Start Date"
             />
@@ -225,8 +234,12 @@ const FeedbacksPage: React.FC = () => {
           <div className="col-md-2">
             <label className="form-label">To Date</label>
             <DatePicker
-              selected={toDate}
-              onChange={(date: Date) => setToDate(date)}
+              selected={filterDto.ToDate}
+              onChange={(date: Date) =>
+                handleFilterChange(
+                  'ToDate', date
+                )
+              }
               className="form-control"
               placeholderText="End Date"
             />
@@ -251,7 +264,7 @@ const FeedbacksPage: React.FC = () => {
             <button
               type="button"
               className="btn btn-primary w-100"
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
             >
               Search
             </button>
@@ -267,8 +280,6 @@ const FeedbacksPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-
       </div>
 
       <GenericTable
@@ -282,12 +293,7 @@ const FeedbacksPage: React.FC = () => {
           currentPage: currentPage,
           totalCount: totalCount,
           onPageChange: handlePageChange,
-          onPageSizeChange: (newSize) => {
-            setCurrentPage(1);
-            if (searchFilters) {
-              fetchData(searchFilters, 1);
-            }
-          }
+          onPageSizeChange: handlePageSizeChange
         }}
       />
     </PagePanel>

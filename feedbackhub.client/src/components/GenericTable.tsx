@@ -303,7 +303,7 @@ const GenericTable = forwardRef(<T extends object>(
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2">
                 <span className="small">Rows per page:</span>
-                {[5, 10, 20, 50].map(size => (
+                {[1,5, 10, 20, 50].map(size => (
                   <button
                     key={size}
                     className={`btn btn-sm ${

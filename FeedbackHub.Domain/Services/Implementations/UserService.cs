@@ -23,14 +23,16 @@ namespace FeedbackHub.Domain.Services.Implementations
         private readonly IEmailSenderService _emailSenderService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFileHelper _fileHelper;
+        private readonly IBaseRepository<UserApplicationAccess> _userApplicationAccessRepo;
 
-        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService, UserManager<ApplicationUser> userManager, IFileHelper fileHelper)
+        public UserService(IBaseRepository<UserDetail> userRepo, IEmailContentComposer emailContentComposer, IEmailSenderService emailSenderService, UserManager<ApplicationUser> userManager, IFileHelper fileHelper, IBaseRepository<UserApplicationAccess> userApplicationAccessRepo)
         {
             _userRepo = userRepo;
             _emailContentComposerService = emailContentComposer;
             _emailSenderService = emailSenderService;
             _userManager = userManager;
             _fileHelper = fileHelper;
+            _userApplicationAccessRepo = userApplicationAccessRepo;
         }
 
         public async Task ChangePasswordAsync(GenericDto<ChangePasswordDto> dto)
@@ -256,10 +258,10 @@ namespace FeedbackHub.Domain.Services.Implementations
             using (TransactionScope tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var user = await _userRepo.GetByIdAsync(dto.UserId) ?? throw new ItemNotFoundException("User not found.");
-                foreach (var application in user.AllowedApplications)
-                {
-                    user.Unsubscribe(application.ClientId, application.ApplicationId);
-                }
+
+                var allowedApplications = user.AllowedApplications.ToList();
+                _userApplicationAccessRepo.DeleteRange(allowedApplications);
+               
 
                 foreach(var application in dto.ApplicationIds)
                 {

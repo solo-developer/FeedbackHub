@@ -98,7 +98,7 @@ namespace FeedbackHub.Domain.Entities
 
         public void Subscribe(int clientId, int applicationId)
         {
-            if (AllowedApplications.Any(a => a.ApplicationId == applicationId && a.ClientId == clientId)) return;
+           // if (AllowedApplications.Any(a => a.ApplicationId == applicationId && a.ClientId == clientId)) return;
             AllowedApplications.Add(new UserApplicationAccess(this.Id,clientId, applicationId));
         }
 

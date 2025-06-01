@@ -16,8 +16,6 @@ interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';
 }
 
-
-
 const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
     const pageSize = 10;
     const [isLoading, setIsLoading] = useState(false);
@@ -256,7 +254,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                 id: 'Applications',
                 header: 'Applications',
                 cell: ({ row }) => {
-                    let applicationsJoinedByComma = row.original.Applications.join(',');
+                    let applicationsJoinedByComma = row.original.Applications.map(a=>a.Name).join(',');
                     return (<label>{applicationsJoinedByComma}</label>);
                 }
             },
@@ -412,7 +410,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                                     isMulti
                                     options={applications}
                                     getOptionLabel={(e) => e.Name}
-                                    getOptionValue={(e) => e.Id.toString()}
+                                    getOptionValue={(e) => e.Id?.toString()}
                                     value={selectedOptions}
                                     onChange={handleChange}
                                     inputValue={inputValue}

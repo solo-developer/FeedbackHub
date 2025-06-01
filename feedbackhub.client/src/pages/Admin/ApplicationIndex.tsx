@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GenericTable from '../../components/GenericTable';
 import PagePanel from '../../components/PagePanel';
-import api  from '../../utils/HttpMiddleware';
 import { useToast } from '../../contexts/ToastContext';
-import { isSuccess, parseMessage, parseResponseType } from '../../utils/HttpResponseParser';
-import { ClientDto } from '../../types/client/ClientDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { ApplicationDto } from '../../types/application/ApplicationDto';
@@ -155,15 +152,18 @@ const ApplicationIndexPage: React.FC = () => {
                 id: 'Name',
                 header: 'Name',
                 accessorKey: 'Name',
+                exportable:true
             },
             {
                 id: 'ShortName',
                 header: 'ShortName',
                 accessorKey: 'ShortName',
+                exportable : true
             },
             {
                 id: 'Logo',
                 header: 'Logo',
+                exportable :false,
                 accessorFn: (row) => row.Logo, // base64 string
                 cell: ({ getValue }) => {
                   const base64 = getValue<string>();
@@ -181,6 +181,7 @@ const ApplicationIndexPage: React.FC = () => {
             {
                 id: 'Action',
                 header: 'Action',
+                exportable:false,
                 cell: ({ row }) => (
                     <div>
                          <span
@@ -216,7 +217,13 @@ const ApplicationIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Applications' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading}  enablePagination={true}/>
+                <GenericTable columns={columns} data={data} isLoading={isLoading}  enablePagination={true}
+                exportProps={
+                    {
+                        enableExporting :true,
+                        fileName : 'Applications.xlsx'
+                    }
+                }/>
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add application" footer={modalFooter}>
                 <form onSubmit={save}>

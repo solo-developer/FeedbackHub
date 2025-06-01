@@ -15,12 +15,20 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 
 interface ServerPaginationProps {
   totalCount: number;
   currentPage: number; // 1-based
   onPageChange: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
+}
+
+interface ExportToExcelProps{
+  fileName? : string;
+  enableExporting :boolean;  
 }
 
 interface GenericTableProps<T> {
@@ -32,7 +40,9 @@ interface GenericTableProps<T> {
   paginationType?: 'client' | 'server';
   pageSize?: number;
   serverPaginationProps?: ServerPaginationProps;
-
+  exportProps? : ExportToExcelProps;
+  getServerExportData?: () => void,
+  enableExporting?: boolean,
   renderFilters?: () => React.ReactNode;
   onSortChange?: (sortedColumn: { id: string; desc: boolean }) => void;
 
@@ -53,6 +63,8 @@ const GenericTable = forwardRef(<T extends object>(
     pageSize = 10,
     serverPaginationProps,
     renderFilters,
+    getServerExportData,
+    exportProps,
     onSortChange,
     getRowId = (row: T) => {
       if (!(row as any)._internalId) {
@@ -191,6 +203,32 @@ const GenericTable = forwardRef(<T extends object>(
     (pagination.pageIndex + 1) * pagination.pageSize,
     filteredTotal
   );
+  const handleExport = async () => {
+    const exportableColumns = columns.filter((col: any) => col.exportable !== false);
+    const exportRows: any[] = [];
+
+    const sourceData = paginationType == 'server'
+      ? await (getServerExportData?.() ?? Promise.resolve([]))
+      : table.getFilteredRowModel().rows.map((r) => r.original);
+
+    sourceData.forEach((row: any) => {
+      const exportRow: any = {};
+      exportableColumns.forEach((col: any) => {
+        const key = col.accessorKey || col.id;
+        const value =
+          typeof col.exportValue === 'function'
+            ? col.exportValue(row)
+            : row[key];
+        exportRow[col.header ?? col.id] = value;
+      });
+      exportRows.push(exportRow);
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
+    XLSX.writeFile(workbook,exportProps?.fileName ?? 'ExportedData.xlsx');
+  };
 
   const handlePageSizeChange = (size: number) => {
     if (paginationType === 'server' && serverPaginationProps) {
@@ -228,11 +266,21 @@ const GenericTable = forwardRef(<T extends object>(
   };
 
   return (
-    <div className="container-fluid mt-3 w-100">
-      {renderFilters && <div className="mb-3">{renderFilters()}</div>}
+    <div className="container-fluid w-100">
+      <div className="mb-3 d-flex justify-content-between">
+        {renderFilters && <div>{renderFilters()}</div>}
 
-      {paginationType === 'client' && enablePagination && (
-        <div className="mb-2 d-flex justify-content-end">
+      </div>
+
+      {renderFilters && <div className="mb-3">{renderFilters()}</div>}
+      <div className="mb-2 d-flex justify-content-end">
+        {(exportProps?.enableExporting == true || paginationType == 'client') &&
+          <button className="btn btn-success btn-sm me-2" onClick={handleExport}>
+            Export to Excel
+          </button>
+        }
+        {paginationType === 'client' && enablePagination && (
+
           <input
             type="text"
             className="form-control form-control-sm w-25"
@@ -240,8 +288,10 @@ const GenericTable = forwardRef(<T extends object>(
             value={globalFilter ?? ''}
             onChange={e => setGlobalFilter(e.target.value)}
           />
-        </div>
-      )}
+
+        )}
+
+      </div>
 
       {isLoading ? (
         <div className="text-center">
@@ -303,12 +353,11 @@ const GenericTable = forwardRef(<T extends object>(
             <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2">
                 <span className="small">Rows per page:</span>
-                {[1,5, 10, 20, 50].map(size => (
+                {[5, 10, 20, 50].map(size => (
                   <button
                     key={size}
-                    className={`btn btn-sm ${
-                      pagination.pageSize === size ? 'btn-primary' : 'btn-outline-primary'
-                    }`}
+                    className={`btn btn-sm ${pagination.pageSize === size ? 'btn-primary' : 'btn-outline-primary'
+                      }`}
                     onClick={() => handlePageSizeChange(size)}
                   >
                     {size}

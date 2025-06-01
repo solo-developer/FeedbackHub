@@ -187,15 +187,19 @@ const ClientOrganizationIndexPage: React.FC = () => {
                 id: 'Name',
                 header: 'Name',
                 accessorKey: 'Name',
+                exportable:true,
             },
             {
                 id: 'Code',
                 header: 'Code',
                 accessorKey: 'Code',
+                exportable:true,
             },
             {
                 id: 'Applications',
                 header: 'Applications',
+                exportable :true,
+                exportValue: (row :any) => row.SubscribedApplications.length > 0 ? row.SubscribedApplications.map(a => a.ShortName).join(',') : 'N/A',
                 cell: ({ row }: any) => (
 
                     row.original.SubscribedApplications.length > 0 ? row.original.SubscribedApplications.map(a => a.ShortName).join(',') : 'N/A'
@@ -204,6 +208,7 @@ const ClientOrganizationIndexPage: React.FC = () => {
             {
                 id: 'Action',
                 header: 'Action',
+                exportable:false,
                 cell: ({ row }: any) => (
                     <div>
 
@@ -260,7 +265,13 @@ const ClientOrganizationIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Client Organization Setup' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}/>
+                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}
+                exportProps={
+                    {
+                        enableExporting :true,
+                        fileName : 'Client Organizations.xlsx'
+                    }
+                }/>
             </PagePanel>
 
             <Modal show={showModal} onClose={closeModal} title="Add Client Organization" footer={modalFooter}>

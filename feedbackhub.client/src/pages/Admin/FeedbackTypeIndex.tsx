@@ -8,6 +8,7 @@ import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import Modal from '../../components/Modal';
 import ConfirmDialog from "../../components/ConfirmDialog";
 import { getAllFeedbackTypesAsync } from '../../services/FeedbackTypeService';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 const FeedbackTypeIndexPage: React.FC = () => {
 
@@ -109,6 +110,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
                 id: 'Type',
                 header: 'Type',
                 accessorKey: 'Type',
+                exportable:true,
             },
             {
                 id: 'Color',
@@ -126,6 +128,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
                         title={row.original.Color}
                     />
                 ),
+                exportable : true,
             },
             {
                 id: 'Action',
@@ -143,6 +146,7 @@ const FeedbackTypeIndexPage: React.FC = () => {
                         </span>
                     </div>
                 ),
+                exportable :false
             }
         ],
         []
@@ -165,7 +169,12 @@ const FeedbackTypeIndexPage: React.FC = () => {
     return (
         <>
             <PagePanel title='Feedback Type Setup' headerContent={headerContent}>
-                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true}/>
+                <GenericTable columns={columns} data={data} isLoading={isLoading} enablePagination={true} exportProps={
+                    {
+                        enableExporting :true,
+                        fileName : 'Feedback Types.xlsx'
+                    }
+                }/>
             </PagePanel>
             <Modal show={showModal} onClose={closeModal} title="Add Feedback Type" footer={modalFooter}>
                 <form onSubmit={saveFeedbackType}>

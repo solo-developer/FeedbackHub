@@ -12,6 +12,7 @@ import { FeedbackBasicDetailDto } from '../../../types/feedback/FeedbackBasicDet
 import { getAsync } from '../../../services/FeedbackService';
 import { useAppSwitcher } from '../../../contexts/AppSwitcherContext';
 import DatePicker from 'react-datepicker';
+import { formatToCustomDateTime } from '../../../utils/DateHelper';
 
 const FeedbacksPage: React.FC = () => {
   const { ticketstatus } = useParams<{ ticketstatus: keyof typeof TicketStatus }>();
@@ -176,6 +177,12 @@ const FeedbacksPage: React.FC = () => {
       id: 'CreatedBy',
       header: 'Raised By',
       accessorFn: (row: FeedbackBasicDetailDto) => row.CreatedBy
+    },
+     {
+      id: 'CreatedDate',
+      header: 'Raised Date',
+      accessorFn: (row: FeedbackBasicDetailDto) => formatToCustomDateTime(row.CreatedDate.toString()),
+      exportValue: (row:FeedbackBasicDetailDto)=> formatToCustomDateTime(row.CreatedDate.toString())
     },
     {
       id: 'FeedbackType',

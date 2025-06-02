@@ -18,6 +18,7 @@ import { ClientDto } from '../../types/client/ClientDto';
 import { GenericDropdownDto } from '../../types/GenericDropdownDto';
 import { getUserOptions } from '../../services/UserService';
 import { TicketStatus, TicketStatusLabels } from '../../types/feedback/TicketStatus';
+import { formatToCustomDateTime } from '../../utils/DateHelper';
 
 
 const AdminFeedbackListPage: React.FC = () => {
@@ -245,6 +246,12 @@ const AdminFeedbackListPage: React.FC = () => {
       id: 'CreatedBy',
       header: 'Raised By',
       accessorFn: (row: FeedbackBasicDetailDto) => row.CreatedBy
+    },
+    {
+      id: 'CreatedDate',
+      header: 'Raised Date',
+      accessorFn: (row: FeedbackBasicDetailDto) => formatToCustomDateTime(row.CreatedDate.toString()),
+      exportValue: (row: FeedbackBasicDetailDto) => formatToCustomDateTime(row.CreatedDate.toString())
     },
     {
       id: 'FeedbackType',

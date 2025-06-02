@@ -17,6 +17,7 @@ import { fetchClients } from '../../services/ClientService';
 import { ClientDto } from '../../types/client/ClientDto';
 import { GenericDropdownDto } from '../../types/GenericDropdownDto';
 import { getUserOptions } from '../../services/UserService';
+import { TicketStatus, TicketStatusLabels } from '../../types/feedback/TicketStatus';
 
 
 const AdminFeedbackListPage: React.FC = () => {
@@ -229,6 +230,11 @@ const AdminFeedbackListPage: React.FC = () => {
       id: 'Title',
       header: 'Title',
       accessorFn: (row: FeedbackBasicDetailDto) => row.Title
+    },
+     {
+      id: 'Status',
+      header: 'Status',
+      accessorFn: (row: FeedbackBasicDetailDto) => TicketStatusLabels[row.Status as TicketStatus]
     },
     {
       id: 'Action',

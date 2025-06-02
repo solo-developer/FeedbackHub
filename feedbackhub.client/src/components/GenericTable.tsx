@@ -16,7 +16,6 @@ import {
 } from '@tanstack/react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 
 interface ServerPaginationProps {

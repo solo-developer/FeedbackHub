@@ -18,7 +18,7 @@ namespace FeedbackHub.Domain.Entities
 
         public string FieldName { get;private set; }
         public string? OldValue { get;private set; }
-        public string NewValue { get;private set; }
+        public string? NewValue { get;private set; }
 
         public virtual FeedbackRevision FeedbackRevision { get; set; }
 

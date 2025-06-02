@@ -92,11 +92,11 @@ namespace FeedbackHub.Domain.Entities
             if (targetFeedback.Id == this.Id)
                 throw new InvalidStateTransitionException("Cannot link with itself");
             var targetFeedbackId = targetFeedback.Id;
-            if (this.TargetLinks.Any(a => a.SourceFeedbackId == this.Id && a.TargetFeedbackId == targetFeedbackId))
+            if (this.SourceLinks.Any(a => a.SourceFeedbackId == this.Id && a.TargetFeedbackId == targetFeedbackId))
                 throw new DuplicateItemException("The feedbacks are already linked.");
-            if (this.SourceLinks.Any(a => a.SourceFeedbackId == targetFeedbackId && a.TargetFeedbackId == this.Id))
+            if (this.TargetLinks.Any(a => a.SourceFeedbackId == targetFeedbackId && a.TargetFeedbackId == this.Id))
                 throw new DuplicateItemException("The feedbacks are already linked.");
-            this.TargetLinks.Add(new FeedbacksLink(this.Id, targetFeedbackId, userId, linkType));
+            this.SourceLinks.Add(new FeedbacksLink(this.Id, targetFeedbackId, userId, linkType));
 
             var revision = new FeedbackRevision(this.Id, this.UserId);
             TrackChangeIfDifferent(revision, TrackedField.LinkedTicket, null, $"#{targetFeedback.TicketId} ({linkType.ToString()})");
@@ -107,19 +107,19 @@ namespace FeedbackHub.Domain.Entities
             }
         }
 
-        public void UnlinkFeedback(Feedback otherFeedback, int userId)
+        public void RecordUnlinkFeedback(Feedback otherFeedback, int userId)
         {
             var otherFeedbackId = otherFeedback.Id;
             var revision = new FeedbackRevision(this.Id, userId);
 
-            FeedbacksLink linkToRemove = this.TargetLinks
+            FeedbacksLink linkToRemove = this.SourceLinks
                 .FirstOrDefault(l => l.TargetFeedbackId == otherFeedbackId);
 
             bool isOutgoing = true;
 
             if (linkToRemove == null)
             {
-                linkToRemove = this.SourceLinks
+                linkToRemove = this.TargetLinks
                     .FirstOrDefault(l => l.SourceFeedbackId == otherFeedbackId);
                 isOutgoing = false;
             }
@@ -130,11 +130,6 @@ namespace FeedbackHub.Domain.Entities
             }
 
             var linkType = linkToRemove.LinkType;
-
-            if (isOutgoing)
-                this.TargetLinks.Remove(linkToRemove);
-            else
-                this.SourceLinks.Remove(linkToRemove);
 
             TrackChangeIfDifferent(
                 revision,

@@ -503,8 +503,10 @@ namespace FeedbackHub.Domain.Services.Implementations
                 var sourceFeedback = link.SourceFeedback;
                 var targetFeedback = link.TargetFeedback;
 
-                sourceFeedback.UnlinkFeedback(targetFeedback,userId);
+                sourceFeedback.RecordUnlinkFeedback(targetFeedback,userId);
                 await _repo.UpdateAsync(sourceFeedback, sourceFeedback.Id);
+
+                await _feedbacksLinkRepo.DeleteAsync(link);
                 tx.Complete();
             }
         }

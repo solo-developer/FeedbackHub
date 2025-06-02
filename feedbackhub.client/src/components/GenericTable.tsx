@@ -29,6 +29,7 @@ interface ServerPaginationProps {
 interface ExportToExcelProps{
   fileName? : string;
   enableExporting :boolean;  
+  getServerExportData? : () => void;
 }
 
 interface GenericTableProps<T> {
@@ -41,7 +42,6 @@ interface GenericTableProps<T> {
   pageSize?: number;
   serverPaginationProps?: ServerPaginationProps;
   exportProps? : ExportToExcelProps;
-  getServerExportData?: () => void,
   enableExporting?: boolean,
   renderFilters?: () => React.ReactNode;
   onSortChange?: (sortedColumn: { id: string; desc: boolean }) => void;
@@ -63,7 +63,6 @@ const GenericTable = forwardRef(<T extends object>(
     pageSize = 10,
     serverPaginationProps,
     renderFilters,
-    getServerExportData,
     exportProps,
     onSortChange,
     getRowId = (row: T) => {
@@ -208,7 +207,7 @@ const GenericTable = forwardRef(<T extends object>(
     const exportRows: any[] = [];
 
     const sourceData = paginationType == 'server'
-      ? await (getServerExportData?.() ?? Promise.resolve([]))
+      ? await (exportProps?.getServerExportData?.() ?? Promise.resolve([]))
       : table.getFilteredRowModel().rows.map((r) => r.original);
 
     sourceData.forEach((row: any) => {

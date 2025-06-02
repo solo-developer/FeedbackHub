@@ -10,5 +10,7 @@ namespace FeedbackHub.Domain.Dto.User
         public UserType UserType { get; set; } = UserType.All;
 
         public int? ClientId { get; set; }
+
+        public bool IsForExport { get; set; } = false;
     }
 }

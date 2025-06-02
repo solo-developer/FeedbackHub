@@ -4,4 +4,5 @@ export interface UserFilterDto{
     Take : Number;
     UserType: string;
     ClientId? :number;
+    IsForExport:boolean;
 }

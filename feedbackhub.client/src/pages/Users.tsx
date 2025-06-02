@@ -11,6 +11,7 @@ import Modal from '../components/Modal';
 import { ApplicationDto } from '../types/application/ApplicationDto';
 import { getApplicationsByClientIdAsync } from '../services/ApplicationService';
 import Select from 'react-select';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 interface UsersPageProps {
     userType: 'All' | 'Client' | 'Admin';
@@ -135,6 +136,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                     draggable: true
                 });
             }
+            return response.Data.Data;
 
         } catch (err) {
             showToast('Failed to load users', 'error');
@@ -143,7 +145,27 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
         }
     };
 
+    const getDataForExport = async () => {
+        try {
+            const response = await getUsersAsync(filterDto,true);
 
+            if (response.Success) {
+               return response.Data.Data;
+            }
+            else {
+                showToast(response.Message, response.ResponseType, {
+                    autoClose: 3000,
+                    draggable: true
+                });
+                return [];
+            }
+            
+
+        } catch (err) {
+            showToast('Failed to load users', 'error');
+            return [];
+        }
+    };
 
     const [selectedUserForApplicationAccess, setSelectedUserForApplicationAccess] = useState<ClientUserDetailDto | undefined>();
     const EditApplicationAccessClicked = (userId: number) => {
@@ -253,14 +275,16 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
             userType != 'Admin' && {
                 id: 'Applications',
                 header: 'Applications',
+                exportValue: (row: any) => row.Applications.length > 0 ? row.Applications.map(a => a.Name).join(',') : 'N/A',
                 cell: ({ row }) => {
-                    let applicationsJoinedByComma = row.original.Applications.map(a=>a.Name).join(',');
+                    let applicationsJoinedByComma = row.original.Applications.map(a => a.Name).join(',');
                     return (<label>{applicationsJoinedByComma}</label>);
                 }
             },
             {
                 id: 'Status',
                 header: 'Status',
+                exportValue: (row: any) => row.IsDeleted ? 'Deleted' : 'Active',
                 cell: ({ row }) => {
                     if (row.original.IsDeleted)
                         return (<label className='text text-danger'>Deleted</label>);
@@ -270,6 +294,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
             {
                 id: 'Action',
                 header: 'Action',
+                exportable: false,
                 cell: ({ row }) => {
                     return (
                         <div className="d-flex gap-2">
@@ -376,6 +401,13 @@ const UsersPage: React.FC<UsersPageProps> = ({ userType }) => {
                     onSortChange={(sortedColumns) => {
                         console.log('Sorted columns:', sortedColumns);
                     }}
+                    exportProps={
+                        {
+                            enableExporting: true,
+                            fileName: 'Users.xlsx',
+                            getServerExportData: getDataForExport
+                        }
+                    }
                 />
             </PagePanel>
             <ConfirmDialog

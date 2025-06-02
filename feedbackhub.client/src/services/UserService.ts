@@ -10,9 +10,13 @@ import api from '../utils/HttpMiddleware';
 import { isSuccess, parseMessage, parseData, parseResponseType } from '../utils/HttpResponseParser';
 
 
-export const getUsersAsync = async (dto: UserFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<ClientUserDetailDto>>> => {
+export const getUsersAsync = async (dto: UserFilterDto, isForExport: boolean = false): Promise<ServiceResponseType<PaginatedDataResponseDto<ClientUserDetailDto>>> => {
     try {
-        const response = await api.post('/users', dto);
+        const payload = {
+            ...dto,
+            isForExport, 
+        };
+        const response = await api.post('/users', payload);
 
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<PaginatedDataResponseDto<ClientUserDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<ClientUserDetailDto>>;

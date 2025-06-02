@@ -13,6 +13,7 @@ namespace FeedbackHub.Domain.Dto
         public TicketStatus? Status { get; set; }
 
         public int? FeedbackTypeId { get; set; }
+        public bool IsForExport { get; set; } = false;
     }
 
     public class AdminFeedbackFilterDto : FeedbackFilterDto

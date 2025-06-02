@@ -100,7 +100,13 @@ namespace FeedbackHub.Domain.Services.Implementations
 
             var totalCount = await queryable.CountAsync();
 
-            var feedbacks = await queryable.OrderByDescending(a => a.ModifiedDate).Skip(request.Model.Skip).Take(request.Model.Take).Select(MapToFeedbackBasicDetail()).ToListAsync();
+            queryable = queryable.OrderByDescending(a => a.ModifiedDate);
+            if (!request.Model.IsForExport)
+            {
+                queryable = queryable.Skip(request.Model.Skip).Take(request.Model.Take);
+            }
+
+            var feedbacks = await queryable.Select(MapToFeedbackBasicDetail()).ToListAsync();
 
             return new PaginatedDataResponseDto<FeedbackBasicDetailDto>
             {

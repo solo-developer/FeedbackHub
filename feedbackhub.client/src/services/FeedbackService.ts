@@ -1,3 +1,4 @@
+import { faL } from '@fortawesome/free-solid-svg-icons';
 import { BoardFeedbackDto } from '../types/feedback/BoardFeedbackDto';
 import { FilterOption } from '../types/feedback/DateFilterRange';
 import { FeedbackAttachmentDto } from '../types/feedback/FeedbackAttachmentDto';
@@ -46,9 +47,13 @@ export const getAsync = async (dto: FeedbackFilterDto): Promise<ServiceResponseT
     }
 };
 
-export const getForAdminAsync = async (dto: AdminFeedbackFilterDto): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
+export const getForAdminAsync = async (dto: AdminFeedbackFilterDto, isForExport:boolean=false): Promise<ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>> => {
     try {
-        const response = await api.post('/admin/feedbacks', dto);
+        const payload={
+            ...dto,
+            isForExport
+        };
+        const response = await api.post('/admin/feedbacks', payload);
 
         if (isSuccess(response)) {
             return { Success: true, Data: parseData<PaginatedDataResponseDto<FeedbackBasicDetailDto>>(response) } as ServiceResponseType<PaginatedDataResponseDto<FeedbackBasicDetailDto>>;

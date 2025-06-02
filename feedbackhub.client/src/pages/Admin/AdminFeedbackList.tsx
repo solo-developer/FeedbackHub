@@ -168,6 +168,22 @@ const AdminFeedbackListPage: React.FC = () => {
     fetchData(newFilters);
   };
 
+  const getDataForExport = async () => {
+    if (!searchFilters) return [];
+    try {
+      const response = await getForAdminAsync(searchFilters, true);
+      if (response.Success) {
+        return response.Data.Data;
+      } else {
+        showToast(response.Message, response.ResponseType);
+        return [];
+      }
+    } catch {
+      showToast('Failed to get feedbacks', 'error');
+      return [];
+    }
+  }
+
   const handleReset = () => {
     setFilterDto({
       Take: pageSize,
@@ -222,7 +238,8 @@ const AdminFeedbackListPage: React.FC = () => {
     {
       id: 'TicketId',
       header: 'Ticket Id',
-      accessorFn: (row: FeedbackBasicDetailDto) => `#${row.TicketId}`
+      accessorFn: (row: FeedbackBasicDetailDto) => `#${row.TicketId}`,
+      exportValue: (row: any) => `#${row.TicketId}`,
     },
     {
       id: 'CreatedBy',
@@ -252,11 +269,13 @@ const AdminFeedbackListPage: React.FC = () => {
     {
       id: 'Status',
       header: 'Status',
-      accessorFn: (row: FeedbackBasicDetailDto) => TicketStatusLabels[row.Status as TicketStatus]
+      accessorFn: (row: FeedbackBasicDetailDto) => TicketStatusLabels[row.Status as TicketStatus],
+      exportValue: (row: any) => TicketStatusLabels[row.Status as TicketStatus],
     },
     {
       id: 'Action',
       header: 'Action',
+      exportable: false,
       cell: ({ row }) => (
         <span
           role="button"
@@ -450,6 +469,13 @@ const AdminFeedbackListPage: React.FC = () => {
           onPageChange: handlePageChange,
           onPageSizeChange: handlePageSizeChange
         }}
+        exportProps={
+          {
+            enableExporting: true,
+            fileName: 'Feedbacks.xlsx',
+            getServerExportData: getDataForExport
+          }
+        }
       />
     </PagePanel>
   );

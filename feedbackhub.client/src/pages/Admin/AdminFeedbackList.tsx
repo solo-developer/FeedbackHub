@@ -6,7 +6,7 @@ import { FeedbackTypeDto } from '../../types/feedbacktype/FeedbackTypeDto';
 import { FeedbackBasicDetailDto } from '../../types/feedback/FeedbackBasicDetailDto';
 import PagePanel from '../../components/PagePanel';
 import GenericTable from '../../components/GenericTable';
-import { getForAdminAsync } from '../../services/FeedbackService';
+import { getForAdminAsync, getTicketStatusOptionsAsync } from '../../services/FeedbackService';
 import { useToast } from '../../contexts/ToastContext';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -24,7 +24,7 @@ const AdminFeedbackListPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const [pageSize,setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
   const [filterDto, setFilterDto] = useState<AdminFeedbackFilterDto>({
     Take: pageSize,
@@ -36,6 +36,7 @@ const AdminFeedbackListPage: React.FC = () => {
     fetchFeedbackTypeOptions();
     fetchClientOptions();
     fetchUserOptions();
+    fetchTicketStatusOptions();
     handleSearch();
   }, []);
 
@@ -125,6 +126,23 @@ const AdminFeedbackListPage: React.FC = () => {
     }
   };
 
+  const [ticketStatusOptions, setTicketStatusOptions] = useState<GenericDropdownDto<number, string>[]>([]);
+  const fetchTicketStatusOptions = async () => {
+    try {
+      const response = await getTicketStatusOptionsAsync();
+      if (response.Success) {
+        setTicketStatusOptions(response.Data);
+      } else {
+        showToast(response.Message, response.ResponseType, {
+          autoClose: 3000,
+          draggable: true
+        });
+      }
+    } catch {
+      showToast('Failed to load ticket status options', 'error');
+    }
+  };
+
   const [searchFilters, setSearchFilters] = useState<AdminFeedbackFilterDto | null>(null);
   const [data, setData] = useState<FeedbackBasicDetailDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -167,7 +185,7 @@ const AdminFeedbackListPage: React.FC = () => {
     const updatedFilter = {
       ...filterDto,
       Skip: (newPage - 1) * pageSize,
-      Take : pageSize
+      Take: pageSize
     }
     searchFilters && fetchData(updatedFilter);
   };
@@ -176,7 +194,7 @@ const AdminFeedbackListPage: React.FC = () => {
     setPageSize(pageSize);
     const updatedFilter = {
       ...filterDto,
-      Skip:0,
+      Skip: 0,
       Take: pageSize
     }
     searchFilters && fetchData(updatedFilter);
@@ -185,7 +203,7 @@ const AdminFeedbackListPage: React.FC = () => {
   const fetchData = async (request: AdminFeedbackFilterDto) => {
     try {
       setIsLoading(true);
-      console.log('request',request);
+      console.log('request', request);
       const response = await getForAdminAsync(request);
       if (response.Success) {
         setData(response.Data.Data);
@@ -231,7 +249,7 @@ const AdminFeedbackListPage: React.FC = () => {
       header: 'Title',
       accessorFn: (row: FeedbackBasicDetailDto) => row.Title
     },
-     {
+    {
       id: 'Status',
       header: 'Status',
       accessorFn: (row: FeedbackBasicDetailDto) => TicketStatusLabels[row.Status as TicketStatus]
@@ -271,6 +289,27 @@ const AdminFeedbackListPage: React.FC = () => {
               {feedbackTypes.map((f) => (
                 <option key={f.Id} value={f.Id}>
                   {f.Type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-md-2">
+            <label className="form-label">Status</label>
+            <select
+              className="form-select"
+              value={filterDto.Status ?? ''}
+              onChange={(e) =>
+                handleFilterChange(
+                  'Status',
+                  e.target.value ? parseInt(e.target.value) : undefined
+                )
+              }
+            >
+              <option value="">All</option>
+              {ticketStatusOptions.map((stat) => (
+                <option key={stat.Value} value={stat.Value}>
+                  {stat.Label}
                 </option>
               ))}
             </select>

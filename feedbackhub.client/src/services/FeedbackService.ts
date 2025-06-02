@@ -309,3 +309,18 @@ export const getFeedbackByTicketIdAsync = async (ticketId:number): Promise<Servi
         return { Success: false, Message: 'Failed to get ticket detail', ResponseType: 'error' };
     }
 };
+
+export const getTicketStatusOptionsAsync = async (): Promise<ServiceResponseType<GenericDropdownDto<number, string>[]>> => {
+    try {
+        const response = await api.get(`/ticket-status-options`);
+
+        if (isSuccess(response)) {
+            return { Success: true, Data: parseData<GenericDropdownDto<number, string>[]>(response) } as ServiceResponseType<GenericDropdownDto<number, string>[]>;
+        }
+        else {
+            return { Success: false, ResponseType: parseResponseType(response), Message: parseMessage(response) } as ServiceResponseType<GenericDropdownDto<number, string>[]>;
+        }
+    } catch (err) {
+        return { Success: false, Message: 'Failed to get ticket status options', ResponseType: 'error' };
+    }
+};

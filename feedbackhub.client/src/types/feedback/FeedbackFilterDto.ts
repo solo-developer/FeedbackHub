@@ -14,5 +14,4 @@ export interface AdminFeedbackFilterDto extends FeedbackFilterDto {
     UserId?: Number;
     ClientId?: Number;
     ApplicationId?: Number;
-
 }

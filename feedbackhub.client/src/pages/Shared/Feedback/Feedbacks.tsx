@@ -84,6 +84,24 @@ const FeedbacksPage: React.FC = () => {
     }
   };
 
+  const getDataForExport= async () => {
+    try {
+      const request = {
+        ...filterDto
+      };
+
+      const response = await getAsync(request,true);
+      if (response.Success) {
+        return response.Data.Data;
+      } else {
+        showToast(response.Message, response.ResponseType);
+        return [];
+      }
+    } catch {
+      showToast('Failed to get feedbacks', 'error');
+      return [];
+    }
+  }
 
   const handleFilterChange = (key: keyof FeedbackFilterDto, value: any) => {
     setFilter(prev => ({
@@ -151,7 +169,8 @@ const FeedbacksPage: React.FC = () => {
     {
       id: 'TicketId',
       header: 'Ticket Id',
-      accessorFn: (row: FeedbackBasicDetailDto) => `#${row.TicketId}`
+      accessorFn: (row: FeedbackBasicDetailDto) => `#${row.TicketId}`,
+       exportValue: (row: any) => `#${row.TicketId}`
     },
     {
       id: 'CreatedBy',
@@ -176,6 +195,7 @@ const FeedbacksPage: React.FC = () => {
     {
       id: 'Action',
       header: 'Action',
+      exportable:false,
       cell: ({ row }) => (
         <div>
           <span
@@ -295,6 +315,13 @@ const FeedbacksPage: React.FC = () => {
           onPageChange: handlePageChange,
           onPageSizeChange: handlePageSizeChange
         }}
+        exportProps={
+          {
+            enableExporting: true,
+            fileName: `${ticketstatus} Feedbacks.xlsx`,
+            getServerExportData: getDataForExport
+          }
+        }
       />
     </PagePanel>
   );
